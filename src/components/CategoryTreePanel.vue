@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="wiki-nav">
     <q-input
       v-model="filter"
       dense
@@ -15,12 +15,22 @@
 
     <q-list dense>
       <q-item
+        v-if="settings.homePostId"
+        clickable
+        :active="selectedKey === 'home'"
+        active-class="bg-blue-1 text-primary"
+        @click="select('home')"
+      >
+        <q-item-section avatar><q-icon name="home" /></q-item-section>
+        <q-item-section>홈</q-item-section>
+      </q-item>
+      <q-item
         clickable
         :active="selectedKey === 'all'"
         active-class="bg-blue-1 text-primary"
         @click="select('all')"
       >
-        <q-item-section avatar><q-icon name="home" /></q-item-section>
+        <q-item-section avatar><q-icon name="article" /></q-item-section>
         <q-item-section>전체 글</q-item-section>
       </q-item>
       <q-item
@@ -36,55 +46,49 @@
 
     <q-tree
       class="q-mt-sm"
+      dense
       :nodes="filteredTree"
       node-key="id"
       :filter="filter"
       selected-color="primary"
       v-model:selected="treeSelected"
-      default-expand-all
+      v-model:expanded="expanded"
       @update:selected="onTreeSelect"
     />
-
-    <q-btn
-      v-if="auth.canWrite"
-      class="q-mt-md full-width"
-      outline
-      no-caps
-      icon="edit"
-      label="카테고리 관리"
-      @click="managerOpen = true"
-    />
-
-    <CategoryManagerDialog v-model="managerOpen" />
   </div>
 </template>
 
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { useWikiStore } from '@/stores/wiki'
-import CategoryManagerDialog from './CategoryManagerDialog.vue'
+import { useSettingsStore } from '@/stores/settings'
 
 const route = useRoute()
 const router = useRouter()
-const auth = useAuthStore()
 const wiki = useWikiStore()
+const settings = useSettingsStore()
 const filter = ref('')
-const managerOpen = ref(false)
 const treeSelected = ref(null)
+const expanded = ref([])
 
 const selectedKey = computed(() => {
   const id = route.query.categoryId
   if (id === 'uncategorized') return 'uncategorized'
   if (id) return String(id)
+  if (route.query.q || route.query.view === 'list') return 'all'
+  if (settings.homePostId && route.path === '/') return 'home'
   return 'all'
 })
 
 const filteredTree = computed(() => wiki.tree)
 
+watch(() => wiki.categories.map((category) => category.id).join(','), () => {
+  expanded.value = wiki.categories.map((category) => category.id)
+}, { immediate: true })
+
 watch(selectedKey, (key) => {
-  treeSelected.value = key === 'all' || key === 'uncategorized' ? null : Number(key)
+  treeSelected.value = key === 'all' || key === 'home' || key === 'uncategorized' ? null : Number(key)
 }, { immediate: true })
 
 function go(query) {
@@ -92,7 +96,8 @@ function go(query) {
 }
 
 function select(key) {
-  if (key === 'all') go(route.query.q ? { q: route.query.q } : {})
+  if (key === 'home') go({})
+  else if (key === 'all') go(route.query.q ? { q: route.query.q } : (settings.homePostId ? { view: 'list' } : {}))
   else if (key === 'uncategorized') go({ ...pickQ(), categoryId: 'uncategorized' })
 }
 

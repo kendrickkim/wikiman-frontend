@@ -1,8 +1,9 @@
 <template>
   <q-page class="wiki-page flex flex-center">
-    <q-card flat bordered class="full-width" style="max-width: 420px;">
+    <q-card flat bordered class="wiki-auth-card">
       <q-card-section>
-        <div class="text-h6">로그인</div>
+        <div class="text-h5 text-weight-medium">로그인</div>
+        <div class="text-grey-7 q-mt-xs">{{ settings.siteTitle }} 계정으로 들어옵니다.</div>
       </q-card-section>
       <q-card-section>
         <q-form class="q-gutter-md" @submit.prevent="submit">
@@ -23,11 +24,13 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useSettingsStore } from '@/stores/settings'
 import { getErrorMessage } from '@/utils/api'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const settings = useSettingsStore()
 const username = ref('')
 const password = ref('')
 const error = ref('')

@@ -1,72 +1,170 @@
 <template>
-  <q-page class="wiki-page">
-    <div class="row items-center q-mb-md no-wrap">
-      <div class="text-h6 text-weight-medium col">{{ heading }}</div>
-      <q-btn
-        v-if="auth.canWrite && $q.screen.gt.sm"
-        class="q-ml-sm"
-        unelevated
-        color="primary"
-        icon="edit"
-        label="새 글"
-        no-caps
-        to="/posts/new"
-      />
-    </div>
-
-    <q-btn-toggle
-      v-if="auth.canWrite"
-      v-model="statusFilter"
-      class="q-mb-md"
-      unelevated
-      no-caps
-      spread
-      toggle-color="primary"
-      :options="statusFilterOptions"
-    />
-
-    <q-banner v-if="error" class="bg-red-1 text-negative q-mb-md">{{ error }}</q-banner>
-
-    <q-card v-if="!posts.length && !loading" flat bordered class="q-pa-lg text-center text-grey-7">
-      표시할 글이 없습니다.
-    </q-card>
-
-    <q-list v-else separator bordered class="rounded-borders bg-white">
-      <q-item v-for="post in posts" :key="post.id" clickable :to="`/posts/${post.id}`" class="q-py-md">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-weight-medium">{{ post.title }}</q-item-label>
-          <q-item-label caption class="ellipsis-2-lines">
-            {{ post.categoryName || '미분류' }} · {{ post.authorName }} · {{ formatDate(post.updatedAt) }}
-          </q-item-label>
-        </q-item-section>
-        <q-item-section side top>
-          <div class="column items-end q-gutter-xs">
-            <q-badge :color="post.status === 'draft' ? 'warning' : 'primary'">
-              {{ post.status === 'draft' ? '작성중' : '발행' }}
-            </q-badge>
-            <q-badge v-if="post.status === 'published'" :color="post.visibility === 'private' ? 'grey' : 'positive'">
-              {{ post.visibility === 'private' ? '비공개' : '공개' }}
-            </q-badge>
+  <q-page class="wiki-page wiki-page--article">
+    <div class="wiki-main wiki-main--wide">
+      <template v-if="showingHome && homePost">
+        <div v-if="loading" class="flex flex-center q-pa-xl">
+          <q-spinner size="40px" color="primary" />
+        </div>
+        <template v-else>
+          <div class="wiki-article-head">
+            <div class="wiki-article-head__body">
+              <div :class="['wiki-article-head__title', isDesktop ? 'text-h4 text-weight-bold' : 'text-h5']">{{ displayTitle(homePost.title) }}</div>
+              <div class="text-grey-7 q-mt-sm" :class="isDesktop ? 'text-body2' : 'text-caption'">
+                {{ homePost.categoryName || '미분류' }} · {{ homePost.authorName }} · {{ formatDate(homePost.updatedAt) }}
+                <q-badge class="q-ml-sm" :color="homePost.status === 'draft' ? 'warning' : 'primary'">
+                  {{ homePost.status === 'draft' ? '작성중' : '발행' }}
+                </q-badge>
+                <q-badge v-if="homePost.status === 'published'" class="q-ml-sm" :color="homePost.visibility === 'private' ? 'grey' : 'positive'">
+                  {{ homePost.visibility === 'private' ? '비공개' : '공개' }}
+                </q-badge>
+              </div>
+              <KeywordChips class="q-mt-sm" :keywords="homePost.keywords" />
+            </div>
+            <div v-if="auth.canWrite" class="wiki-article-actions">
+              <q-btn
+                outline
+                color="primary"
+                icon="edit"
+                :label="isDesktop || $q.screen.gt.xs ? '수정' : undefined"
+                :to="`/posts/${homePost.id}/edit`"
+              />
+              <q-btn
+                unelevated
+                color="negative"
+                icon="delete"
+                :label="isDesktop || $q.screen.gt.xs ? '삭제' : undefined"
+                @click="onRemoveHome"
+              />
+            </div>
           </div>
-        </q-item-section>
-      </q-item>
-    </q-list>
+          <q-card flat bordered class="wiki-article-card wiki-article-body">
+            <PostViewer :editor-type="homePost.editorType" :content="homePost.content" />
+          </q-card>
+        </template>
+      </template>
+
+      <template v-else>
+        <div class="row items-center q-mb-md no-wrap">
+          <div :class="isDesktop ? 'text-h4 text-weight-bold col' : 'text-h6 text-weight-medium col'">
+            {{ heading }}
+          </div>
+        </div>
+
+        <q-btn-toggle
+          v-if="auth.canWrite"
+          v-model="statusFilter"
+          class="q-mb-md"
+          unelevated
+          no-caps
+          :spread="!isDesktop"
+          toggle-color="primary"
+          :options="statusFilterOptions"
+        />
+
+        <div v-if="loading" class="flex flex-center q-pa-xl">
+          <q-spinner size="40px" color="primary" />
+        </div>
+
+        <q-banner v-else-if="error" class="bg-red-1 text-negative q-mb-md">{{ error }}</q-banner>
+
+        <q-card v-else-if="!posts.length" flat bordered class="q-pa-lg text-center text-grey-7">
+          표시할 글이 없습니다.
+        </q-card>
+
+        <div v-else-if="isDesktop" class="wiki-article-card">
+          <div v-for="post in posts" :key="post.id" class="wiki-post-row">
+            <router-link :to="`/posts/${post.id}`" class="wiki-post-row__main">
+              <div class="wiki-post-row__title">{{ displayTitle(post.title) }}</div>
+              <div class="wiki-post-row__meta">
+                <span class="wiki-post-row__url">{{ postPath(post) }}</span>
+                <span>{{ post.categoryName || '미분류' }} · {{ post.authorName }}</span>
+                <KeywordChips :keywords="post.keywords" :wrap="false" />
+              </div>
+            </router-link>
+            <div class="wiki-post-row__aside">
+              <div class="row q-gutter-xs justify-end">
+                <q-badge :color="post.status === 'draft' ? 'warning' : 'primary'">
+                  {{ post.status === 'draft' ? '작성중' : '발행' }}
+                </q-badge>
+                <q-badge v-if="post.status === 'published'" :color="post.visibility === 'private' ? 'grey' : 'positive'">
+                  {{ post.visibility === 'private' ? '비공개' : '공개' }}
+                </q-badge>
+              </div>
+              <div class="row items-center no-wrap q-gutter-xs">
+                <div class="wiki-post-row__date">{{ formatDate(post.updatedAt) }}</div>
+                <q-btn
+                  v-if="auth.canWrite"
+                  flat
+                  round
+                  dense
+                  color="negative"
+                  icon="delete"
+                  aria-label="삭제"
+                  @click="onRemove(post)"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <q-list v-else separator bordered class="rounded-borders bg-white">
+          <q-item v-for="post in posts" :key="post.id" clickable :to="`/posts/${post.id}`" class="q-py-md">
+            <q-item-section>
+              <q-item-label class="text-subtitle1 text-weight-medium">{{ displayTitle(post.title) }}</q-item-label>
+              <q-item-label caption class="wiki-post-row__meta">
+                <span class="wiki-post-row__url">{{ postPath(post) }}</span>
+                <span>{{ post.categoryName || '미분류' }} · {{ post.authorName }} · {{ formatDate(post.updatedAt) }}</span>
+                <KeywordChips :keywords="post.keywords" :wrap="false" />
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <div class="column items-end q-gutter-xs">
+                <q-badge :color="post.status === 'draft' ? 'warning' : 'primary'">
+                  {{ post.status === 'draft' ? '작성중' : '발행' }}
+                </q-badge>
+                <q-badge v-if="post.status === 'published'" :color="post.visibility === 'private' ? 'grey' : 'positive'">
+                  {{ post.visibility === 'private' ? '비공개' : '공개' }}
+                </q-badge>
+                <q-btn
+                  v-if="auth.canWrite"
+                  flat
+                  round
+                  dense
+                  color="negative"
+                  icon="delete"
+                  aria-label="삭제"
+                  @click.stop.prevent="onRemove(post)"
+                />
+              </div>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </template>
+    </div>
   </q-page>
 </template>
 
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
 import { useAuthStore } from '@/stores/auth'
 import { useWikiStore } from '@/stores/wiki'
+import { useSettingsStore } from '@/stores/settings'
+import { useLayout } from '@/composables/useLayout'
+import { usePostActions } from '@/composables/usePostActions'
+import KeywordChips from '@/components/KeywordChips.vue'
+import PostViewer from '@/components/PostViewer.vue'
+import { displayTitle } from '@/utils/title'
 
 const route = useRoute()
-const $q = useQuasar()
+const { $q, isDesktop } = useLayout()
+const { removePost } = usePostActions()
 const auth = useAuthStore()
 const wiki = useWikiStore()
+const settings = useSettingsStore()
 const posts = ref([])
+const homePost = ref(null)
 const loading = ref(false)
 const error = ref('')
 const statusFilter = ref('all')
@@ -76,6 +174,16 @@ const statusFilterOptions = [
   { label: '작성중', value: 'draft' }
 ]
 
+const wantsHomepage = computed(() => (
+  settings.loaded
+  && settings.homePostId
+  && !route.query.categoryId
+  && !route.query.q
+  && route.query.view !== 'list'
+))
+
+const showingHome = computed(() => wantsHomepage.value && Boolean(homePost.value))
+
 const heading = computed(() => {
   if (route.query.q) return `"${route.query.q}" 검색 결과`
   if (route.query.categoryId === 'uncategorized') return '미분류'
@@ -84,16 +192,37 @@ const heading = computed(() => {
   return category ? category.name : '전체 글'
 })
 
+async function loadList() {
+  const params = {}
+  if (route.query.categoryId) params.categoryId = route.query.categoryId
+  if (route.query.q) params.q = route.query.q
+  if (statusFilter.value !== 'all') params.status = statusFilter.value
+  const { data } = await api.get('/posts', { params })
+  posts.value = data.posts
+  homePost.value = null
+}
+
 async function load() {
+  if (!settings.loaded) {
+    loading.value = true
+    return
+  }
   loading.value = true
   error.value = ''
   try {
-    const params = {}
-    if (route.query.categoryId) params.categoryId = route.query.categoryId
-    if (route.query.q) params.q = route.query.q
-    if (statusFilter.value !== 'all') params.status = statusFilter.value
-    const { data } = await api.get('/posts', { params })
-    posts.value = data.posts
+    if (wantsHomepage.value) {
+      try {
+        const { data } = await api.get(`/posts/${settings.homePostId}`)
+        homePost.value = data.post
+        posts.value = []
+        return
+      } catch {
+        homePost.value = null
+      }
+    } else {
+      homePost.value = null
+    }
+    await loadList()
   } catch (err) {
     error.value = getErrorMessage(err)
   } finally {
@@ -101,10 +230,37 @@ async function load() {
   }
 }
 
-watch(() => [route.query.categoryId, route.query.q, auth.user, statusFilter.value], load, { immediate: true })
+watch(
+  () => [
+    route.query.categoryId,
+    route.query.q,
+    route.query.view,
+    settings.homePostId,
+    settings.loaded,
+    auth.user,
+    statusFilter.value
+  ],
+  load,
+  { immediate: true }
+)
 
 function formatDate(value) {
   if (!value) return ''
   return String(value).replace('T', ' ').slice(0, 16)
+}
+
+function postPath(post) {
+  return `${window.location.origin}/posts/${post.id}`
+}
+
+async function onRemove(post) {
+  const removed = await removePost(post, { redirect: false })
+  if (removed) await load()
+}
+
+async function onRemoveHome() {
+  if (!homePost.value) return
+  const removed = await removePost(homePost.value, { redirect: false })
+  if (removed) await load()
 }
 </script>

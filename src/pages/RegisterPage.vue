@@ -1,8 +1,9 @@
 <template>
   <q-page class="wiki-page flex flex-center">
-    <q-card flat bordered class="full-width" style="max-width: 420px;">
+    <q-card flat bordered class="wiki-auth-card">
       <q-card-section>
-        <div class="text-h6">회원가입</div>
+        <div class="text-h5 text-weight-medium">회원가입</div>
+        <div class="text-grey-7 q-mt-xs">처음 가입한 계정이 작성자가 됩니다.</div>
       </q-card-section>
       <q-card-section>
         <div v-if="!auth.canRegister" class="text-grey-7">

@@ -1,20 +1,26 @@
 <template>
-  <q-layout view="hHh lpR fFf">
-    <q-header elevated class="bg-dark text-white wiki-header">
-      <q-toolbar>
+  <q-layout
+    view="hHh lpR fFf"
+    :class="isDesktop ? 'wiki-layout-desktop' : 'wiki-layout-mobile'"
+  >
+    <q-header
+      :elevated="!isDesktop"
+      :bordered="isDesktop || !settings.isDark"
+      :class="headerClass"
+    >
+      <q-toolbar v-if="isDesktop" class="wiki-toolbar-desktop">
         <q-btn dense flat round icon="menu" aria-label="메뉴" @click="leftDrawer = !leftDrawer" />
-        <q-toolbar-title class="cursor-pointer ellipsis" style="max-width: 42vw;" @click="goHome">
-          Wikiman
+        <q-toolbar-title class="cursor-pointer wiki-brand ellipsis" @click="goHome">
+          {{ settings.siteTitle }}
         </q-toolbar-title>
-        <q-space />
         <q-input
-          v-if="$q.screen.gt.xs"
           v-model="search"
-          dark
           dense
           outlined
-          placeholder="검색"
-          class="q-mr-sm wiki-search"
+          placeholder="글 검색"
+          :dark="settings.isDark"
+          :bg-color="settings.isDark ? undefined : 'grey-2'"
+          class="wiki-search"
           debounce="300"
           @keyup.enter="applySearch"
           @update:model-value="applySearch"
@@ -23,87 +29,184 @@
             <q-icon name="search" />
           </template>
         </q-input>
-        <q-btn
-          v-else
-          flat
-          round
-          dense
-          icon="search"
-          aria-label="검색"
-          @click="mobileSearch = !mobileSearch"
-        />
+        <q-space />
         <q-btn
           v-if="auth.canWrite"
           unelevated
           color="primary"
           icon="add"
-          :label="$q.screen.gt.sm ? '새 글' : undefined"
-          :round="$q.screen.lt.md"
-          dense
+          label="새 글"
           no-caps
           to="/posts/new"
         />
         <q-btn
           v-if="!auth.isLoggedIn"
-          flat
+          outline
           no-caps
-          :dense="$q.screen.lt.sm"
-          :label="$q.screen.gt.xs ? '로그인' : undefined"
-          :icon="$q.screen.lt.sm ? 'login' : undefined"
+          color="primary"
+          label="로그인"
           to="/login"
         />
-        <q-btn-dropdown
-          v-else
-          flat
-          no-caps
-          :dense="$q.screen.lt.sm"
-          :icon="$q.screen.lt.sm ? 'account_circle' : undefined"
-          :label="$q.screen.gt.xs ? auth.user.username : undefined"
-        >
+        <q-btn-dropdown v-else flat no-caps dropdown-icon="expand_more">
+          <template #label>
+            <div class="row items-center no-wrap">
+              <q-avatar size="28px" color="primary" text-color="white" class="q-mr-sm">
+                {{ auth.user.username.slice(0, 1).toUpperCase() }}
+              </q-avatar>
+              <span>{{ auth.user.username }}</span>
+            </div>
+          </template>
           <q-list>
-            <q-item>
-              <q-item-section class="text-grey-8">{{ auth.user.username }}</q-item-section>
+            <q-item v-if="auth.canWrite" clickable v-close-popup to="/settings">
+              <q-item-section avatar>
+                <q-icon name="settings" />
+              </q-item-section>
+              <q-item-section>사이트 관리</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup to="/trash">
+              <q-item-section avatar>
+                <q-icon name="delete" />
+              </q-item-section>
+              <q-item-section>휴지통</q-item-section>
             </q-item>
             <q-item clickable v-close-popup @click="logout">
+              <q-item-section avatar>
+                <q-icon name="logout" />
+              </q-item-section>
               <q-item-section>로그아웃</q-item-section>
             </q-item>
           </q-list>
         </q-btn-dropdown>
       </q-toolbar>
-      <q-toolbar v-if="mobileSearch && $q.screen.lt.sm" class="q-pt-none">
-        <q-input
-          v-model="search"
-          dark
-          dense
-          outlined
-          placeholder="검색"
-          class="full-width"
-          debounce="300"
-          autofocus
-          @keyup.enter="applySearch"
-          @update:model-value="applySearch"
-        >
-          <template #prepend>
-            <q-icon name="search" />
-          </template>
-          <template #append>
-            <q-icon name="close" class="cursor-pointer" @click="mobileSearch = false" />
-          </template>
-        </q-input>
-      </q-toolbar>
+
+      <template v-else>
+        <q-toolbar>
+          <q-btn dense flat round icon="menu" aria-label="메뉴" @click="leftDrawer = !leftDrawer" />
+          <q-toolbar-title class="cursor-pointer ellipsis" style="max-width: 42vw;" @click="goHome">
+            {{ settings.siteTitle }}
+          </q-toolbar-title>
+          <q-space />
+          <q-btn
+            v-if="$q.screen.lt.sm"
+            flat
+            round
+            dense
+            icon="search"
+            aria-label="검색"
+            @click="mobileSearch = !mobileSearch"
+          />
+            <q-input
+            v-else
+            v-model="search"
+            :dark="settings.isDark"
+            dense
+            outlined
+            placeholder="검색"
+            class="q-mr-sm wiki-search"
+            debounce="300"
+            @keyup.enter="applySearch"
+            @update:model-value="applySearch"
+          >
+            <template #prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+          <q-btn
+            v-if="auth.canWrite"
+            unelevated
+            color="primary"
+            icon="add"
+            :label="$q.screen.gt.xs ? '새 글' : undefined"
+            :round="$q.screen.lt.sm"
+            dense
+            no-caps
+            to="/posts/new"
+          />
+          <q-btn
+            v-if="!auth.isLoggedIn"
+            flat
+            no-caps
+            :dense="$q.screen.lt.sm"
+            :label="$q.screen.gt.xs ? '로그인' : undefined"
+            :icon="$q.screen.lt.sm ? 'login' : undefined"
+            to="/login"
+          />
+          <q-btn-dropdown
+            v-else
+            flat
+            no-caps
+            :dense="$q.screen.lt.sm"
+            :icon="$q.screen.lt.sm ? 'account_circle' : undefined"
+            :label="$q.screen.gt.xs ? auth.user.username : undefined"
+          >
+            <q-list>
+              <q-item>
+                <q-item-section class="text-grey-8">{{ auth.user.username }}</q-item-section>
+              </q-item>
+              <q-item v-if="auth.canWrite" clickable v-close-popup to="/settings">
+                <q-item-section>사이트 관리</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup to="/trash">
+                <q-item-section>휴지통</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="logout">
+                <q-item-section>로그아웃</q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
+        </q-toolbar>
+        <q-toolbar v-if="mobileSearch && $q.screen.lt.sm" class="q-pt-none">
+          <q-input
+            v-model="search"
+            :dark="settings.isDark"
+            dense
+            outlined
+            placeholder="검색"
+            class="full-width"
+            debounce="300"
+            autofocus
+            @keyup.enter="applySearch"
+            @update:model-value="applySearch"
+          >
+            <template #prepend>
+              <q-icon name="search" />
+            </template>
+            <template #append>
+              <q-icon name="close" class="cursor-pointer" @click="mobileSearch = false" />
+            </template>
+          </q-input>
+        </q-toolbar>
+      </template>
     </q-header>
 
     <q-drawer
       v-model="leftDrawer"
-      show-if-above
       bordered
       :width="drawerWidth"
-      class="bg-white"
       :breakpoint="1023"
+      :class="drawerClass"
     >
-      <div class="q-pa-md">
-        <div class="text-subtitle2 q-mb-sm">카테고리</div>
+      <div class="wiki-drawer-inner">
+        <div class="wiki-drawer-title">카테고리</div>
         <CategoryTreePanel />
+        <q-btn
+          v-if="auth.isLoggedIn"
+          class="q-mt-md full-width"
+          flat
+          no-caps
+          icon="delete"
+          label="휴지통"
+          to="/trash"
+        />
+        <q-btn
+          v-if="auth.canWrite"
+          class="q-mt-sm full-width"
+          flat
+          no-caps
+          icon="settings"
+          label="사이트 관리"
+          to="/settings"
+        />
       </div>
     </q-drawer>
 
@@ -116,32 +219,44 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
 import { useAuthStore } from '@/stores/auth'
 import { useWikiStore } from '@/stores/wiki'
+import { useSettingsStore } from '@/stores/settings'
+import { useLayout } from '@/composables/useLayout'
 import CategoryTreePanel from '@/components/CategoryTreePanel.vue'
 
 const route = useRoute()
 const router = useRouter()
-const $q = useQuasar()
+const { $q, isDesktop } = useLayout()
 const auth = useAuthStore()
 const wiki = useWikiStore()
+const settings = useSettingsStore()
 const leftDrawer = ref(false)
 const mobileSearch = ref(false)
 const search = ref(String(route.query.q || ''))
-const drawerWidth = computed(() => ($q.screen.lt.sm ? Math.min(300, $q.screen.width - 24) : 280))
-
-onMounted(async () => {
-  leftDrawer.value = $q.screen.gt.sm
-  await Promise.all([auth.restore(), wiki.loadCategories()])
+const drawerWidth = computed(() => (isDesktop.value ? 300 : Math.min(300, $q.screen.width - 24)))
+const headerClass = computed(() => {
+  const layout = isDesktop.value ? 'wiki-header wiki-header--desktop' : 'wiki-header wiki-header--mobile'
+  return settings.isDark
+    ? `bg-dark text-white ${layout}`
+    : `bg-white text-dark ${layout}`
+})
+const drawerClass = computed(() => {
+  if (settings.isDark) return 'bg-dark text-white wiki-drawer'
+  return isDesktop.value ? 'bg-grey-1 wiki-drawer wiki-drawer--desktop' : 'bg-white wiki-drawer'
 })
 
-watch(() => $q.screen.gt.sm, (desktop) => {
+onMounted(async () => {
+  leftDrawer.value = isDesktop.value
+  await Promise.all([auth.restore(), wiki.loadCategories(), settings.load()])
+})
+
+watch(isDesktop, (desktop) => {
   leftDrawer.value = desktop
 })
 
 watch(() => route.fullPath, () => {
-  if ($q.screen.lt.md) leftDrawer.value = false
+  if (!isDesktop.value) leftDrawer.value = false
 })
 
 watch(() => route.query.q, (q) => {
@@ -157,7 +272,7 @@ function applySearch() {
   if (search.value.trim()) next.q = search.value.trim()
   else delete next.q
   router.push({ path: '/', query: next })
-  if ($q.screen.lt.sm) mobileSearch.value = false
+  if (!isDesktop.value && $q.screen.lt.sm) mobileSearch.value = false
 }
 
 function logout() {
@@ -165,13 +280,3 @@ function logout() {
   router.push('/')
 }
 </script>
-
-<style scoped>
-.wiki-header {
-  padding-top: env(safe-area-inset-top);
-}
-
-.wiki-search {
-  width: min(320px, 36vw);
-}
-</style>

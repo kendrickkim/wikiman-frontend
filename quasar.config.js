@@ -39,7 +39,7 @@ export default defineConfig(() => {
           warning: '#f08c00'
         }
       },
-      plugins: ['Notify', 'Dialog']
+        plugins: ['Notify', 'Dialog', 'Dark']
     },
     animations: []
   }
