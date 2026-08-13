@@ -1,0 +1,136 @@
+body {
+  background: #f4f6f8;
+  overflow-x: hidden;
+}
+
+.wiki-page {
+  padding: 12px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+
+  @media (min-width: 1024px) {
+    padding: 24px;
+  }
+}
+
+.wiki-content {
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  h1, h2, h3, h4, h5, h6 {
+    margin: 1.2em 0 0.5em;
+    font-weight: 650;
+  }
+
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.35rem; }
+  h3 { font-size: 1.15rem; }
+
+  @media (min-width: 1024px) {
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; }
+  }
+
+  p {
+    margin: 0.6em 0;
+  }
+
+  pre, code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  pre {
+    background: #111827;
+    color: #e5e7eb;
+    padding: 12px 14px;
+    border-radius: 8px;
+    overflow: auto;
+    max-width: 100%;
+    font-size: 0.85rem;
+  }
+
+  img, svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+    display: block;
+    overflow-x: auto;
+  }
+
+  th, td {
+    border: 1px solid #d0d7de;
+    padding: 6px 10px;
+  }
+
+  .plantuml-block {
+    margin: 1em 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    overflow-x: auto;
+  }
+}
+
+.editorjs-holder {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  min-height: 280px;
+  padding: 8px 4px 24px;
+  overflow: hidden;
+
+  @media (min-width: 1024px) {
+    min-height: 420px;
+    padding: 12px 8px 32px;
+  }
+}
+
+.cm-editor {
+  height: 100%;
+  min-height: 240px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 16px;
+
+  @media (min-width: 1024px) {
+    min-height: 420px;
+    font-size: 14px;
+  }
+}
+
+.ce-block__content,
+.ce-toolbar__content {
+  max-width: calc(100% - 52px) !important;
+  margin-left: 44px !important;
+  margin-right: 8px !important;
+}
+
+@media (min-width: 1024px) {
+  .ce-block__content,
+  .ce-toolbar__content {
+    max-width: 650px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+.q-item {
+  min-height: 48px;
+}
+
+@media (max-width: 600px) {
+  .q-field__native,
+  .q-field__input,
+  .q-field__prefix,
+  .q-field__suffix {
+    font-size: 16px !important;
+  }
+}

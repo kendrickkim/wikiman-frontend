@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.quasar/
+.env
+.env.local
+*.log
+.DS_Store
+.idea/
+.vscode/
+quasar.config.js.temporary.compiled.*.mjs
