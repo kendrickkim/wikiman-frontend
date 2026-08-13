@@ -2,7 +2,7 @@
 
 개인 위키 UI. Vue 3 + Quasar.
 
-백엔드는 별도 저장소입니다. API 기본 주소는 `http://localhost:3001` 입니다.
+백엔드는 별도 저장소입니다. API 기본 주소는 `http://localhost:85` 입니다.
 
 ## 요구 사항
 

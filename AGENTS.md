@@ -2,7 +2,7 @@
 
 Vue 3 · Quasar 2 · Pinia · Vue Router · JavaScript. Node 22.22+.
 
-개발: 백엔드(`:3001`)를 띄운 뒤 `npm run dev` (`:9000`). `/api`는 백엔드로 프록시됩니다.
+개발: 백엔드 API(`:85`)를 띄운 뒤 `npm run dev` (`:9000`). `/api`는 백엔드로 프록시됩니다.
 
 ## 구조
 
