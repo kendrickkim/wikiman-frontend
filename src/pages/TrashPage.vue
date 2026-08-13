@@ -28,10 +28,10 @@
         </div>
       </div>
 
-      <q-list v-else separator bordered class="rounded-borders bg-white">
+      <q-list v-else separator bordered class="rounded-borders wiki-article-card">
         <q-item v-for="post in posts" :key="post.id" class="q-py-md">
           <q-item-section>
-            <q-item-label class="text-subtitle1 text-weight-medium">{{ displayTitle(post.title) }}</q-item-label>
+            <q-item-label class="text-subtitle1 text-weight-medium wiki-post-row__title">{{ displayTitle(post.title) }}</q-item-label>
             <q-item-label caption>
               {{ post.categoryName || '미분류' }} · {{ formatDate(post.deletedAt) }}에 삭제
             </q-item-label>

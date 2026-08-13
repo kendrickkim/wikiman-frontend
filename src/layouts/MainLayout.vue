@@ -82,7 +82,7 @@
       <template v-else>
         <q-toolbar>
           <q-btn dense flat round icon="menu" aria-label="메뉴" @click="leftDrawer = !leftDrawer" />
-          <q-toolbar-title class="cursor-pointer ellipsis" style="max-width: 42vw;" @click="goHome">
+          <q-toolbar-title class="cursor-pointer wiki-brand ellipsis" @click="goHome">
             {{ settings.siteTitle }}
           </q-toolbar-title>
           <q-space />
@@ -263,6 +263,10 @@ watch(() => route.query.q, (q) => {
   search.value = String(q || '')
 })
 
+watch(() => auth.isLoggedIn, () => {
+  wiki.loadCategories()
+})
+
 function goHome() {
   router.push('/')
 }
@@ -277,6 +281,7 @@ function applySearch() {
 
 function logout() {
   auth.logout()
+  wiki.loadCategories()
   router.push('/')
 }
 </script>

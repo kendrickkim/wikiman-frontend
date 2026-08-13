@@ -1,45 +1,54 @@
 <template>
   <q-page class="wiki-page wiki-page--article">
     <div class="wiki-main wiki-main--wide">
-      <template v-if="showingHome && homePost">
+      <template v-if="showingHome">
         <div v-if="loading" class="flex flex-center q-pa-xl">
           <q-spinner size="40px" color="primary" />
         </div>
+        <q-banner v-else-if="error" class="bg-red-1 text-negative q-mb-md">{{ error }}</q-banner>
         <template v-else>
-          <div class="wiki-article-head">
-            <div class="wiki-article-head__body">
-              <div :class="['wiki-article-head__title', isDesktop ? 'text-h4 text-weight-bold' : 'text-h5']">{{ displayTitle(homePost.title) }}</div>
-              <div class="text-grey-7 q-mt-sm" :class="isDesktop ? 'text-body2' : 'text-caption'">
-                {{ homePost.categoryName || '미분류' }} · {{ homePost.authorName }} · {{ formatDate(homePost.updatedAt) }}
-                <q-badge class="q-ml-sm" :color="homePost.status === 'draft' ? 'warning' : 'primary'">
-                  {{ homePost.status === 'draft' ? '작성중' : '발행' }}
-                </q-badge>
-                <q-badge v-if="homePost.status === 'published'" class="q-ml-sm" :color="homePost.visibility === 'private' ? 'grey' : 'positive'">
-                  {{ homePost.visibility === 'private' ? '비공개' : '공개' }}
-                </q-badge>
+          <div
+            v-for="(homePost, index) in homePosts"
+            :key="homePost.id"
+            :class="index ? 'q-mt-xl' : ''"
+          >
+            <div class="wiki-article-head">
+              <div class="wiki-article-head__body">
+                <div :class="['wiki-article-head__title', isDesktop ? 'text-h4 text-weight-bold' : 'text-h5']">{{ displayTitle(homePost.title) }}</div>
+                <div class="text-grey-7 q-mt-sm" :class="isDesktop ? 'text-body2' : 'text-caption'">
+                  {{ homePost.categoryName || '미분류' }} · {{ homePost.authorName }} · {{ formatDate(homePost.updatedAt) }}
+                  <q-badge class="q-ml-sm" color="info">홈페이지</q-badge>
+                  <q-badge class="q-ml-sm" :color="homePost.status === 'draft' ? 'warning' : 'primary'">
+                    {{ homePost.status === 'draft' ? '작성중' : '발행' }}
+                  </q-badge>
+                  <q-badge v-if="homePost.status === 'published'" class="q-ml-sm" :color="homePost.visibility === 'private' ? 'grey' : 'positive'">
+                    {{ homePost.visibility === 'private' ? '비공개' : '공개' }}
+                  </q-badge>
+                </div>
+                <KeywordChips class="q-mt-sm" :keywords="homePost.keywords" />
               </div>
-              <KeywordChips class="q-mt-sm" :keywords="homePost.keywords" />
+              <div v-if="auth.canWrite" class="wiki-article-actions">
+                <q-btn
+                  outline
+                  color="primary"
+                  icon="edit"
+                  :label="isDesktop || $q.screen.gt.xs ? '수정' : undefined"
+                  :to="`/posts/${homePost.id}/edit`"
+                />
+                <q-btn
+                  unelevated
+                  color="negative"
+                  icon="delete"
+                  :label="isDesktop || $q.screen.gt.xs ? '삭제' : undefined"
+                  @click="onRemoveHome(homePost)"
+                />
+              </div>
             </div>
-            <div v-if="auth.canWrite" class="wiki-article-actions">
-              <q-btn
-                outline
-                color="primary"
-                icon="edit"
-                :label="isDesktop || $q.screen.gt.xs ? '수정' : undefined"
-                :to="`/posts/${homePost.id}/edit`"
-              />
-              <q-btn
-                unelevated
-                color="negative"
-                icon="delete"
-                :label="isDesktop || $q.screen.gt.xs ? '삭제' : undefined"
-                @click="onRemoveHome"
-              />
-            </div>
+            <q-card flat bordered class="wiki-article-card wiki-article-body">
+              <PostViewer :editor-type="homePost.editorType" :content="homePost.content" />
+            </q-card>
+            <FileAttachments :model-value="homePost.attachments || []" card-class="q-mt-md" />
           </div>
-          <q-card flat bordered class="wiki-article-card wiki-article-body">
-            <PostViewer :editor-type="homePost.editorType" :content="homePost.content" />
-          </q-card>
         </template>
       </template>
 
@@ -83,6 +92,7 @@
             </router-link>
             <div class="wiki-post-row__aside">
               <div class="row q-gutter-xs justify-end">
+                <q-badge v-if="post.isHomepage" color="info">홈페이지</q-badge>
                 <q-badge :color="post.status === 'draft' ? 'warning' : 'primary'">
                   {{ post.status === 'draft' ? '작성중' : '발행' }}
                 </q-badge>
@@ -107,10 +117,10 @@
           </div>
         </div>
 
-        <q-list v-else separator bordered class="rounded-borders bg-white">
+        <q-list v-else separator bordered class="rounded-borders wiki-article-card">
           <q-item v-for="post in posts" :key="post.id" clickable :to="`/posts/${post.id}`" class="q-py-md">
             <q-item-section>
-              <q-item-label class="text-subtitle1 text-weight-medium">{{ displayTitle(post.title) }}</q-item-label>
+              <q-item-label class="text-subtitle1 text-weight-medium wiki-post-row__title">{{ displayTitle(post.title) }}</q-item-label>
               <q-item-label caption class="wiki-post-row__meta">
                 <span class="wiki-post-row__url">{{ postPath(post) }}</span>
                 <span>{{ post.categoryName || '미분류' }} · {{ post.authorName }} · {{ formatDate(post.updatedAt) }}</span>
@@ -119,6 +129,7 @@
             </q-item-section>
             <q-item-section side>
               <div class="column items-end q-gutter-xs">
+                <q-badge v-if="post.isHomepage" color="info">홈페이지</q-badge>
                 <q-badge :color="post.status === 'draft' ? 'warning' : 'primary'">
                   {{ post.status === 'draft' ? '작성중' : '발행' }}
                 </q-badge>
@@ -155,6 +166,7 @@ import { useLayout } from '@/composables/useLayout'
 import { usePostActions } from '@/composables/usePostActions'
 import KeywordChips from '@/components/KeywordChips.vue'
 import PostViewer from '@/components/PostViewer.vue'
+import FileAttachments from '@/components/FileAttachments.vue'
 import { displayTitle } from '@/utils/title'
 
 const route = useRoute()
@@ -164,7 +176,7 @@ const auth = useAuthStore()
 const wiki = useWikiStore()
 const settings = useSettingsStore()
 const posts = ref([])
-const homePost = ref(null)
+const homePosts = ref([])
 const loading = ref(false)
 const error = ref('')
 const statusFilter = ref('all')
@@ -176,13 +188,13 @@ const statusFilterOptions = [
 
 const wantsHomepage = computed(() => (
   settings.loaded
-  && settings.homePostId
+  && settings.hasHomepage
   && !route.query.categoryId
   && !route.query.q
   && route.query.view !== 'list'
 ))
 
-const showingHome = computed(() => wantsHomepage.value && Boolean(homePost.value))
+const showingHome = computed(() => wantsHomepage.value && homePosts.value.length > 0)
 
 const heading = computed(() => {
   if (route.query.q) return `"${route.query.q}" 검색 결과`
@@ -199,7 +211,7 @@ async function loadList() {
   if (statusFilter.value !== 'all') params.status = statusFilter.value
   const { data } = await api.get('/posts', { params })
   posts.value = data.posts
-  homePost.value = null
+  homePosts.value = []
 }
 
 async function load() {
@@ -212,15 +224,15 @@ async function load() {
   try {
     if (wantsHomepage.value) {
       try {
-        const { data } = await api.get(`/posts/${settings.homePostId}`)
-        homePost.value = data.post
+        const { data } = await api.get('/posts/homepage')
+        homePosts.value = Array.isArray(data.posts) ? data.posts : []
         posts.value = []
-        return
+        if (homePosts.value.length) return
       } catch {
-        homePost.value = null
+        homePosts.value = []
       }
     } else {
-      homePost.value = null
+      homePosts.value = []
     }
     await loadList()
   } catch (err) {
@@ -235,7 +247,8 @@ watch(
     route.query.categoryId,
     route.query.q,
     route.query.view,
-    settings.homePostId,
+    settings.hasHomepage,
+    settings.homePostIds.join(','),
     settings.loaded,
     auth.user,
     statusFilter.value
@@ -255,12 +268,17 @@ function postPath(post) {
 
 async function onRemove(post) {
   const removed = await removePost(post, { redirect: false })
-  if (removed) await load()
+  if (removed) {
+    await settings.load()
+    await load()
+  }
 }
 
-async function onRemoveHome() {
-  if (!homePost.value) return
-  const removed = await removePost(homePost.value, { redirect: false })
-  if (removed) await load()
+async function onRemoveHome(post) {
+  const removed = await removePost(post, { redirect: false })
+  if (removed) {
+    await settings.load()
+    await load()
+  }
 }
 </script>

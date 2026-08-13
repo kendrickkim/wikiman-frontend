@@ -12,6 +12,7 @@
     "postinstall": "quasar prepare"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-vue": "^8.2.0",
     "@codemirror/lang-html": "^6.4.12",
     "@codemirror/lang-markdown": "^6.3.4",
     "@codemirror/state": "^6.5.2",
@@ -25,6 +26,7 @@
     "@editorjs/table": "^2.4.5",
     "@quasar/extras": "^2.0.3",
     "axios": "^1.11.0",
+    "ckeditor5": "^48.4.0",
     "codemirror": "^6.0.2",
     "markdown-it": "^14.1.0",
     "pinia": "^3.0.3",

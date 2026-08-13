@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Wikiman">
+  <rect width="192" height="192" rx="36" fill="#1f6feb"/>
+  <text
+    x="96"
+    y="104"
+    text-anchor="middle"
+    dominant-baseline="central"
+    font-family="Arial Black, Arial, sans-serif"
+    font-size="110"
+    font-weight="700"
+    fill="#ffffff"
+  >W</text>
+</svg>

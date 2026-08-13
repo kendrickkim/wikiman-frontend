@@ -26,7 +26,7 @@
             :disable="saving"
             @click="save('published')"
           />
-          <q-btn outline no-caps label="취소" :to="isEdit ? `/posts/${route.params.id}` : '/'" />
+          <q-btn outline no-caps label="취소" :disable="saving" @click="cancelEdit" />
           <q-btn
             v-if="isEdit"
             outline
@@ -44,7 +44,7 @@
       <q-card flat bordered :class="isDesktop ? 'q-pa-lg' : 'q-pa-md'">
         <div class="row q-col-gutter-md">
           <div class="col-12">
-            <q-input v-model="title" outlined label="제목" :input-class="isDesktop ? 'text-h4 text-weight-bold' : 'text-h5 text-weight-bold'" />
+            <q-input v-model="title" outlined label="제목" />
           </div>
           <div class="col-12">
             <KeywordSelect v-model="keywords" />
@@ -52,8 +52,22 @@
           <div class="col-12">
             <q-checkbox v-model="isHomepage" label="홈페이지로 사용" />
             <div class="text-caption text-grey-7 q-ml-lg">
-              사이트에 들어오면 이 글이 먼저 보입니다. 홈페이지는 한 글만 지정할 수 있습니다.
+              여러 글을 지정할 수 있으며, 홈에서는 표시 순서대로 이어서 보입니다.
             </div>
+            <q-input
+              v-if="isHomepage"
+              v-model.number="homepageSort"
+              type="number"
+              outlined
+              dense
+              class="q-mt-sm q-ml-lg"
+              style="max-width: 220px"
+              label="표시 순서"
+              hint="숫자가 작을수록 위에 표시됩니다."
+              :min="0"
+              :max="9999"
+              step="1"
+            />
           </div>
           <div :class="isDesktop ? 'col-4' : 'col-12 col-md-4'">
             <q-select
@@ -82,9 +96,16 @@
         </div>
       </q-card>
 
+      <FileAttachments v-model="attachments" editable class="q-mt-md" />
+
       <div class="q-mt-md">
+        <CkeditorEditor
+          v-if="editorType === 'ckeditor'"
+          :key="editorKey"
+          v-model="drafts.ckeditor"
+        />
         <EditorJsEditor
-          v-if="editorType === 'editorjs'"
+          v-else-if="editorType === 'editorjs'"
           :key="editorKey"
           v-model="drafts.editorjs"
         />
@@ -136,7 +157,7 @@
           :disable="saving"
           @click="save('published')"
         />
-        <q-btn outline no-caps label="취소" :to="isEdit ? `/posts/${route.params.id}` : '/'" />
+        <q-btn outline no-caps label="취소" :disable="saving" @click="cancelEdit" />
         <q-btn
           v-if="isEdit"
           outline
@@ -153,7 +174,8 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { Dialog } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
 import { useWikiStore } from '@/stores/wiki'
 import { useLayout } from '@/composables/useLayout'
@@ -163,8 +185,10 @@ import { renderMarkdown } from '@/utils/markdown'
 import { EDITOR_OPTIONS } from '@/utils/editors'
 import CategorySelect from '@/components/CategorySelect.vue'
 import KeywordSelect from '@/components/KeywordSelect.vue'
+import CkeditorEditor from '@/components/CkeditorEditor.vue'
 import EditorJsEditor from '@/components/EditorJsEditor.vue'
 import SourceEditor from '@/components/SourceEditor.vue'
+import FileAttachments from '@/components/FileAttachments.vue'
 
 const EMPTY_EDITORJS = JSON.stringify({ blocks: [] })
 
@@ -179,12 +203,14 @@ const isEdit = computed(() => Boolean(route.params.id))
 const title = ref('')
 const keywords = ref([])
 const isHomepage = ref(false)
+const homepageSort = ref(0)
 const visibility = ref('public')
 const status = ref('draft')
 const categoryId = ref(null)
 const editorType = ref(settings.defaultEditor)
 const previousEditorType = ref(settings.defaultEditor)
-const drafts = ref({ editorjs: EMPTY_EDITORJS, markdown: '', html: '' })
+const drafts = ref({ ckeditor: '', editorjs: EMPTY_EDITORJS, markdown: '', html: '' })
+const attachments = ref([])
 const editorKey = ref(0)
 const showPreview = ref(isDesktop.value)
 const saving = ref(false)
@@ -228,19 +254,23 @@ function snapshot() {
     title: title.value.trim(),
     keywords: [...keywords.value].map((item) => String(item).trim()).filter(Boolean).sort(),
     isHomepage: Boolean(isHomepage.value),
+    homepageSort: isHomepage.value ? Number(homepageSort.value) || 0 : null,
     visibility: visibility.value,
     categoryId: categoryId.value ?? null,
     editorType: editorType.value,
-    content: editorContent()
+    content: editorContent(),
+    attachments: attachments.value.map((file) => file.storedName).sort()
   })
 }
 
 const isDirty = computed(() => leaveReady.value && snapshot() !== savedSnapshot.value)
+const cancelTarget = computed(() => (isEdit.value ? `/posts/${route.params.id}` : '/'))
+let removeLeaveGuard = null
 
 function confirmLeave() {
   if (leaveConfirming) return leaveConfirming
   leaveConfirming = new Promise((resolve) => {
-    $q.dialog({
+    Dialog.create({
       title: '저장하지 않은 내용',
       message: '저장하지 않은 내용이 있습니다. 이 페이지를 나가면 사라집니다.',
       persistent: true,
@@ -248,7 +278,6 @@ function confirmLeave() {
       ok: { label: '나가기', color: 'negative', unelevated: true }
     }).onOk(() => resolve(true))
       .onCancel(() => resolve(false))
-      .onDismiss(() => resolve(false))
   }).finally(() => {
     leaveConfirming = null
   })
@@ -261,7 +290,42 @@ function onBeforeUnload(event) {
   event.returnValue = ''
 }
 
+async function leaveTo(path) {
+  if (!bypassLeave.value && isDirty.value) {
+    const ok = await confirmLeave()
+    if (!ok) return false
+  }
+  bypassLeave.value = true
+  await router.push(path)
+  return true
+}
+
+async function cancelEdit() {
+  await leaveTo(cancelTarget.value)
+}
+
+removeLeaveGuard = router.beforeEach(async (to, from) => {
+  if (bypassLeave.value) return true
+  if (from.fullPath !== route.fullPath) return true
+  if (to.fullPath === from.fullPath) return true
+  if (!isDirty.value) return true
+  const ok = await confirmLeave()
+  if (ok) {
+    bypassLeave.value = true
+    return true
+  }
+  return false
+})
+
 onMounted(async () => {
+  // 새 글은 로딩 중에도 이탈 확인이 되도록 기준 스냅샷을 먼저 잡습니다.
+  if (!isEdit.value) {
+    editorType.value = settings.defaultEditor
+    previousEditorType.value = settings.defaultEditor
+    savedSnapshot.value = snapshot()
+    leaveReady.value = true
+  }
+
   await Promise.all([wiki.loadCategories(), settings.load()])
   if (isEdit.value) {
     try {
@@ -270,6 +334,7 @@ onMounted(async () => {
       title.value = post.title
       keywords.value = post.keywords || []
       isHomepage.value = Boolean(post.isHomepage)
+      homepageSort.value = post.homepageSort != null ? Number(post.homepageSort) : 0
       visibility.value = post.visibility
       status.value = post.status || 'published'
       categoryId.value = post.categoryId
@@ -277,29 +342,31 @@ onMounted(async () => {
       previousEditorType.value = post.editorType
       if (post.editorType === 'markdown') drafts.value.markdown = post.content || ''
       else if (post.editorType === 'html') drafts.value.html = post.content || ''
+      else if (post.editorType === 'ckeditor') drafts.value.ckeditor = post.content || ''
       else drafts.value.editorjs = post.content || EMPTY_EDITORJS
+      attachments.value = Array.isArray(post.attachments) ? post.attachments : []
       editorKey.value += 1
     } catch (err) {
       error.value = getErrorMessage(err)
     }
+    savedSnapshot.value = snapshot()
+    leaveReady.value = true
   } else {
+    const dirtyAlready = isDirty.value
     editorType.value = settings.defaultEditor
     previousEditorType.value = settings.defaultEditor
+    if (!dirtyAlready) {
+      savedSnapshot.value = snapshot()
+      editorKey.value += 1
+    }
   }
-  savedSnapshot.value = snapshot()
-  leaveReady.value = true
   window.addEventListener('beforeunload', onBeforeUnload)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', onBeforeUnload)
-})
-
-onBeforeRouteLeave(async () => {
-  if (bypassLeave.value || !isDirty.value) return true
-  const ok = await confirmLeave()
-  if (ok) bypassLeave.value = true
-  return ok
+  removeLeaveGuard?.()
+  removeLeaveGuard = null
 })
 
 async function deleteCurrent() {
@@ -336,18 +403,19 @@ async function save(nextStatus) {
       title: title.value.trim(),
       keywords: keywords.value,
       isHomepage: isHomepage.value,
+      homepageSort: isHomepage.value ? Number(homepageSort.value) || 0 : undefined,
       visibility: visibility.value,
       status: nextStatus,
       categoryId: categoryId.value,
       editorType: editorType.value,
-      content: editorType.value === 'editorjs' ? drafts.value.editorjs : drafts.value[editorType.value]
+      content: editorType.value === 'editorjs' ? drafts.value.editorjs : drafts.value[editorType.value],
+      attachments: attachments.value
     }
     const { data } = isEdit.value
       ? await api.patch(`/posts/${route.params.id}`, payload)
       : await api.post('/posts', payload)
     status.value = nextStatus
-    if (data.post.isHomepage) settings.homePostId = data.post.id
-    else if (settings.homePostId === data.post.id) settings.homePostId = null
+    await settings.load()
     $q.notify({ type: 'positive', message: nextStatus === 'published' ? '발행했습니다.' : '작성중으로 저장했습니다.' })
     bypassLeave.value = true
     router.push(`/posts/${data.post.id}`)

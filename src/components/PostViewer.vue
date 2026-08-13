@@ -1,6 +1,6 @@
 <template>
   <div v-if="editorType === 'markdown'" class="wiki-content" v-html="markdownHtml" />
-  <div v-else-if="editorType === 'html'" class="wiki-content wiki-html" v-html="htmlContent" />
+  <div v-else-if="editorType === 'html' || editorType === 'ckeditor'" class="wiki-content wiki-html" v-html="htmlContent" />
   <div v-else class="wiki-content">
     <template v-for="(block, index) in blocks" :key="index">
       <component :is="headingTag(block)" v-if="block.type === 'header'" v-html="safeText(block.data?.text)" />
@@ -33,7 +33,7 @@ import { computed } from 'vue'
 import { renderMarkdown } from '@/utils/markdown'
 
 const props = defineProps({
-  editorType: { type: String, default: 'editorjs' },
+  editorType: { type: String, default: 'ckeditor' },
   content: { type: String, default: '' }
 })
 

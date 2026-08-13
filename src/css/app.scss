@@ -129,6 +129,42 @@ body {
   display: table;
 }
 
+.ckeditor-holder {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: var(--wiki-font-size);
+  line-height: var(--wiki-line-height);
+
+  .ck.ck-toolbar {
+    border: none;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f8fafc;
+  }
+
+  .ck.ck-editor__main > .ck-editor__editable {
+    min-height: 280px;
+    border: none;
+    box-shadow: none;
+    font-size: var(--wiki-font-size);
+    line-height: var(--wiki-line-height);
+  }
+
+  .ck.ck-editor__main > .ck-editor__editable.ck-focused {
+    box-shadow: none;
+  }
+
+  .ck-content {
+    font-family: inherit;
+  }
+}
+
+.ck.ck-balloon-panel,
+.ck.ck-body .ck-balloon-panel {
+  z-index: 6000;
+}
+
 .editorjs-holder {
   background: white;
   border: 1px solid #e5e7eb;
@@ -224,6 +260,13 @@ body {
     padding-top: env(safe-area-inset-top);
   }
 
+  .wiki-brand {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: none;
+    padding-right: 8px;
+  }
+
   .wiki-search {
     width: min(320px, 36vw);
   }
@@ -249,9 +292,9 @@ body {
     font-size: 1.15rem;
     font-weight: 700;
     letter-spacing: -0.02em;
-    max-width: min(320px, 28vw);
-    flex: 0 0 auto;
-    min-width: auto;
+    max-width: min(560px, 48vw);
+    flex: 0 1 auto;
+    min-width: 0;
   }
 
   .wiki-search {
@@ -319,6 +362,14 @@ body {
     h3.ce-header { font-size: 1.2rem; }
   }
 
+  .ckeditor-holder {
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+
+    .ck.ck-editor__main > .ck-editor__editable {
+      min-height: 480px;
+    }
+  }
+
   .cm-editor {
     min-height: 480px;
   }
@@ -375,6 +426,17 @@ body {
   .q-tree__spinner {
     font-size: 14px;
     margin-right: 1px;
+  }
+}
+
+.wiki-category-tree__row {
+  min-width: 0;
+  gap: 4px;
+
+  .q-badge {
+    flex: 0 0 auto;
+    font-size: 10px;
+    padding: 1px 5px;
   }
 }
 
@@ -456,6 +518,25 @@ body {
   margin-top: 0;
   flex-wrap: nowrap;
   min-width: 0;
+}
+
+.wiki-favicon-preview {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  flex: 0 0 auto;
+}
+
+.wiki-settings-nav {
+  background: #fff;
+}
+
+.wiki-settings-nav__active {
+  background: rgba(25, 118, 210, 0.08);
+  color: var(--q-primary);
 }
 
 .wiki-article-card {
@@ -569,10 +650,25 @@ body.body--dark {
   }
 
   .editorjs-holder,
+  .ckeditor-holder,
   .cm-editor,
   .wiki-article-card {
     background: #1b2128;
     border-color: #3a4149;
+  }
+
+  .wiki-favicon-preview {
+    border-color: #3a4149;
+    background: #151a1f;
+  }
+
+  .wiki-settings-nav {
+    background: #1b2128;
+    border-color: #3a4149;
+  }
+
+  .wiki-settings-nav__active {
+    background: rgba(64, 158, 255, 0.12);
   }
 
   .editorjs-holder {
@@ -627,6 +723,42 @@ body.body--dark {
     .ce-popover-item:hover,
     .ce-inline-tool:hover {
       background-color: #2a3138;
+    }
+  }
+
+  .ckeditor-holder {
+    --ck-color-base-background: #1b2128;
+    --ck-color-base-border: #3a4149;
+    --ck-color-base-text: #e5e7eb;
+    --ck-color-base-foreground: #151a1f;
+    --ck-color-toolbar-background: #151a1f;
+    --ck-color-toolbar-border: #3a4149;
+    --ck-color-button-default-hover-background: #2a3138;
+    --ck-color-button-on-background: #2a3138;
+    --ck-color-button-on-color: #f3f4f6;
+    --ck-color-dropdown-panel-background: #1b2128;
+    --ck-color-dropdown-panel-border: #3a4149;
+    --ck-color-list-background: #1b2128;
+    --ck-color-list-button-hover-background: #2a3138;
+    --ck-color-panel-background: #1b2128;
+    --ck-color-panel-border: #3a4149;
+    --ck-color-input-background: #151a1f;
+    --ck-color-input-border: #3a4149;
+    --ck-color-input-text: #e5e7eb;
+    --ck-color-text: #e5e7eb;
+    --ck-color-engine-placeholder-text: #9ca3af;
+    --ck-color-shadow-drop: rgba(0, 0, 0, 0.45);
+    --ck-color-focus-border: #3b82f6;
+    color: #e5e7eb;
+
+    .ck.ck-toolbar {
+      background: #151a1f;
+      border-bottom-color: #3a4149;
+    }
+
+    .ck.ck-editor__main > .ck-editor__editable {
+      background: #1b2128;
+      color: #e5e7eb;
     }
   }
 

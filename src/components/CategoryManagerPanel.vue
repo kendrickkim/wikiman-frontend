@@ -7,7 +7,22 @@
         selected-color="primary"
         v-model:selected="selectedId"
         default-expand-all
-      />
+        class="wiki-category-tree"
+      >
+        <template #default-header="prop">
+          <div class="row items-center no-wrap full-width wiki-category-tree__row">
+            <div class="ellipsis col">{{ prop.node.name || prop.node.label }}</div>
+            <q-badge
+              v-if="prop.node.visibility === 'private'"
+              dense
+              color="grey-7"
+              class="q-ml-sm"
+            >
+              비공개
+            </q-badge>
+          </div>
+        </template>
+      </q-tree>
       <div v-if="!treeNodes.length" class="text-grey-7 q-mt-sm">아직 카테고리가 없습니다.</div>
     </div>
 
@@ -25,6 +40,17 @@
           label="상위 카테고리"
           clearable
         />
+        <div>
+          <div class="text-body2 q-mb-xs">공개 범위</div>
+          <q-btn-toggle
+            v-model="createVisibility"
+            unelevated
+            no-caps
+            dense
+            toggle-color="primary"
+            :options="visibilityOptions"
+          />
+        </div>
         <q-btn type="submit" color="primary" label="추가" unelevated />
       </q-form>
 
@@ -44,6 +70,20 @@
           clearable
           class="q-mt-sm"
         />
+        <div class="q-mt-sm">
+          <div class="text-body2 q-mb-xs">공개 범위</div>
+          <q-btn-toggle
+            v-model="editVisibility"
+            unelevated
+            no-caps
+            dense
+            toggle-color="primary"
+            :options="visibilityOptions"
+          />
+          <div class="text-caption text-grey-7 q-mt-xs">
+            비공개 카테고리의 글은 로그인한 사용자만 목록·본문을 볼 수 있습니다.
+          </div>
+        </div>
         <div class="row q-gutter-sm q-mt-sm">
           <q-btn color="primary" outline label="저장" @click="saveCategory" />
           <q-btn color="negative" flat label="삭제" @click="removeCategory" />
@@ -67,8 +107,15 @@ const wiki = useWikiStore()
 const selectedId = ref(null)
 const createName = ref('')
 const createParentId = ref(null)
+const createVisibility = ref('public')
 const editName = ref('')
 const editParentId = ref(null)
+const editVisibility = ref('public')
+
+const visibilityOptions = [
+  { label: '공개', value: 'public' },
+  { label: '비공개', value: 'private' }
+]
 
 const selected = computed(() => wiki.categories.find((c) => c.id === Number(selectedId.value)) || null)
 const treeNodes = computed(() => wiki.tree)
@@ -81,6 +128,7 @@ const moveOptions = computed(() => parentOptions.value.filter((opt) => opt.value
 watch(selected, (value) => {
   editName.value = value?.name || ''
   editParentId.value = value?.parent_id ?? null
+  editVisibility.value = value?.visibility === 'private' ? 'private' : 'public'
 })
 
 async function notifyError(err) {
@@ -95,8 +143,13 @@ async function reload() {
 async function createCategory() {
   if (!createName.value.trim()) return
   try {
-    await api.post('/categories', { name: createName.value.trim(), parentId: createParentId.value })
+    await api.post('/categories', {
+      name: createName.value.trim(),
+      parentId: createParentId.value,
+      visibility: createVisibility.value
+    })
     createName.value = ''
+    createVisibility.value = 'public'
     await reload()
     $q.notify({ type: 'positive', message: '카테고리를 추가했습니다.' })
   } catch (err) {
@@ -109,7 +162,8 @@ async function saveCategory() {
   try {
     await api.patch(`/categories/${selected.value.id}`, {
       name: editName.value.trim(),
-      parentId: editParentId.value
+      parentId: editParentId.value,
+      visibility: editVisibility.value
     })
     await reload()
     $q.notify({ type: 'positive', message: '카테고리를 저장했습니다.' })

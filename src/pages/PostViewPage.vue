@@ -11,6 +11,7 @@
             <div :class="['wiki-article-head__title', isDesktop ? 'text-h4 text-weight-bold' : 'text-h5']">{{ displayTitle(post.title) }}</div>
             <div class="text-grey-7 q-mt-sm" :class="isDesktop ? 'text-body2' : 'text-caption'">
               {{ post.categoryName || '미분류' }} · {{ post.authorName }} · {{ formatDate(post.updatedAt) }}
+              <q-badge v-if="post.isHomepage" class="q-ml-sm" color="info">홈페이지</q-badge>
               <q-badge class="q-ml-sm" :color="post.status === 'draft' ? 'warning' : 'primary'">
                 {{ post.status === 'draft' ? '작성중' : '발행' }}
               </q-badge>
@@ -40,6 +41,7 @@
         <q-card flat bordered class="wiki-article-card wiki-article-body">
           <PostViewer :editor-type="post.editorType" :content="post.content" />
         </q-card>
+        <FileAttachments :model-value="post.attachments || []" card-class="q-mt-md" />
       </div>
     </div>
   </q-page>
@@ -54,6 +56,7 @@ import { useLayout } from '@/composables/useLayout'
 import { usePostActions } from '@/composables/usePostActions'
 import PostViewer from '@/components/PostViewer.vue'
 import KeywordChips from '@/components/KeywordChips.vue'
+import FileAttachments from '@/components/FileAttachments.vue'
 import { displayTitle } from '@/utils/title'
 
 const route = useRoute()

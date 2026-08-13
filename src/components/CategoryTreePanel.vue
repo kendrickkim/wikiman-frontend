@@ -15,7 +15,7 @@
 
     <q-list dense>
       <q-item
-        v-if="settings.homePostId"
+        v-if="settings.hasHomepage"
         clickable
         :active="selectedKey === 'home'"
         active-class="bg-blue-1 text-primary"
@@ -45,7 +45,7 @@
     </q-list>
 
     <q-tree
-      class="q-mt-sm"
+      class="q-mt-sm wiki-category-tree"
       dense
       :nodes="filteredTree"
       node-key="id"
@@ -54,7 +54,21 @@
       v-model:selected="treeSelected"
       v-model:expanded="expanded"
       @update:selected="onTreeSelect"
-    />
+    >
+      <template #default-header="prop">
+        <div class="row items-center no-wrap full-width wiki-category-tree__row">
+          <div class="ellipsis col">{{ prop.node.name || prop.node.label }}</div>
+          <q-badge
+            v-if="prop.node.visibility === 'private'"
+            dense
+            color="grey-7"
+            class="q-ml-sm"
+          >
+            비공개
+          </q-badge>
+        </div>
+      </template>
+    </q-tree>
   </div>
 </template>
 
@@ -77,7 +91,7 @@ const selectedKey = computed(() => {
   if (id === 'uncategorized') return 'uncategorized'
   if (id) return String(id)
   if (route.query.q || route.query.view === 'list') return 'all'
-  if (settings.homePostId && route.path === '/') return 'home'
+  if (settings.hasHomepage && route.path === '/') return 'home'
   return 'all'
 })
 
@@ -97,7 +111,7 @@ function go(query) {
 
 function select(key) {
   if (key === 'home') go({})
-  else if (key === 'all') go(route.query.q ? { q: route.query.q } : (settings.homePostId ? { view: 'list' } : {}))
+  else if (key === 'all') go(route.query.q ? { q: route.query.q } : (settings.hasHomepage ? { view: 'list' } : {}))
   else if (key === 'uncategorized') go({ ...pickQ(), categoryId: 'uncategorized' })
 }
 
