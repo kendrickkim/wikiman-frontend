@@ -31,6 +31,13 @@ function applyFavicon(url) {
   if (apple) apple.href = url || DEFAULT_APPLE_TOUCH
 }
 
+function applyFontScale(scale) {
+  if (typeof document === 'undefined') return
+  const n = Number(scale)
+  const value = Number.isFinite(n) && n > 0 ? n / 100 : 1
+  document.documentElement.style.setProperty('--wiki-font-scale', String(value))
+}
+
 export const useSettingsStore = defineStore('settings', {
   state: () => ({
     siteTitle: 'Wikiman',
@@ -39,6 +46,8 @@ export const useSettingsStore = defineStore('settings', {
     defaultEditor: 'ckeditor',
     favicon: '',
     maxAttachmentMb: 20,
+    categoryTreeExpand: 'expanded',
+    fontScale: 100,
     homePostIds: [],
     hasHomepage: false,
     loaded: false
@@ -51,6 +60,7 @@ export const useSettingsStore = defineStore('settings', {
       Dark.set(this.theme === 'dark')
       document.title = this.siteTitle
       applyFavicon(this.favicon)
+      applyFontScale(this.fontScale)
     },
     assign(data) {
       this.siteTitle = data.siteTitle || 'Wikiman'
@@ -60,6 +70,10 @@ export const useSettingsStore = defineStore('settings', {
       this.favicon = typeof data.favicon === 'string' ? data.favicon : ''
       const mb = Math.round(Number(data.maxAttachmentMb))
       this.maxAttachmentMb = Number.isFinite(mb) && mb >= 1 && mb <= 200 ? mb : 20
+      const treeExpand = String(data.categoryTreeExpand || '')
+      this.categoryTreeExpand = ['expanded', 'collapsed', 'root'].includes(treeExpand) ? treeExpand : 'expanded'
+      const scale = Math.round(Number(data.fontScale))
+      this.fontScale = Number.isFinite(scale) && scale >= 60 && scale <= 120 ? scale : 100
       const ids = Array.isArray(data.homePostIds)
         ? data.homePostIds.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0)
         : []

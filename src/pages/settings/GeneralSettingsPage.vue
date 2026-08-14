@@ -65,6 +65,33 @@
           </div>
 
           <div>
+            <div class="text-body2 q-mb-sm">글자 스케일</div>
+            <q-select
+              v-model="form.fontScale"
+              outlined
+              dense
+              emit-value
+              map-options
+              :options="fontScaleOptions"
+              style="max-width: 220px"
+            />
+            <div class="text-caption text-grey-7 q-mt-xs">기본값은 100%입니다. 모바일에서 글자가 크면 낮춰 보세요.</div>
+          </div>
+
+          <div>
+            <div class="text-body2 q-mb-sm">카테고리 트리</div>
+            <q-btn-toggle
+              v-model="form.categoryTreeExpand"
+              unelevated
+              no-caps
+              toggle-color="primary"
+              :spread="!isDesktop"
+              :options="treeExpandOptions"
+            />
+            <div class="text-caption text-grey-7 q-mt-xs">왼쪽 메뉴 카테고리의 기본 펼침 상태입니다.</div>
+          </div>
+
+          <div>
             <div class="text-body2 q-mb-sm">기본 작성 방식</div>
             <q-btn-toggle
               v-model="form.defaultEditor"
@@ -112,13 +139,24 @@ const form = reactive({
   theme: settings.theme,
   plantumlServer: settings.plantumlServer,
   defaultEditor: settings.defaultEditor,
-  favicon: settings.favicon
+  favicon: settings.favicon,
+  categoryTreeExpand: settings.categoryTreeExpand,
+  fontScale: settings.fontScale
 })
 
 const themeOptions = [
   { label: '밝은', value: 'light', icon: 'light_mode' },
   { label: '어두운', value: 'dark', icon: 'dark_mode' }
 ]
+const treeExpandOptions = [
+  { label: '모두 펼침', value: 'expanded' },
+  { label: '모두 접힘', value: 'collapsed' },
+  { label: '1단계만 펼침', value: 'root' }
+]
+const fontScaleOptions = [60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120].map((value) => ({
+  label: value === 100 ? '100% (기본)' : `${value}%`,
+  value
+}))
 const editorOptions = EDITOR_OPTIONS
 
 onMounted(async () => {
@@ -128,6 +166,8 @@ onMounted(async () => {
   form.plantumlServer = settings.plantumlServer
   form.defaultEditor = settings.defaultEditor
   form.favicon = settings.favicon
+  form.categoryTreeExpand = settings.categoryTreeExpand
+  form.fontScale = settings.fontScale
 })
 
 function pickFavicon() {
@@ -180,7 +220,9 @@ async function save() {
       theme: form.theme,
       plantumlServer: form.plantumlServer,
       defaultEditor: form.defaultEditor,
-      favicon: form.favicon
+      favicon: form.favicon,
+      categoryTreeExpand: form.categoryTreeExpand,
+      fontScale: form.fontScale
     })
     $q.notify({ type: 'positive', message: '설정을 저장했습니다.' })
   } catch (err) {

@@ -63,12 +63,6 @@
               </q-item-section>
               <q-item-section>사이트 관리</q-item-section>
             </q-item>
-            <q-item clickable v-close-popup to="/trash">
-              <q-item-section avatar>
-                <q-icon name="delete" />
-              </q-item-section>
-              <q-item-section>휴지통</q-item-section>
-            </q-item>
             <q-item clickable v-close-popup @click="logout">
               <q-item-section avatar>
                 <q-icon name="logout" />
@@ -146,9 +140,6 @@
               <q-item v-if="auth.canWrite" clickable v-close-popup to="/settings">
                 <q-item-section>사이트 관리</q-item-section>
               </q-item>
-              <q-item clickable v-close-popup to="/trash">
-                <q-item-section>휴지통</q-item-section>
-              </q-item>
               <q-item clickable v-close-popup @click="logout">
                 <q-item-section>로그아웃</q-item-section>
               </q-item>
@@ -190,17 +181,8 @@
         <div class="wiki-drawer-title">카테고리</div>
         <CategoryTreePanel />
         <q-btn
-          v-if="auth.isLoggedIn"
-          class="q-mt-md full-width"
-          flat
-          no-caps
-          icon="delete"
-          label="휴지통"
-          to="/trash"
-        />
-        <q-btn
           v-if="auth.canWrite"
-          class="q-mt-sm full-width"
+          class="q-mt-md full-width"
           flat
           no-caps
           icon="settings"
@@ -272,9 +254,8 @@ function goHome() {
 }
 
 function applySearch() {
-  const next = { ...route.query }
+  const next = {}
   if (search.value.trim()) next.q = search.value.trim()
-  else delete next.q
   router.push({ path: '/', query: next })
   if (!isDesktop.value && $q.screen.lt.sm) mobileSearch.value = false
 }

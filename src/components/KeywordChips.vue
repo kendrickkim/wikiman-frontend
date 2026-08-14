@@ -24,6 +24,6 @@ defineProps({
 const router = useRouter()
 
 function search(keyword) {
-  router.push({ path: '/', query: { q: keyword } })
+  router.push(`/keyword/${encodeURIComponent(keyword)}`)
 }
 </script>

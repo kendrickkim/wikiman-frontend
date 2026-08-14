@@ -1,32 +1,35 @@
 <template>
-  <div class="row q-col-gutter-md">
+  <div ref="panelRoot" class="row q-col-gutter-md">
     <div class="col-12 col-md-5">
-      <q-tree
-        :nodes="treeNodes"
-        node-key="id"
-        selected-color="primary"
-        v-model:selected="selectedId"
-        default-expand-all
-        class="wiki-category-tree"
-      >
-        <template #default-header="prop">
-          <div class="row items-center no-wrap full-width wiki-category-tree__row">
-            <div class="ellipsis col">{{ prop.node.name || prop.node.label }}</div>
-            <q-badge
-              v-if="prop.node.visibility === 'private'"
-              dense
-              color="grey-7"
-              class="q-ml-sm"
-            >
-              비공개
-            </q-badge>
-          </div>
-        </template>
-      </q-tree>
-      <div v-if="!treeNodes.length" class="text-grey-7 q-mt-sm">아직 카테고리가 없습니다.</div>
+      <div class="category-manager-tree" :style="paneStyle">
+        <q-tree
+          :nodes="treeNodes"
+          node-key="id"
+          selected-color="primary"
+          v-model:selected="selectedId"
+          default-expand-all
+          class="wiki-category-tree"
+        >
+          <template #default-header="prop">
+            <div class="row items-center no-wrap full-width wiki-category-tree__row">
+              <div class="ellipsis col">{{ prop.node.name || prop.node.label }}</div>
+              <q-badge
+                v-if="prop.node.visibility === 'private'"
+                dense
+                color="grey-7"
+                class="q-ml-sm"
+              >
+                비공개
+              </q-badge>
+            </div>
+          </template>
+        </q-tree>
+        <div v-if="!treeNodes.length" class="text-grey-7 q-mt-sm">아직 카테고리가 없습니다.</div>
+      </div>
     </div>
 
     <div class="col-12 col-md-7">
+      <div class="category-manager-form" :style="paneStyle">
       <q-form class="q-gutter-sm" @submit.prevent="createCategory">
         <div class="text-subtitle2">새 카테고리</div>
         <q-input v-model="createName" dense outlined label="이름" />
@@ -38,7 +41,6 @@
           dense
           outlined
           label="상위 카테고리"
-          clearable
         />
         <div>
           <div class="text-body2 q-mb-xs">공개 범위</div>
@@ -59,17 +61,6 @@
       <template v-if="selected">
         <div class="text-subtitle2">선택한 카테고리</div>
         <q-input v-model="editName" dense outlined label="이름" class="q-mt-sm" />
-        <q-select
-          v-model="editParentId"
-          :options="moveOptions"
-          emit-value
-          map-options
-          dense
-          outlined
-          label="상위 카테고리"
-          clearable
-          class="q-mt-sm"
-        />
         <div class="q-mt-sm">
           <div class="text-body2 q-mb-xs">공개 범위</div>
           <q-btn-toggle
@@ -88,14 +79,43 @@
           <q-btn color="primary" outline label="저장" @click="saveCategory" />
           <q-btn color="negative" flat label="삭제" @click="removeCategory" />
         </div>
+
+        <q-separator class="q-my-lg" />
+
+        <div class="text-subtitle2">카테고리 이동</div>
+        <div class="text-caption text-grey-7 q-mt-xs">
+          현재 위치: {{ currentLocationLabel }}
+        </div>
+        <q-select
+          v-model="editParentId"
+          :options="moveOptions"
+          emit-value
+          map-options
+          dense
+          outlined
+          label="이동할 상위 카테고리"
+          class="q-mt-sm"
+        />
+        <div class="text-caption text-grey-7 q-mt-xs">
+          다른 카테고리의 하위로 옮기거나, 최상위로 이동할 수 있습니다.
+        </div>
+        <q-btn
+          class="q-mt-sm"
+          color="primary"
+          unelevated
+          label="이동"
+          :disable="!canMove"
+          @click="moveCategory"
+        />
       </template>
       <div v-else class="text-grey-7">{{ $q.screen.lt.md ? '위에서 카테고리를 선택하세요.' : '왼쪽에서 카테고리를 선택하세요.' }}</div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
 import { useWikiStore } from '@/stores/wiki'
@@ -106,11 +126,16 @@ const $q = useQuasar()
 const wiki = useWikiStore()
 const selectedId = ref(null)
 const createName = ref('')
-const createParentId = ref(null)
+const createParentId = ref(0)
 const createVisibility = ref('public')
 const editName = ref('')
-const editParentId = ref(null)
+const editParentId = ref(0)
 const editVisibility = ref('public')
+const panelRoot = ref(null)
+const paneMaxHeight = ref('')
+const paneStyle = computed(() => (
+  paneMaxHeight.value ? { maxHeight: paneMaxHeight.value } : null
+))
 
 const visibilityOptions = [
   { label: '공개', value: 'public' },
@@ -120,16 +145,98 @@ const visibilityOptions = [
 const selected = computed(() => wiki.categories.find((c) => c.id === Number(selectedId.value)) || null)
 const treeNodes = computed(() => wiki.tree)
 const parentOptions = computed(() => [
-  { label: '없음 (최상위)', value: null },
+  { label: '최상위', value: 0 },
   ...wiki.flatOptions.map((c) => ({ label: c.label, value: c.id }))
 ])
-const moveOptions = computed(() => parentOptions.value.filter((opt) => opt.value !== selectedId.value))
+
+function descendantIdSet(categoryId) {
+  const children = new Map()
+  for (const category of wiki.categories) {
+    const key = category.parent_id ?? 0
+    if (!children.has(key)) children.set(key, [])
+    children.get(key).push(category.id)
+  }
+  const ids = new Set()
+  const stack = [Number(categoryId)]
+  while (stack.length) {
+    const current = stack.pop()
+    if (!Number.isFinite(current) || ids.has(current)) continue
+    ids.add(current)
+    for (const child of children.get(current) || []) stack.push(child)
+  }
+  return ids
+}
+
+const moveOptions = computed(() => {
+  if (!selected.value) {
+    return [{ label: '최상위', value: 0 }]
+  }
+  const blocked = descendantIdSet(selected.value.id)
+  return [
+    { label: '최상위', value: 0 },
+    ...wiki.flatOptions
+      .filter((category) => !blocked.has(category.id))
+      .map((category) => ({ label: category.label, value: category.id }))
+  ]
+})
+
+const currentLocationLabel = computed(() => {
+  if (!selected.value) return ''
+  if (selected.value.parent_id == null) return '최상위'
+  const parent = wiki.categories.find((category) => category.id === selected.value.parent_id)
+  return parent ? `${parent.name} 하위` : '최상위'
+})
+
+const canMove = computed(() => {
+  if (!selected.value) return false
+  const current = selected.value.parent_id ?? 0
+  return Number(editParentId.value || 0) !== Number(current)
+})
 
 watch(selected, (value) => {
   editName.value = value?.name || ''
-  editParentId.value = value?.parent_id ?? null
+  editParentId.value = value?.parent_id ?? 0
   editVisibility.value = value?.visibility === 'private' ? 'private' : 'public'
 })
+
+function toParentId(value) {
+  const id = Number(value)
+  return Number.isFinite(id) && id > 0 ? id : null
+}
+
+function fitPaneHeight() {
+  const el = panelRoot.value
+  if (!el) {
+    paneMaxHeight.value = ''
+    return
+  }
+  if (!$q.screen.gt.sm) {
+    paneMaxHeight.value = ''
+    return
+  }
+  const top = el.getBoundingClientRect().top
+  // 카드 아래 여백 + 페이지 하단 패딩만큼 남겨 페이지 스크롤이 생기지 않게 합니다.
+  const bottomSpace = 72
+  const height = Math.floor(window.innerHeight - top - bottomSpace)
+  paneMaxHeight.value = `${Math.max(200, height)}px`
+}
+
+onMounted(() => {
+  fitPaneHeight()
+  nextTick(() => {
+    fitPaneHeight()
+    requestAnimationFrame(fitPaneHeight)
+  })
+  window.addEventListener('resize', fitPaneHeight)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', fitPaneHeight)
+})
+
+watch(() => $q.screen.gt.sm, () => nextTick(fitPaneHeight))
+watch(() => wiki.categories.length, () => nextTick(fitPaneHeight))
+watch(selectedId, () => nextTick(fitPaneHeight))
 
 async function notifyError(err) {
   $q.notify({ type: 'negative', message: getErrorMessage(err) })
@@ -145,10 +252,11 @@ async function createCategory() {
   try {
     await api.post('/categories', {
       name: createName.value.trim(),
-      parentId: createParentId.value,
+      parentId: toParentId(createParentId.value),
       visibility: createVisibility.value
     })
     createName.value = ''
+    createParentId.value = 0
     createVisibility.value = 'public'
     await reload()
     $q.notify({ type: 'positive', message: '카테고리를 추가했습니다.' })
@@ -162,11 +270,28 @@ async function saveCategory() {
   try {
     await api.patch(`/categories/${selected.value.id}`, {
       name: editName.value.trim(),
-      parentId: editParentId.value,
       visibility: editVisibility.value
     })
     await reload()
     $q.notify({ type: 'positive', message: '카테고리를 저장했습니다.' })
+  } catch (err) {
+    notifyError(err)
+  }
+}
+
+async function moveCategory() {
+  if (!selected.value || !canMove.value) return
+  const parentId = toParentId(editParentId.value)
+  const targetLabel = parentId
+    ? wiki.categories.find((category) => category.id === parentId)?.name || '선택한 카테고리'
+    : '최상위'
+  try {
+    await api.patch(`/categories/${selected.value.id}`, { parentId })
+    await reload()
+    $q.notify({
+      type: 'positive',
+      message: parentId ? `"${targetLabel}" 아래로 이동했습니다.` : '최상위로 이동했습니다.'
+    })
   } catch (err) {
     notifyError(err)
   }
@@ -191,3 +316,24 @@ function removeCategory() {
   })
 }
 </script>
+
+<style scoped>
+.category-manager-tree {
+  max-height: 50vh;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.category-manager-form {
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+}
+
+.body--dark .category-manager-tree {
+  border-color: #3a4149;
+}
+</style>

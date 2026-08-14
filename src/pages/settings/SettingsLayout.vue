@@ -67,7 +67,7 @@ const menu = [
   {
     to: '/settings/general',
     label: '일반',
-    caption: '제목, 파비콘, 테마, 에디터',
+    caption: '제목, 파비콘, 테마, 글자, 트리, 에디터',
     icon: 'tune'
   },
   {

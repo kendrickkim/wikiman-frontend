@@ -7,6 +7,8 @@ const routes = [
       { path: 'posts/new', component: () => import('@/pages/PostEditPage.vue'), meta: { requiresWriter: true } },
       { path: 'posts/:id/edit', component: () => import('@/pages/PostEditPage.vue'), meta: { requiresWriter: true } },
       { path: 'posts/:id', component: () => import('@/pages/PostViewPage.vue') },
+      { path: 'keywords', component: () => import('@/pages/KeywordsPage.vue') },
+      { path: 'keyword/:keyword', component: () => import('@/pages/IndexPage.vue') },
       { path: 'trash', component: () => import('@/pages/TrashPage.vue'), meta: { requiresAuth: true } },
       {
         path: 'settings',

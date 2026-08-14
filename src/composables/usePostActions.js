@@ -19,7 +19,10 @@ export function usePostActions() {
         try {
           await api.delete(`/posts/${post.id}`)
           $q.notify({ type: 'positive', message: '휴지통으로 이동했습니다.' })
-          if (redirect) router.push('/')
+          if (redirect) {
+            if (window.history.state?.back != null) router.back()
+            else router.push('/')
+          }
           resolve(true)
         } catch (err) {
           $q.notify({ type: 'negative', message: getErrorMessage(err) })

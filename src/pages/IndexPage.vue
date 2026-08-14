@@ -53,10 +53,20 @@
       </template>
 
       <template v-else>
-        <div class="row items-center q-mb-md no-wrap">
+        <div class="row items-center q-mb-md q-gutter-sm">
           <div :class="isDesktop ? 'text-h4 text-weight-bold col' : 'text-h6 text-weight-medium col'">
             {{ heading }}
           </div>
+          <q-select
+            v-model="pageSize"
+            dense
+            outlined
+            emit-value
+            map-options
+            hide-bottom-space
+            :options="pageSizeOptions"
+            style="min-width: 128px"
+          />
         </div>
 
         <q-btn-toggle
@@ -150,6 +160,21 @@
             </q-item-section>
           </q-item>
         </q-list>
+
+        <div v-if="!loading && !error && total > 0" class="row items-center justify-between q-mt-md q-gutter-sm">
+          <div class="text-grey-7 text-caption">
+            {{ pageRangeLabel }}
+          </div>
+          <q-pagination
+            v-model="page"
+            :max="pageCount"
+            :max-pages="isDesktop ? 7 : 4"
+            direction-links
+            :boundary-links="isDesktop"
+            unelevated
+            color="primary"
+          />
+        </div>
       </template>
     </div>
   </q-page>
@@ -157,7 +182,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { api, getErrorMessage } from '@/utils/api'
 import { useAuthStore } from '@/stores/auth'
 import { useWikiStore } from '@/stores/wiki'
@@ -170,6 +195,7 @@ import FileAttachments from '@/components/FileAttachments.vue'
 import { displayTitle } from '@/utils/title'
 
 const route = useRoute()
+const router = useRouter()
 const { $q, isDesktop } = useLayout()
 const { removePost } = usePostActions()
 const auth = useAuthStore()
@@ -179,24 +205,73 @@ const posts = ref([])
 const homePosts = ref([])
 const loading = ref(false)
 const error = ref('')
+const total = ref(0)
 const statusFilter = ref('all')
 const statusFilterOptions = [
   { label: '전체', value: 'all' },
   { label: '발행', value: 'published' },
   { label: '작성중', value: 'draft' }
 ]
+const PAGE_SIZE_KEY = 'wikiman_page_size'
+const PAGE_SIZES = [10, 20, 50, 100]
+const pageSizeOptions = [
+  { label: '10개씩', value: 10 },
+  { label: '20개씩', value: 20 },
+  { label: '50개씩', value: 50 },
+  { label: '100개씩', value: 100 }
+]
+
+function readStoredPageSize() {
+  const n = Number(localStorage.getItem(PAGE_SIZE_KEY))
+  return PAGE_SIZES.includes(n) ? n : 10
+}
+
+const pageSize = ref(readStoredPageSize())
+const activeKeyword = computed(() => {
+  const fromParam = route.params.keyword
+  if (fromParam != null && String(fromParam).trim() !== '') return String(fromParam)
+  return String(route.query.keyword || '').trim()
+})
+const listPath = computed(() => (
+  activeKeyword.value
+    ? `/keyword/${encodeURIComponent(activeKeyword.value)}`
+    : '/'
+))
+const page = computed({
+  get() {
+    const n = Math.floor(Number(route.query.page))
+    return Number.isFinite(n) && n > 0 ? n : 1
+  },
+  set(value) {
+    const next = { ...route.query }
+    delete next.keyword
+    if (!value || value <= 1) delete next.page
+    else next.page = String(value)
+    router.push({ path: listPath.value, query: next })
+  }
+})
+const pageCount = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value) || 1))
+const pageRangeLabel = computed(() => {
+  if (!total.value) return ''
+  const start = (page.value - 1) * pageSize.value + 1
+  const end = Math.min(total.value, page.value * pageSize.value)
+  return `${start}–${end} / ${total.value}개`
+})
 
 const wantsHomepage = computed(() => (
   settings.loaded
   && settings.hasHomepage
+  && route.path === '/'
   && !route.query.categoryId
   && !route.query.q
+  && !activeKeyword.value
   && route.query.view !== 'list'
 ))
 
 const showingHome = computed(() => wantsHomepage.value && homePosts.value.length > 0)
 
 const heading = computed(() => {
+  if (activeKeyword.value) return `"${activeKeyword.value}" 키워드 글`
   if (route.query.q) return `"${route.query.q}" 검색 결과`
   if (route.query.categoryId === 'uncategorized') return '미분류'
   const id = Number(route.query.categoryId)
@@ -205,13 +280,19 @@ const heading = computed(() => {
 })
 
 async function loadList() {
-  const params = {}
+  const params = {
+    page: page.value,
+    pageSize: pageSize.value
+  }
   if (route.query.categoryId) params.categoryId = route.query.categoryId
   if (route.query.q) params.q = route.query.q
+  if (activeKeyword.value) params.keyword = activeKeyword.value
   if (statusFilter.value !== 'all') params.status = statusFilter.value
   const { data } = await api.get('/posts', { params })
   posts.value = data.posts
+  total.value = Number(data.total) || 0
   homePosts.value = []
+  if (data.page && data.page !== page.value) page.value = data.page
 }
 
 async function load() {
@@ -227,6 +308,7 @@ async function load() {
         const { data } = await api.get('/posts/homepage')
         homePosts.value = Array.isArray(data.posts) ? data.posts : []
         posts.value = []
+        total.value = 0
         if (homePosts.value.length) return
       } catch {
         homePosts.value = []
@@ -244,9 +326,13 @@ async function load() {
 
 watch(
   () => [
+    route.path,
+    route.params.keyword,
     route.query.categoryId,
     route.query.q,
     route.query.view,
+    route.query.page,
+    pageSize.value,
     settings.hasHomepage,
     settings.homePostIds.join(','),
     settings.loaded,
@@ -256,6 +342,15 @@ watch(
   load,
   { immediate: true }
 )
+
+watch(pageSize, (value) => {
+  localStorage.setItem(PAGE_SIZE_KEY, String(value))
+  if (page.value !== 1) page.value = 1
+})
+
+watch(statusFilter, () => {
+  if (page.value !== 1) page.value = 1
+})
 
 function formatDate(value) {
   if (!value) return ''
@@ -270,6 +365,10 @@ async function onRemove(post) {
   const removed = await removePost(post, { redirect: false })
   if (removed) {
     await settings.load()
+    if (posts.value.length <= 1 && page.value > 1) {
+      page.value = page.value - 1
+      return
+    }
     await load()
   }
 }
