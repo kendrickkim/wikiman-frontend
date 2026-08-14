@@ -1,19 +1,5 @@
 <template>
   <div class="wiki-nav">
-    <q-input
-      v-if="showTree"
-      v-model="filter"
-      dense
-      outlined
-      placeholder="카테고리 찾기"
-      class="q-mb-sm"
-      clearable
-    >
-      <template #prepend>
-        <q-icon name="search" />
-      </template>
-    </q-input>
-
     <q-list v-if="showNav" dense>
       <q-item
         v-if="settings.hasHomepage"
@@ -64,33 +50,64 @@
       </q-item>
     </q-list>
 
-    <q-tree
-      v-if="showTree"
-      class="q-mt-sm wiki-category-tree"
-      :class="{ 'q-mt-none': !showNav }"
-      dense
-      :nodes="filteredTree"
-      node-key="id"
-      :filter="filter"
-      selected-color="primary"
-      v-model:selected="treeSelected"
-      v-model:expanded="expanded"
-      @update:selected="onTreeSelect"
-    >
-      <template #default-header="prop">
-        <div class="row items-center no-wrap full-width wiki-category-tree__row">
-          <div class="ellipsis col">{{ prop.node.name || prop.node.label }}</div>
-          <q-badge
-            v-if="prop.node.visibility === 'private'"
-            dense
-            color="grey-7"
-            class="q-ml-sm"
-          >
-            비공개
-          </q-badge>
-        </div>
-      </template>
-    </q-tree>
+    <div v-if="showNav && auth.canWrite" class="wiki-nav-settings">
+      <div class="wiki-drawer-title">사이트 관리</div>
+      <q-list dense>
+        <q-item
+          v-for="item in settingsMenu"
+          :key="item.key"
+          clickable
+          :active="selectedKey === item.key"
+          active-class="wiki-nav-active"
+          @click="router.push(item.to)"
+        >
+          <q-item-section avatar><q-icon :name="item.icon" /></q-item-section>
+          <q-item-section>{{ item.label }}</q-item-section>
+        </q-item>
+      </q-list>
+    </div>
+
+    <template v-if="showTree">
+      <div class="wiki-drawer-title" :class="{ 'q-mt-md': showNav }">카테고리</div>
+      <q-input
+        v-model="filter"
+        dense
+        outlined
+        placeholder="카테고리 찾기"
+        class="q-mb-sm"
+        clearable
+      >
+        <template #prepend>
+          <q-icon name="search" />
+        </template>
+      </q-input>
+
+      <q-tree
+        class="wiki-category-tree"
+        dense
+        :nodes="filteredTree"
+        node-key="id"
+        :filter="filter"
+        selected-color="primary"
+        v-model:selected="treeSelected"
+        v-model:expanded="expanded"
+        @update:selected="onTreeSelect"
+      >
+        <template #default-header="prop">
+          <div class="row items-center no-wrap full-width wiki-category-tree__row">
+            <div class="ellipsis col">{{ prop.node.name || prop.node.label }}</div>
+            <q-badge
+              v-if="prop.node.visibility === 'private'"
+              dense
+              color="grey-7"
+              class="q-ml-sm"
+            >
+              비공개
+            </q-badge>
+          </div>
+        </template>
+      </q-tree>
+    </template>
   </div>
 </template>
 
@@ -106,6 +123,23 @@ const props = defineProps({
   showTree: { type: Boolean, default: true }
 })
 
+const settingsMenu = [
+  { key: 'settings-general', to: '/settings/general', label: '일반', icon: 'tune' },
+  { key: 'settings-categories', to: '/settings/categories', label: '카테고리', icon: 'folder' },
+  { key: 'settings-homepage', to: '/settings/homepage', label: '홈페이지', icon: 'home' },
+  { key: 'settings-attachments', to: '/settings/attachments', label: '첨부파일', icon: 'attach_file' },
+  { key: 'settings-backup', to: '/settings/backup', label: '백업/복구', icon: 'backup' }
+]
+
+const NAV_KEYS = new Set([
+  'all',
+  'home',
+  'uncategorized',
+  'keywords',
+  'trash',
+  ...settingsMenu.map((item) => item.key)
+])
+
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
@@ -117,6 +151,10 @@ const expanded = ref([])
 
 const selectedKey = computed(() => {
   if (route.path === '/trash') return 'trash'
+  if (route.path.startsWith('/settings')) {
+    const match = settingsMenu.find((item) => route.path.startsWith(item.to))
+    return match?.key || 'settings-general'
+  }
   if (route.path === '/keywords' || route.path.startsWith('/keyword/')) return 'keywords'
   const id = route.query.categoryId
   if (id === 'uncategorized') return 'uncategorized'
@@ -133,9 +171,7 @@ watch(() => [wiki.categories.map((category) => category.id).join(','), settings.
 }, { immediate: true })
 
 watch(selectedKey, (key) => {
-  treeSelected.value = key === 'all' || key === 'home' || key === 'uncategorized' || key === 'keywords' || key === 'trash'
-    ? null
-    : Number(key)
+  treeSelected.value = NAV_KEYS.has(key) ? null : Number(key)
   if (props.showTree) ensureSelectedVisible()
 }, { immediate: true })
 
@@ -164,7 +200,7 @@ function ancestorIds(categoryId) {
 function applyTreeExpand() {
   const ids = new Set(defaultExpandedIds())
   const key = selectedKey.value
-  if (key && key !== 'all' && key !== 'home' && key !== 'uncategorized' && key !== 'keywords' && key !== 'trash') {
+  if (key && !NAV_KEYS.has(key)) {
     for (const id of ancestorIds(key)) ids.add(id)
   }
   expanded.value = [...ids]
@@ -172,7 +208,7 @@ function applyTreeExpand() {
 
 function ensureSelectedVisible() {
   const key = selectedKey.value
-  if (!key || key === 'all' || key === 'home' || key === 'uncategorized' || key === 'keywords' || key === 'trash') return
+  if (!key || NAV_KEYS.has(key)) return
   const extra = ancestorIds(key)
   if (!extra.length) return
   const ids = new Set(expanded.value)

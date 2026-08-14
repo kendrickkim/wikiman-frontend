@@ -401,6 +401,11 @@ html {
     font-weight: 600;
     margin-bottom: 10px;
   }
+
+  .wiki-nav-settings {
+    margin-top: 24px;
+    padding-top: 4px;
+  }
 }
 
 .wiki-layout-desktop {
@@ -451,6 +456,11 @@ html {
   .wiki-nav .q-item__section--avatar {
     min-width: 34px;
     padding-right: 8px;
+  }
+
+  .wiki-nav-settings {
+    margin-top: 28px;
+    padding-top: 8px;
   }
 
   .wiki-page {
@@ -661,15 +671,6 @@ html {
   flex: 0 0 auto;
 }
 
-.wiki-settings-nav {
-  background: #fff;
-}
-
-.wiki-settings-nav__active {
-  background: rgba(25, 118, 210, 0.08);
-  color: var(--q-primary);
-}
-
 .wiki-article-card {
   background: white;
   border: 1px solid #e5e7eb;
@@ -825,15 +826,6 @@ body.body--dark {
   .wiki-favicon-preview {
     border-color: #3a4149;
     background: #151a1f;
-  }
-
-  .wiki-settings-nav {
-    background: #1b2128;
-    border-color: #3a4149;
-  }
-
-  .wiki-settings-nav__active {
-    background: rgba(64, 158, 255, 0.12);
   }
 
   .editorjs-holder {

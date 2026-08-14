@@ -188,17 +188,8 @@
       :class="drawerClass"
     >
       <div class="wiki-drawer-inner">
-        <div class="wiki-drawer-title">{{ treeOnRight ? '메뉴' : '카테고리' }}</div>
+        <div v-if="treeOnRight" class="wiki-drawer-title">메뉴</div>
         <CategoryTreePanel :show-nav="true" :show-tree="!treeOnRight" />
-        <q-btn
-          v-if="auth.canWrite"
-          class="q-mt-md full-width"
-          flat
-          no-caps
-          icon="settings"
-          label="사이트 관리"
-          to="/settings"
-        />
       </div>
     </q-drawer>
 
@@ -212,7 +203,6 @@
       :class="drawerClass"
     >
       <div class="wiki-drawer-inner">
-        <div class="wiki-drawer-title">카테고리</div>
         <CategoryTreePanel :show-nav="false" :show-tree="true" />
       </div>
     </q-drawer>
