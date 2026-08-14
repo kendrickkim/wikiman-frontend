@@ -1,6 +1,7 @@
 <template>
   <div class="wiki-nav">
     <q-input
+      v-if="showTree"
       v-model="filter"
       dense
       outlined
@@ -13,7 +14,7 @@
       </template>
     </q-input>
 
-    <q-list dense>
+    <q-list v-if="showNav" dense>
       <q-item
         v-if="settings.hasHomepage"
         clickable
@@ -64,7 +65,9 @@
     </q-list>
 
     <q-tree
+      v-if="showTree"
       class="q-mt-sm wiki-category-tree"
+      :class="{ 'q-mt-none': !showNav }"
       dense
       :nodes="filteredTree"
       node-key="id"
@@ -98,6 +101,11 @@ import { useAuthStore } from '@/stores/auth'
 import { useWikiStore } from '@/stores/wiki'
 import { useSettingsStore } from '@/stores/settings'
 
+const props = defineProps({
+  showNav: { type: Boolean, default: true },
+  showTree: { type: Boolean, default: true }
+})
+
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
@@ -121,14 +129,14 @@ const selectedKey = computed(() => {
 const filteredTree = computed(() => wiki.tree)
 
 watch(() => [wiki.categories.map((category) => category.id).join(','), settings.categoryTreeExpand], () => {
-  applyTreeExpand()
+  if (props.showTree) applyTreeExpand()
 }, { immediate: true })
 
 watch(selectedKey, (key) => {
   treeSelected.value = key === 'all' || key === 'home' || key === 'uncategorized' || key === 'keywords' || key === 'trash'
     ? null
     : Number(key)
-  ensureSelectedVisible()
+  if (props.showTree) ensureSelectedVisible()
 }, { immediate: true })
 
 function defaultExpandedIds() {

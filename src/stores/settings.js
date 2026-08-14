@@ -47,6 +47,7 @@ export const useSettingsStore = defineStore('settings', {
     favicon: '',
     maxAttachmentMb: 20,
     categoryTreeExpand: 'expanded',
+    categoryTreeSide: 'left',
     fontScale: 100,
     homePostIds: [],
     hasHomepage: false,
@@ -73,6 +74,7 @@ export const useSettingsStore = defineStore('settings', {
       this.maxAttachmentMb = Number.isFinite(mb) && mb >= 1 && mb <= 200 ? mb : 20
       const treeExpand = String(data.categoryTreeExpand || '')
       this.categoryTreeExpand = ['expanded', 'collapsed', 'root'].includes(treeExpand) ? treeExpand : 'expanded'
+      this.categoryTreeSide = data.categoryTreeSide === 'right' ? 'right' : 'left'
       const scale = Math.round(Number(data.fontScale))
       this.fontScale = Number.isFinite(scale) && scale >= 60 && scale <= 120 ? scale : 100
       const ids = Array.isArray(data.homePostIds)

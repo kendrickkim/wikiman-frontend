@@ -1,6 +1,6 @@
 <template>
   <q-layout
-    view="hHh lpR fFf"
+    :view="layoutView"
     :class="isDesktop ? 'wiki-layout-desktop' : 'wiki-layout-mobile'"
   >
     <q-header
@@ -30,6 +30,15 @@
           </template>
         </q-input>
         <q-space />
+        <q-btn
+          v-if="treeOnRight"
+          dense
+          flat
+          round
+          icon="account_tree"
+          aria-label="카테고리"
+          @click="rightDrawer = !rightDrawer"
+        />
         <q-btn
           v-if="auth.canWrite"
           unelevated
@@ -172,14 +181,15 @@
 
     <q-drawer
       v-model="leftDrawer"
+      side="left"
       bordered
       :width="drawerWidth"
       :breakpoint="1023"
       :class="drawerClass"
     >
       <div class="wiki-drawer-inner">
-        <div class="wiki-drawer-title">카테고리</div>
-        <CategoryTreePanel />
+        <div class="wiki-drawer-title">{{ treeOnRight ? '메뉴' : '카테고리' }}</div>
+        <CategoryTreePanel :show-nav="true" :show-tree="!treeOnRight" />
         <q-btn
           v-if="auth.canWrite"
           class="q-mt-md full-width"
@@ -189,6 +199,21 @@
           label="사이트 관리"
           to="/settings"
         />
+      </div>
+    </q-drawer>
+
+    <q-drawer
+      v-if="treeOnRight"
+      v-model="rightDrawer"
+      side="right"
+      bordered
+      :width="drawerWidth"
+      :breakpoint="1023"
+      :class="drawerClass"
+    >
+      <div class="wiki-drawer-inner">
+        <div class="wiki-drawer-title">카테고리</div>
+        <CategoryTreePanel :show-nav="false" :show-tree="true" />
       </div>
     </q-drawer>
 
@@ -214,9 +239,12 @@ const auth = useAuthStore()
 const wiki = useWikiStore()
 const settings = useSettingsStore()
 const leftDrawer = ref(false)
+const rightDrawer = ref(false)
 const mobileSearch = ref(false)
 const search = ref(String(route.query.q || ''))
 const drawerWidth = computed(() => (isDesktop.value ? 300 : Math.min(300, $q.screen.width - 24)))
+const treeOnRight = computed(() => isDesktop.value && settings.categoryTreeSide === 'right')
+const layoutView = computed(() => (treeOnRight.value ? 'hHh LpR fFf' : 'hHh lpR fFf'))
 const headerClass = computed(() => {
   const layout = isDesktop.value ? 'wiki-header wiki-header--desktop' : 'wiki-header wiki-header--mobile'
   return settings.isDark
@@ -230,11 +258,18 @@ const drawerClass = computed(() => {
 
 onMounted(async () => {
   leftDrawer.value = isDesktop.value
+  rightDrawer.value = isDesktop.value && settings.categoryTreeSide === 'right'
   await Promise.all([auth.ensureLoaded(), wiki.ensureLoaded(), settings.ensureLoaded()])
+  if (treeOnRight.value) rightDrawer.value = true
 })
 
 watch(isDesktop, (desktop) => {
   leftDrawer.value = desktop
+  rightDrawer.value = desktop && settings.categoryTreeSide === 'right'
+})
+
+watch(treeOnRight, (onRight) => {
+  rightDrawer.value = onRight
 })
 
 watch(() => route.fullPath, () => {

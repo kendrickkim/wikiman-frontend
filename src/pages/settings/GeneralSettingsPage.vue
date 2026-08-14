@@ -88,7 +88,20 @@
               :spread="!isDesktop"
               :options="treeExpandOptions"
             />
-            <div class="text-caption text-grey-7 q-mt-xs">왼쪽 메뉴 카테고리의 기본 펼침 상태입니다.</div>
+            <div class="text-caption text-grey-7 q-mt-xs">사이드 메뉴 카테고리의 기본 펼침 상태입니다.</div>
+          </div>
+
+          <div>
+            <div class="text-body2 q-mb-sm">카테고리 트리 위치</div>
+            <q-btn-toggle
+              v-model="form.categoryTreeSide"
+              unelevated
+              no-caps
+              toggle-color="primary"
+              :spread="!isDesktop"
+              :options="treeSideOptions"
+            />
+            <div class="text-caption text-grey-7 q-mt-xs">데스크톱에서 카테고리 트리만 오른쪽/왼쪽으로 옮깁니다. 홈·전체 글 등 메뉴는 항상 왼쪽에 둡니다.</div>
           </div>
 
           <div>
@@ -141,6 +154,7 @@ const form = reactive({
   defaultEditor: settings.defaultEditor,
   favicon: settings.favicon,
   categoryTreeExpand: settings.categoryTreeExpand,
+  categoryTreeSide: settings.categoryTreeSide,
   fontScale: settings.fontScale
 })
 
@@ -152,6 +166,10 @@ const treeExpandOptions = [
   { label: '모두 펼침', value: 'expanded' },
   { label: '모두 접힘', value: 'collapsed' },
   { label: '1단계만 펼침', value: 'root' }
+]
+const treeSideOptions = [
+  { label: '왼쪽', value: 'left' },
+  { label: '오른쪽', value: 'right' }
 ]
 const fontScaleOptions = [60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120].map((value) => ({
   label: value === 100 ? '100% (기본)' : `${value}%`,
@@ -167,6 +185,7 @@ onMounted(async () => {
   form.defaultEditor = settings.defaultEditor
   form.favicon = settings.favicon
   form.categoryTreeExpand = settings.categoryTreeExpand
+  form.categoryTreeSide = settings.categoryTreeSide
   form.fontScale = settings.fontScale
 })
 
@@ -222,6 +241,7 @@ async function save() {
       defaultEditor: form.defaultEditor,
       favicon: form.favicon,
       categoryTreeExpand: form.categoryTreeExpand,
+      categoryTreeSide: form.categoryTreeSide,
       fontScale: form.fontScale
     })
     $q.notify({ type: 'positive', message: '설정을 저장했습니다.' })
