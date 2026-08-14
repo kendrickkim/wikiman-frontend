@@ -7,12 +7,15 @@
   "description": "Personal wiki",
   "scripts": {
     "dev": "quasar dev",
+    "dev:pwa": "quasar dev -m pwa",
     "build": "quasar build",
-    "build:backend": "quasar build && node scripts/copy-to-backend.mjs",
+    "build:pwa": "quasar build -m pwa",
+    "build:backend": "npm run build:pwa && node scripts/copy-to-backend.mjs",
+    "icons:pwa": "node scripts/generate-pwa-icons.mjs",
     "postinstall": "quasar prepare",
     "lint": "node scripts/syntax-check.mjs",
     "test": "node --test test/**/*.test.js",
-    "check": "npm run lint && npm test && npm run build"
+    "check": "npm run lint && npm test && npm run build:pwa"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-vue": "^8.2.0",
@@ -42,7 +45,8 @@
     "@quasar/app-vite": "^3.5.0",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
-    "sass-embedded": "^1.90.0"
+    "sass-embedded": "^1.90.0",
+    "sharp": "^0.35.3"
   },
   "engines": {
     "node": ">=22.22.0"

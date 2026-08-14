@@ -33,6 +33,13 @@ Vue 3 · Quasar 2 · Pinia · Vue Router · JavaScript. Node 22.22+.
 - 첨부 파일 최대 용량(MB)과 미연결 파일 정리는 사이트 관리 → 첨부파일에서 합니다.
 - 백업/복구는 `.wkmbak` 파일로 합니다. 복구 전 파일 검사 후 확인 대화상자로 덮어씁니다.
 
+## PWA
+
+- 개발: `npm run dev:pwa`
+- 빌드: `npm run build:pwa` → `dist/pwa/`
+- 백엔드 배포: `npm run build:backend` (PWA 빌드 후 `backend/public/`에 복사)
+- 아이콘 재생성: `npm run icons:pwa` (`public/icons/favicon.svg` 기준)
+
 ## 하지 말 것
 
 - TypeScript / Options API로 전환.
