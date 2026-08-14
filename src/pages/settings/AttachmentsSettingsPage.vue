@@ -65,6 +65,7 @@ import { onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
 import { useSettingsStore } from '@/stores/settings'
+import { formatBytes } from '@/utils/format'
 
 const $q = useQuasar()
 const settings = useSettingsStore()
@@ -75,17 +76,9 @@ const orphanSummary = ref(null)
 const maxAttachmentMb = ref(settings.maxAttachmentMb)
 
 onMounted(async () => {
-  await settings.load()
+  await settings.ensureLoaded()
   maxAttachmentMb.value = settings.maxAttachmentMb
 })
-
-function formatBytes(bytes) {
-  const size = Number(bytes) || 0
-  if (size < 1024) return `${size} B`
-  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
-  if (size < 1024 * 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`
-  return `${(size / (1024 * 1024 * 1024)).toFixed(2)} GB`
-}
 
 function confirmOrphanDelete(summary) {
   return new Promise((resolve) => {

@@ -18,6 +18,6 @@ import CategoryManagerPanel from '@/components/CategoryManagerPanel.vue'
 const wiki = useWikiStore()
 
 onMounted(() => {
-  wiki.loadCategories()
+  wiki.ensureLoaded()
 })
 </script>

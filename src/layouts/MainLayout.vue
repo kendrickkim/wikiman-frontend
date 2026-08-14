@@ -230,7 +230,7 @@ const drawerClass = computed(() => {
 
 onMounted(async () => {
   leftDrawer.value = isDesktop.value
-  await Promise.all([auth.restore(), wiki.loadCategories(), settings.load()])
+  await Promise.all([auth.ensureLoaded(), wiki.ensureLoaded(), settings.ensureLoaded()])
 })
 
 watch(isDesktop, (desktop) => {
@@ -246,7 +246,7 @@ watch(() => route.query.q, (q) => {
 })
 
 watch(() => auth.isLoggedIn, () => {
-  wiki.loadCategories()
+  wiki.ensureLoaded({ force: true })
 })
 
 function goHome() {
@@ -262,7 +262,7 @@ function applySearch() {
 
 function logout() {
   auth.logout()
-  wiki.loadCategories()
+  wiki.ensureLoaded({ force: true })
   router.push('/')
 }
 </script>

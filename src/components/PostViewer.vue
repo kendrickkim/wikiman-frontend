@@ -31,14 +31,15 @@
 <script setup>
 import { computed } from 'vue'
 import { renderMarkdown } from '@/utils/markdown'
+import { sanitizeHtml } from '@/utils/sanitize'
 
 const props = defineProps({
   editorType: { type: String, default: 'ckeditor' },
   content: { type: String, default: '' }
 })
 
-const markdownHtml = computed(() => renderMarkdown(props.content))
-const htmlContent = computed(() => props.content || '')
+const markdownHtml = computed(() => sanitizeHtml(renderMarkdown(props.content)))
+const htmlContent = computed(() => sanitizeHtml(props.content || ''))
 const blocks = computed(() => {
   try {
     return JSON.parse(props.content || '{"blocks":[]}').blocks || []
@@ -109,6 +110,6 @@ function fallbackText(block) {
 }
 
 function safeText(value) {
-  return value == null ? '' : String(value)
+  return sanitizeHtml(value == null ? '' : String(value))
 }
 </script>

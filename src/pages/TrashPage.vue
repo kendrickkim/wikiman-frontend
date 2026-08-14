@@ -57,6 +57,7 @@ import { useLayout } from '@/composables/useLayout'
 import { usePostActions } from '@/composables/usePostActions'
 import KeywordChips from '@/components/KeywordChips.vue'
 import { displayTitle } from '@/utils/title'
+import { formatDate } from '@/utils/format'
 
 const { isDesktop } = useLayout()
 const { restorePost, purgePost } = usePostActions()
@@ -80,10 +81,6 @@ async function load() {
 
 onMounted(load)
 
-function formatDate(value) {
-  if (!value) return ''
-  return String(value).replace('T', ' ').slice(0, 16)
-}
 
 async function onRestore(post) {
   const restored = await restorePost(post)

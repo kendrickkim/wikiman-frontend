@@ -47,11 +47,13 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { api, getErrorMessage } from '@/utils/api'
+import { getErrorMessage } from '@/utils/api'
 import { useLayout } from '@/composables/useLayout'
+import { useWikiStore } from '@/stores/wiki'
 
 const router = useRouter()
 const { isDesktop } = useLayout()
+const wiki = useWikiStore()
 const items = ref([])
 const filter = ref('')
 const loading = ref(false)
@@ -66,10 +68,8 @@ const filteredItems = computed(() => {
 onMounted(async () => {
   loading.value = true
   try {
-    const { data } = await api.get('/posts/keywords')
-    items.value = Array.isArray(data.keywordItems)
-      ? data.keywordItems
-      : (data.keywords || []).map((name) => ({ name, count: 0 }))
+    await wiki.ensureKeywords()
+    items.value = wiki.keywords
   } catch (err) {
     error.value = getErrorMessage(err, '키워드를 불러오지 못했습니다.')
   } finally {

@@ -181,7 +181,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api, getErrorMessage } from '@/utils/api'
 import { useAuthStore } from '@/stores/auth'
@@ -193,6 +193,7 @@ import KeywordChips from '@/components/KeywordChips.vue'
 import PostViewer from '@/components/PostViewer.vue'
 import FileAttachments from '@/components/FileAttachments.vue'
 import { displayTitle } from '@/utils/title'
+import { formatDate } from '@/utils/format'
 
 const route = useRoute()
 const router = useRouter()
@@ -279,7 +280,24 @@ const heading = computed(() => {
   return category ? category.name : '전체 글'
 })
 
-async function loadList() {
+const listKey = computed(() => [
+  route.path,
+  String(route.params.keyword || ''),
+  String(route.query.categoryId || ''),
+  String(route.query.q || ''),
+  String(route.query.view || ''),
+  String(route.query.page || ''),
+  String(pageSize.value),
+  String(settings.hasHomepage),
+  settings.loaded ? '1' : '0',
+  auth.user?.id || '',
+  statusFilter.value
+].join('|'))
+
+let loadGeneration = 0
+let loadAbort = null
+
+async function loadList(signal) {
   const params = {
     page: page.value,
     pageSize: pageSize.value
@@ -288,7 +306,7 @@ async function loadList() {
   if (route.query.q) params.q = route.query.q
   if (activeKeyword.value) params.keyword = activeKeyword.value
   if (statusFilter.value !== 'all') params.status = statusFilter.value
-  const { data } = await api.get('/posts', { params })
+  const { data } = await api.get('/posts', { params, signal })
   posts.value = data.posts
   total.value = Number(data.total) || 0
   homePosts.value = []
@@ -300,48 +318,39 @@ async function load() {
     loading.value = true
     return
   }
+  const generation = ++loadGeneration
+  loadAbort?.abort()
+  loadAbort = new AbortController()
+  const { signal } = loadAbort
   loading.value = true
   error.value = ''
   try {
     if (wantsHomepage.value) {
       try {
-        const { data } = await api.get('/posts/homepage')
+        const { data } = await api.get('/posts/homepage', { signal })
+        if (generation !== loadGeneration) return
         homePosts.value = Array.isArray(data.posts) ? data.posts : []
         posts.value = []
         total.value = 0
         if (homePosts.value.length) return
-      } catch {
+      } catch (err) {
+        if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError' || err?.name === 'AbortError') return
         homePosts.value = []
       }
     } else {
       homePosts.value = []
     }
-    await loadList()
+    await loadList(signal)
   } catch (err) {
+    if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError' || err?.name === 'AbortError') return
+    if (generation !== loadGeneration) return
     error.value = getErrorMessage(err)
   } finally {
-    loading.value = false
+    if (generation === loadGeneration) loading.value = false
   }
 }
 
-watch(
-  () => [
-    route.path,
-    route.params.keyword,
-    route.query.categoryId,
-    route.query.q,
-    route.query.view,
-    route.query.page,
-    pageSize.value,
-    settings.hasHomepage,
-    settings.homePostIds.join(','),
-    settings.loaded,
-    auth.user,
-    statusFilter.value
-  ],
-  load,
-  { immediate: true }
-)
+watch(listKey, load, { immediate: true })
 
 watch(pageSize, (value) => {
   localStorage.setItem(PAGE_SIZE_KEY, String(value))
@@ -352,10 +361,9 @@ watch(statusFilter, () => {
   if (page.value !== 1) page.value = 1
 })
 
-function formatDate(value) {
-  if (!value) return ''
-  return String(value).replace('T', ' ').slice(0, 16)
-}
+onBeforeUnmount(() => {
+  loadAbort?.abort()
+})
 
 function postPath(post) {
   return `${window.location.origin}/posts/${post.id}`
@@ -364,7 +372,10 @@ function postPath(post) {
 async function onRemove(post) {
   const removed = await removePost(post, { redirect: false })
   if (removed) {
-    await settings.load()
+    if (post.isHomepage) {
+      settings.hasHomepage = settings.homePostIds.filter((id) => id !== post.id).length > 0
+      settings.homePostIds = settings.homePostIds.filter((id) => id !== post.id)
+    }
     if (posts.value.length <= 1 && page.value > 1) {
       page.value = page.value - 1
       return
@@ -376,7 +387,8 @@ async function onRemove(post) {
 async function onRemoveHome(post) {
   const removed = await removePost(post, { redirect: false })
   if (removed) {
-    await settings.load()
+    settings.homePostIds = settings.homePostIds.filter((id) => id !== post.id)
+    settings.hasHomepage = settings.homePostIds.length > 0
     await load()
   }
 }

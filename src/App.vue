@@ -8,6 +8,6 @@ import { useSettingsStore } from '@/stores/settings'
 
 const settings = useSettingsStore()
 onMounted(() => {
-  settings.load()
+  settings.ensureLoaded()
 })
 </script>

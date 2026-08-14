@@ -2,7 +2,7 @@ import { defineConfig } from '#q-app'
 
 export default defineConfig(() => {
   return {
-    boot: ['axios'],
+    boot: [],
     css: ['app.scss'],
     extras: [
       'roboto-font',

@@ -74,6 +74,7 @@ import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
 import { useSettingsStore } from '@/stores/settings'
+import { formatBytes as formatSize } from '@/utils/format'
 
 const MAX_FILES = 50
 
@@ -104,13 +105,6 @@ const files = computed({
     emit('update:modelValue', value)
   }
 })
-
-function formatSize(bytes) {
-  const size = Number(bytes) || 0
-  if (size < 1024) return `${size} B`
-  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`
-}
 
 function pick() {
   inputEl.value?.click()

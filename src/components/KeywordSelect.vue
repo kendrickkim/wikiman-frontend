@@ -19,32 +19,28 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { api } from '@/utils/api'
+import { useWikiStore } from '@/stores/wiki'
 
 defineProps({
   modelValue: { type: Array, default: () => [] }
 })
 defineEmits(['update:modelValue'])
 
-const allKeywords = ref([])
+const wiki = useWikiStore()
 const filteredOptions = ref([])
 
 onMounted(async () => {
-  try {
-    const { data } = await api.get('/posts/keywords')
-    allKeywords.value = data.keywords || []
-    filteredOptions.value = allKeywords.value
-  } catch {
-    allKeywords.value = []
-  }
+  await wiki.ensureKeywords()
+  filteredOptions.value = wiki.keywordNames
 })
 
 function onFilter(val, update) {
   update(() => {
     const needle = String(val || '').trim().toLowerCase()
+    const all = wiki.keywordNames
     filteredOptions.value = needle
-      ? allKeywords.value.filter((keyword) => keyword.toLowerCase().includes(needle))
-      : allKeywords.value
+      ? all.filter((keyword) => keyword.toLowerCase().includes(needle))
+      : all
   })
 }
 

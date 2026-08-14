@@ -173,7 +173,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Dialog } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
@@ -182,13 +182,15 @@ import { useLayout } from '@/composables/useLayout'
 import { usePostActions } from '@/composables/usePostActions'
 import { useSettingsStore } from '@/stores/settings'
 import { renderMarkdown } from '@/utils/markdown'
+import { sanitizeHtml } from '@/utils/sanitize'
 import { EDITOR_OPTIONS } from '@/utils/editors'
 import CategorySelect from '@/components/CategorySelect.vue'
 import KeywordSelect from '@/components/KeywordSelect.vue'
-import CkeditorEditor from '@/components/CkeditorEditor.vue'
-import EditorJsEditor from '@/components/EditorJsEditor.vue'
-import SourceEditor from '@/components/SourceEditor.vue'
 import FileAttachments from '@/components/FileAttachments.vue'
+
+const CkeditorEditor = defineAsyncComponent(() => import('@/components/CkeditorEditor.vue'))
+const EditorJsEditor = defineAsyncComponent(() => import('@/components/EditorJsEditor.vue'))
+const SourceEditor = defineAsyncComponent(() => import('@/components/SourceEditor.vue'))
 
 const EMPTY_EDITORJS = JSON.stringify({ blocks: [] })
 
@@ -233,8 +235,8 @@ const sourceHint = computed(() => (
 ))
 const previewHtml = computed(() => (
   editorType.value === 'html'
-    ? drafts.value.html
-    : renderMarkdown(drafts.value.markdown)
+    ? sanitizeHtml(drafts.value.html)
+    : sanitizeHtml(renderMarkdown(drafts.value.markdown))
 ))
 
 function editorContent() {
@@ -326,7 +328,7 @@ onMounted(async () => {
     leaveReady.value = true
   }
 
-  await Promise.all([wiki.loadCategories(), settings.load()])
+  await Promise.all([wiki.ensureLoaded(), settings.ensureLoaded()])
   if (isEdit.value) {
     try {
       const { data } = await api.get(`/posts/${route.params.id}`)
@@ -415,7 +417,7 @@ async function save(nextStatus) {
       ? await api.patch(`/posts/${route.params.id}`, payload)
       : await api.post('/posts', payload)
     status.value = nextStatus
-    await settings.load()
+    await settings.load({ force: true })
     $q.notify({ type: 'positive', message: nextStatus === 'published' ? '발행했습니다.' : '작성중으로 저장했습니다.' })
     bypassLeave.value = true
     router.push(`/posts/${data.post.id}`)

@@ -36,7 +36,7 @@
         <div v-if="inspectInfo" class="q-mb-md">
           <div class="text-body2">형식 버전 {{ inspectInfo.formatVersion }} · 스키마 {{ inspectInfo.schemaVersion }}</div>
           <div class="text-body2 q-mt-xs">
-            생성 {{ formatDate(inspectInfo.createdAt) }} ·
+            생성 {{ formatDate(inspectInfo.createdAt, 19) || '-' }} ·
             파일 {{ inspectInfo.fileCount }}개 ·
             첨부 {{ inspectInfo.uploadCount }}개 ·
             {{ formatBytes(inspectInfo.totalBytes) }}
@@ -87,6 +87,7 @@ import { api, getErrorMessage } from '@/utils/api'
 import { useSettingsStore } from '@/stores/settings'
 import { useWikiStore } from '@/stores/wiki'
 import { useAuthStore } from '@/stores/auth'
+import { formatBytes, formatDate } from '@/utils/format'
 
 const $q = useQuasar()
 const settings = useSettingsStore()
@@ -101,19 +102,6 @@ const inputEl = ref(null)
 const pendingFile = ref(null)
 const pendingName = ref('')
 const inspectInfo = ref(null)
-
-function formatBytes(bytes) {
-  const size = Number(bytes) || 0
-  if (size < 1024) return `${size} B`
-  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
-  if (size < 1024 * 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`
-  return `${(size / (1024 * 1024 * 1024)).toFixed(2)} GB`
-}
-
-function formatDate(value) {
-  if (!value) return '-'
-  return String(value).replace('T', ' ').slice(0, 19)
-}
 
 function filenameFromDisposition(header, fallback) {
   const raw = String(header || '')
@@ -219,9 +207,9 @@ async function restoreBackup() {
     const { data } = await api.post('/backup/restore', form, { timeout: 600000 })
     if (data.settings) settings.assign(data.settings)
     await Promise.all([
-      auth.restore(),
-      wiki.loadCategories(),
-      settings.load()
+      auth.ensureLoaded({ force: true }),
+      wiki.ensureLoaded({ force: true }),
+      settings.load({ force: true })
     ])
     inspectInfo.value = null
     pendingFile.value = null

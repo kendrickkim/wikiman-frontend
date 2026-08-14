@@ -18,7 +18,7 @@
         v-if="settings.hasHomepage"
         clickable
         :active="selectedKey === 'home'"
-        active-class="bg-blue-1 text-primary"
+        active-class="wiki-nav-active"
         @click="select('home')"
       >
         <q-item-section avatar><q-icon name="home" /></q-item-section>
@@ -27,7 +27,7 @@
       <q-item
         clickable
         :active="selectedKey === 'all'"
-        active-class="bg-blue-1 text-primary"
+        active-class="wiki-nav-active"
         @click="select('all')"
       >
         <q-item-section avatar><q-icon name="article" /></q-item-section>
@@ -36,7 +36,7 @@
       <q-item
         clickable
         :active="selectedKey === 'uncategorized'"
-        active-class="bg-blue-1 text-primary"
+        active-class="wiki-nav-active"
         @click="select('uncategorized')"
       >
         <q-item-section avatar><q-icon name="inbox" /></q-item-section>
@@ -45,17 +45,17 @@
       <q-item
         clickable
         :active="selectedKey === 'keywords'"
-        active-class="bg-blue-1 text-primary"
+        active-class="wiki-nav-active"
         @click="select('keywords')"
       >
         <q-item-section avatar><q-icon name="sell" /></q-item-section>
         <q-item-section>키워드</q-item-section>
       </q-item>
       <q-item
-        v-if="auth.isLoggedIn"
+        v-if="auth.canWrite"
         clickable
         :active="selectedKey === 'trash'"
-        active-class="bg-blue-1 text-primary"
+        active-class="wiki-nav-active"
         @click="select('trash')"
       >
         <q-item-section avatar><q-icon name="delete" /></q-item-section>

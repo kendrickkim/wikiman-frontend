@@ -58,6 +58,7 @@ import PostViewer from '@/components/PostViewer.vue'
 import KeywordChips from '@/components/KeywordChips.vue'
 import FileAttachments from '@/components/FileAttachments.vue'
 import { displayTitle } from '@/utils/title'
+import { formatDate } from '@/utils/format'
 
 const route = useRoute()
 const { $q, isDesktop } = useLayout()
@@ -83,8 +84,4 @@ async function load() {
 
 watch(() => route.params.id, load, { immediate: true })
 
-function formatDate(value) {
-  if (!value) return ''
-  return String(value).replace('T', ' ').slice(0, 16)
-}
 </script>

@@ -50,7 +50,8 @@ export const useSettingsStore = defineStore('settings', {
     fontScale: 100,
     homePostIds: [],
     hasHomepage: false,
-    loaded: false
+    loaded: false,
+    loading: null
   }),
   getters: {
     isDark: (state) => state.theme === 'dark'
@@ -81,7 +82,8 @@ export const useSettingsStore = defineStore('settings', {
       this.hasHomepage = data.hasHomepage === true || ids.length > 0
       this.apply()
     },
-    async load() {
+    async load({ force = false } = {}) {
+      if (this.loaded && !force) return
       try {
         const { data } = await api.get('/settings')
         this.assign(data)
@@ -90,6 +92,14 @@ export const useSettingsStore = defineStore('settings', {
       } finally {
         this.loaded = true
       }
+    },
+    async ensureLoaded({ force = false } = {}) {
+      if (this.loaded && !force) return
+      if (this.loading && !force) return this.loading
+      this.loading = this.load({ force }).finally(() => {
+        this.loading = null
+      })
+      return this.loading
     },
     async save(payload) {
       const { data } = await api.patch('/settings', payload)

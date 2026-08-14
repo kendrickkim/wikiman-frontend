@@ -115,7 +115,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
 import { useWikiStore } from '@/stores/wiki'
@@ -204,6 +204,8 @@ function toParentId(value) {
   return Number.isFinite(id) && id > 0 ? id : null
 }
 
+let paneObserver = null
+
 function fitPaneHeight() {
   const el = panelRoot.value
   if (!el) {
@@ -215,7 +217,6 @@ function fitPaneHeight() {
     return
   }
   const top = el.getBoundingClientRect().top
-  // 카드 아래 여백 + 페이지 하단 패딩만큼 남겨 페이지 스크롤이 생기지 않게 합니다.
   const bottomSpace = 72
   const height = Math.floor(window.innerHeight - top - bottomSpace)
   paneMaxHeight.value = `${Math.max(200, height)}px`
@@ -223,27 +224,27 @@ function fitPaneHeight() {
 
 onMounted(() => {
   fitPaneHeight()
-  nextTick(() => {
-    fitPaneHeight()
-    requestAnimationFrame(fitPaneHeight)
-  })
+  paneObserver = new ResizeObserver(() => fitPaneHeight())
+  if (panelRoot.value) paneObserver.observe(panelRoot.value)
   window.addEventListener('resize', fitPaneHeight)
 })
 
 onBeforeUnmount(() => {
+  paneObserver?.disconnect()
+  paneObserver = null
   window.removeEventListener('resize', fitPaneHeight)
 })
 
-watch(() => $q.screen.gt.sm, () => nextTick(fitPaneHeight))
-watch(() => wiki.categories.length, () => nextTick(fitPaneHeight))
-watch(selectedId, () => nextTick(fitPaneHeight))
+watch(() => $q.screen.gt.sm, fitPaneHeight)
+watch(() => wiki.categories.length, fitPaneHeight)
+watch(selectedId, fitPaneHeight)
 
 async function notifyError(err) {
   $q.notify({ type: 'negative', message: getErrorMessage(err) })
 }
 
 async function reload() {
-  await wiki.loadCategories()
+  await wiki.ensureLoaded({ force: true })
   emit('saved')
 }
 

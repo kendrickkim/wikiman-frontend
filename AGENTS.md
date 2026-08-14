@@ -12,7 +12,7 @@ Vue 3 · Quasar 2 · Pinia · Vue Router · JavaScript. Node 22.22+.
 - `src/composables/useLayout.js` — 데스크톱은 `$q.screen.gt.sm` (1024px)
 - `src/utils/api.js` — axios. `src/utils/title.js` — `displayTitle()`
 
-작성자만 글 작성·수정·설정. `auth.canWrite`. 휴지통은 로그인 필요.
+작성자만 글 작성·수정·설정. `auth.canWrite`. 휴지통은 작성자만.
 
 ## UI
 
@@ -27,7 +27,7 @@ Vue 3 · Quasar 2 · Pinia · Vue Router · JavaScript. Node 22.22+.
 - 글 작성·수정: CKEditor 기본, Editor.js·Markdown·HTML 선택. 카테고리 선택 옆에서 카테고리 관리.
 - 액션 버튼(저장·발행·취소·삭제) 높이를 `wiki-edit-actions`로 맞춥니다.
 - 사이트 관리(`/settings`)는 일반·카테고리·홈페이지·첨부파일·백업/복구 메뉴로 나뉩니다.
-- 글자 스케일은 사이트 관리 → 일반에서 선택(60~120%, 기본 100). `html`의 `--wiki-font-scale`로 적용합니다.
+- 글자 스케일은 사이트 관리 → 일반에서 선택(60~120%, 기본 100). `--wiki-font-scale`은 `html` 변수로 두고, 실제 크기는 `.wiki-content`와 편집 영역에만 적용합니다.
 - 사이트 관리에서 파비콘을 바꿀 수 있습니다. **기본값으로 되돌리기**는 바로 저장됩니다.
 - 첨부 파일 최대 용량(MB)과 미연결 파일 정리는 사이트 관리 → 첨부파일에서 합니다.
 - 백업/복구는 `.wkmbak` 파일로 합니다. 복구 전 파일 검사 후 확인 대화상자로 덮어씁니다.

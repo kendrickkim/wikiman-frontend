@@ -6,7 +6,8 @@ export const useAuthStore = defineStore('auth', {
     token: localStorage.getItem('wikiman_token') || '',
     user: null,
     loaded: false,
-    canRegister: false
+    canRegister: false,
+    loading: null
   }),
   getters: {
     isLoggedIn: (state) => Boolean(state.token && state.user),
@@ -45,6 +46,14 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.loaded = true
       }
+    },
+    async ensureLoaded({ force = false } = {}) {
+      if (this.loaded && !force) return
+      if (this.loading && !force) return this.loading
+      this.loading = this.restore().finally(() => {
+        this.loading = null
+      })
+      return this.loading
     },
     async login(username, password) {
       const { data } = await api.post('/auth/login', { username, password })

@@ -10,7 +10,7 @@ body {
 }
 
 html {
-  font-size: calc(100% * var(--wiki-font-scale, 1));
+  font-size: 100%;
 }
 
 .wiki-page {
@@ -29,7 +29,7 @@ html {
 }
 
 .wiki-content {
-  font-size: var(--wiki-font-size);
+  font-size: calc(var(--wiki-font-size) * var(--wiki-font-scale, 1));
   line-height: var(--wiki-line-height);
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -44,12 +44,12 @@ html {
     }
   }
 
-  h1 { font-size: 1.6rem; }
-  h2 { font-size: 1.35rem; }
-  h3 { font-size: 1.15rem; }
-  h4 { font-size: 1.05rem; }
-  h5 { font-size: 0.95rem; }
-  h6 { font-size: 0.9rem; }
+  h1 { font-size: 1.52em; }
+  h2 { font-size: 1.29em; }
+  h3 { font-size: 1.1em; }
+  h4 { font-size: 1em; }
+  h5 { font-size: 0.9em; }
+  h6 { font-size: 0.86em; }
 
   a {
     color: #1f6feb;
@@ -153,7 +153,7 @@ html {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   overflow: hidden;
-  font-size: var(--wiki-font-size);
+  font-size: calc(var(--wiki-font-size) * var(--wiki-font-scale, 1));
   line-height: var(--wiki-line-height);
 
   .ck.ck-toolbar {
@@ -166,7 +166,7 @@ html {
     min-height: 280px;
     border: none;
     box-shadow: none;
-    font-size: var(--wiki-font-size);
+    font-size: calc(var(--wiki-font-size) * var(--wiki-font-scale, 1));
     line-height: var(--wiki-line-height);
   }
 
@@ -191,14 +191,14 @@ html {
   min-height: 280px;
   padding: 8px 4px 24px;
   overflow: hidden;
-  font-size: var(--wiki-font-size);
+  font-size: calc(var(--wiki-font-size) * var(--wiki-font-scale, 1));
   line-height: var(--wiki-line-height);
 
   .ce-paragraph,
   .cdx-list,
   .cdx-block,
   .ce-block [contenteditable] {
-    font-size: var(--wiki-font-size);
+    font-size: calc(var(--wiki-font-size) * var(--wiki-font-scale, 1));
     line-height: var(--wiki-line-height);
   }
 
@@ -218,12 +218,12 @@ html {
     margin-top: 0;
   }
 
-  h1.ce-header { font-size: 1.6rem; }
-  h2.ce-header { font-size: 1.35rem; }
-  h3.ce-header { font-size: 1.15rem; }
-  h4.ce-header { font-size: 1.05rem; }
-  h5.ce-header { font-size: 0.95rem; }
-  h6.ce-header { font-size: 0.9rem; }
+  h1.ce-header { font-size: 1.52em; }
+  h2.ce-header { font-size: 1.29em; }
+  h3.ce-header { font-size: 1.1em; }
+  h4.ce-header { font-size: 1em; }
+  h5.ce-header { font-size: 0.9em; }
+  h6.ce-header { font-size: 0.86em; }
 
   .cdx-list {
     font-size: inherit;
@@ -242,7 +242,7 @@ html {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   overflow: hidden;
-  font-size: var(--wiki-font-size);
+  font-size: calc(var(--wiki-font-size) * var(--wiki-font-scale, 1));
   line-height: var(--wiki-line-height);
   font-family: inherit;
   background: #fff;
@@ -251,7 +251,7 @@ html {
 
 .cm-editor .cm-scroller,
 .cm-editor .cm-content {
-  font-size: var(--wiki-font-size);
+  font-size: calc(var(--wiki-font-size) * var(--wiki-font-scale, 1));
   line-height: var(--wiki-line-height);
   font-family: inherit;
 }
@@ -365,6 +365,11 @@ html {
     border-radius: 8px;
     padding-left: 10px;
     margin-bottom: 2px;
+  }
+
+  .wiki-nav-active {
+    background: rgba(31, 111, 235, 0.12);
+    color: var(--q-primary);
   }
 
   .wiki-nav .q-item__section--avatar {
@@ -551,6 +556,11 @@ html {
   white-space: nowrap;
 }
 
+.wiki-nav-active {
+  background: rgba(31, 111, 235, 0.12);
+  color: var(--q-primary);
+}
+
 .wiki-keywords {
   display: flex;
   flex-wrap: wrap;
@@ -682,6 +692,11 @@ html {
 
 body.body--dark {
   background: #101418;
+
+  .wiki-nav-active {
+    background: rgba(31, 111, 235, 0.28);
+    color: #8ab4f8;
+  }
 
   .wiki-content {
     th, td {

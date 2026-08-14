@@ -9,7 +9,7 @@ const routes = [
       { path: 'posts/:id', component: () => import('@/pages/PostViewPage.vue') },
       { path: 'keywords', component: () => import('@/pages/KeywordsPage.vue') },
       { path: 'keyword/:keyword', component: () => import('@/pages/IndexPage.vue') },
-      { path: 'trash', component: () => import('@/pages/TrashPage.vue'), meta: { requiresAuth: true } },
+      { path: 'trash', component: () => import('@/pages/TrashPage.vue'), meta: { requiresWriter: true } },
       {
         path: 'settings',
         component: () => import('@/pages/settings/SettingsLayout.vue'),

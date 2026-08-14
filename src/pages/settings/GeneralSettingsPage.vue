@@ -160,7 +160,7 @@ const fontScaleOptions = [60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 12
 const editorOptions = EDITOR_OPTIONS
 
 onMounted(async () => {
-  await settings.load()
+  await settings.ensureLoaded()
   form.siteTitle = settings.siteTitle
   form.theme = settings.theme
   form.plantumlServer = settings.plantumlServer
