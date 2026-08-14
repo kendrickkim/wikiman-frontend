@@ -4,6 +4,7 @@
       v-model="model"
       :editor="ClassicEditor"
       :config="config"
+      @ready="onReady"
     />
   </div>
 </template>
@@ -50,6 +51,41 @@ import 'ckeditor5/ckeditor5.css'
 import { api } from '@/utils/api'
 
 const model = defineModel({ type: String, default: '' })
+let editorInstance = null
+
+function onReady(editor) {
+  editorInstance = editor
+}
+
+function selectedText() {
+  if (!editorInstance) return ''
+  const selection = editorInstance.model.document.selection
+  let text = ''
+  for (const range of selection.getRanges()) {
+    for (const item of range.getItems()) {
+      if (item.is?.('$textProxy')) text += item.data
+    }
+  }
+  return text
+}
+
+function insertLink({ href, label }) {
+  if (!editorInstance) return
+  const selection = editorInstance.model.document.selection
+  if (selection.isCollapsed) {
+    editorInstance.model.change((writer) => {
+      editorInstance.model.insertContent(
+        writer.createText(label || href, { linkHref: href }),
+        selection.getFirstPosition()
+      )
+    })
+  } else {
+    editorInstance.execute('link', href)
+  }
+  editorInstance.editing.view.focus()
+}
+
+defineExpose({ selectedText, insertLink })
 
 class UploadAdapter {
   constructor(loader) {

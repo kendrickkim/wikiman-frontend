@@ -17,6 +17,7 @@ const routes = [
         children: [
           { path: '', redirect: '/settings/general' },
           { path: 'general', component: () => import('@/pages/settings/GeneralSettingsPage.vue') },
+          { path: 'top-menu', component: () => import('@/pages/settings/TopMenuSettingsPage.vue') },
           { path: 'categories', component: () => import('@/pages/settings/CategoriesSettingsPage.vue') },
           { path: 'homepage', component: () => import('@/pages/settings/HomepageSettingsPage.vue') },
           { path: 'attachments', component: () => import('@/pages/settings/AttachmentsSettingsPage.vue') },

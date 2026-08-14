@@ -99,13 +99,26 @@
       <FileAttachments v-model="attachments" editable class="q-mt-md" />
 
       <div class="q-mt-md">
+        <div class="row justify-end q-mb-xs">
+          <q-btn
+            flat
+            dense
+            no-caps
+            color="primary"
+            icon="link"
+            label="링크 추가"
+            @click="openLinkDialog"
+          />
+        </div>
         <CkeditorEditor
           v-if="editorType === 'ckeditor'"
+          ref="activeEditor"
           :key="editorKey"
           v-model="drafts.ckeditor"
         />
         <EditorJsEditor
           v-else-if="editorType === 'editorjs'"
+          ref="activeEditor"
           :key="editorKey"
           v-model="drafts.editorjs"
         />
@@ -118,12 +131,14 @@
             <div :class="showPreview && isDesktop ? 'col-6' : 'col-12'">
               <SourceEditor
                 v-if="editorType === 'html'"
+                ref="activeEditor"
                 :key="editorKey + '-html'"
                 v-model="drafts.html"
                 mode="html"
               />
               <SourceEditor
                 v-else
+                ref="activeEditor"
                 :key="editorKey + '-md'"
                 v-model="drafts.markdown"
                 mode="markdown"
@@ -146,6 +161,12 @@
           </div>
         </div>
       </div>
+
+      <WikiLinkDialog
+        v-model="linkDialog"
+        :initial-label="linkInitialLabel"
+        @submit="insertLink"
+      />
 
       <div v-if="!isDesktop" class="wiki-edit-actions wiki-edit-actions--mobile q-mt-md">
         <q-btn
@@ -202,6 +223,7 @@ import CategorySelect from '@/components/CategorySelect.vue'
 import KeywordSelect from '@/components/KeywordSelect.vue'
 import FileAttachments from '@/components/FileAttachments.vue'
 import PostViewer from '@/components/PostViewer.vue'
+import WikiLinkDialog from '@/components/WikiLinkDialog.vue'
 
 const CkeditorEditor = defineAsyncComponent(() => import('@/components/CkeditorEditor.vue'))
 const EditorJsEditor = defineAsyncComponent(() => import('@/components/EditorJsEditor.vue'))
@@ -233,6 +255,9 @@ const showPreview = ref(isDesktop.value)
 const saving = ref(false)
 const savingAs = ref('')
 const error = ref('')
+const activeEditor = ref(null)
+const linkDialog = ref(false)
+const linkInitialLabel = ref('')
 const savedSnapshot = ref('')
 const leaveReady = ref(false)
 const bypassLeave = ref(false)
@@ -249,6 +274,15 @@ const sourceHint = computed(() => (
     : 'Markdown · plantuml · 이미지 붙여넣기'
 ))
 const previewHtml = computed(() => sanitizeHtml(drafts.value.html || ''))
+
+function openLinkDialog() {
+  linkInitialLabel.value = activeEditor.value?.selectedText?.() || ''
+  linkDialog.value = true
+}
+
+function insertLink(link) {
+  activeEditor.value?.insertLink?.(link)
+}
 
 function editorContent() {
   if (editorType.value === 'editorjs') {

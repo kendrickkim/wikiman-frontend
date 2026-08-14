@@ -8,7 +8,8 @@
       :bordered="isDesktop || !settings.isDark"
       :class="headerClass"
     >
-      <q-toolbar v-if="isDesktop" class="wiki-toolbar-desktop">
+      <template v-if="isDesktop">
+      <q-toolbar class="wiki-toolbar-desktop">
         <q-btn dense flat round icon="menu" aria-label="메뉴" @click="leftDrawer = !leftDrawer" />
         <q-toolbar-title class="cursor-pointer wiki-brand ellipsis" @click="goHome">
           {{ settings.siteTitle }}
@@ -81,6 +82,19 @@
           </q-list>
         </q-btn-dropdown>
       </q-toolbar>
+      <q-toolbar v-if="settings.showTopMenu" class="wiki-top-menu-bar">
+        <q-btn
+          v-for="item in settings.topMenuItems"
+          :key="item.id"
+          flat
+          no-caps
+          dense
+          :label="item.label"
+          v-bind="topMenuLinkProps(item)"
+          active-class="wiki-top-menu-active"
+        />
+      </q-toolbar>
+      </template>
 
       <template v-else>
         <q-toolbar>
@@ -154,6 +168,18 @@
               </q-item>
             </q-list>
           </q-btn-dropdown>
+        </q-toolbar>
+        <q-toolbar v-if="settings.showTopMenu" class="wiki-top-menu-bar">
+          <q-btn
+            v-for="item in settings.topMenuItems"
+            :key="item.id"
+            flat
+            no-caps
+            dense
+            :label="item.label"
+            v-bind="topMenuLinkProps(item)"
+            active-class="wiki-top-menu-active"
+          />
         </q-toolbar>
         <q-toolbar v-if="mobileSearch && $q.screen.lt.sm" class="q-pt-none">
           <q-input
@@ -273,6 +299,21 @@ watch(() => route.query.q, (q) => {
 watch(() => auth.isLoggedIn, () => {
   wiki.ensureLoaded({ force: true })
 })
+
+function topMenuLinkProps(item) {
+  if (item.postId) {
+    return { to: `/posts/${item.postId}` }
+  }
+  const url = String(item.url || '').trim()
+  if (url.startsWith('/') && !url.startsWith('//')) {
+    return { to: url }
+  }
+  return {
+    href: url,
+    target: '_blank',
+    rel: 'noopener noreferrer'
+  }
+}
 
 function goHome() {
   router.push('/')

@@ -20,8 +20,53 @@ const emit = defineEmits(['update:modelValue'])
 
 const holder = ref(null)
 let editor = null
+let savedRange = null
 
 const EditorCtor = EditorJS.default || EditorJS
+
+function selectedText() {
+  const selection = window.getSelection()
+  const range = selection?.rangeCount ? selection.getRangeAt(0) : null
+  if (!range || !holder.value?.contains(range.commonAncestorContainer)) {
+    savedRange = null
+    return ''
+  }
+  savedRange = range.cloneRange()
+  return selection.toString()
+}
+
+async function insertLink({ href, label }) {
+  if (!editor || props.readOnly) return
+  const selection = window.getSelection()
+  if (savedRange) {
+    selection.removeAllRanges()
+    selection.addRange(savedRange)
+  }
+  if (selection?.toString()) {
+    document.execCommand('createLink', false, href)
+  } else {
+    const anchor = document.createElement('a')
+    anchor.href = href
+    anchor.textContent = label || href
+    const range = savedRange
+    if (range) {
+      range.deleteContents()
+      range.insertNode(anchor)
+      range.setStartAfter(anchor)
+      range.collapse(true)
+      selection.removeAllRanges()
+      selection.addRange(range)
+    } else {
+      const block = editor.blocks.getCurrentBlockIndex()
+      editor.blocks.insert('paragraph', { text: anchor.outerHTML }, {}, block + 1, true)
+    }
+  }
+  savedRange = null
+  const data = await editor.save()
+  emit('update:modelValue', JSON.stringify(data))
+}
+
+defineExpose({ selectedText, insertLink })
 
 function parseContent(value) {
   try {

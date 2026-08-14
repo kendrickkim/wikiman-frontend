@@ -365,6 +365,27 @@ html {
   overflow: auto;
 }
 
+.wiki-top-menu-bar {
+  min-height: 38px;
+  padding: 0 16px;
+  gap: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-top: 1px solid rgba(127, 127, 127, 0.18);
+  scrollbar-width: thin;
+
+  .q-btn {
+    flex: 0 0 auto;
+    min-height: 32px;
+    padding: 0 12px;
+  }
+}
+
+.wiki-top-menu-active {
+  color: var(--q-primary);
+  background: rgba(31, 111, 235, 0.12);
+}
+
 .ce-block__content,
 .ce-toolbar__content {
   max-width: calc(100% - 52px) !important;

@@ -125,6 +125,7 @@ const props = defineProps({
 
 const settingsMenu = [
   { key: 'settings-general', to: '/settings/general', label: '일반', icon: 'tune' },
+  { key: 'settings-top-menu', to: '/settings/top-menu', label: '상단 메뉴', icon: 'view_week' },
   { key: 'settings-categories', to: '/settings/categories', label: '카테고리', icon: 'folder' },
   { key: 'settings-homepage', to: '/settings/homepage', label: '홈페이지', icon: 'home' },
   { key: 'settings-attachments', to: '/settings/attachments', label: '첨부파일', icon: 'attach_file' },

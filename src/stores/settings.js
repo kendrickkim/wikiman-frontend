@@ -49,13 +49,16 @@ export const useSettingsStore = defineStore('settings', {
     categoryTreeExpand: 'expanded',
     categoryTreeSide: 'left',
     fontScale: 100,
+    topMenuVisible: true,
     homePostIds: [],
     hasHomepage: false,
+    topMenuItems: [],
     loaded: false,
     loading: null
   }),
   getters: {
-    isDark: (state) => state.theme === 'dark'
+    isDark: (state) => state.theme === 'dark',
+    showTopMenu: (state) => state.topMenuVisible && state.topMenuItems.length > 0
   },
   actions: {
     apply() {
@@ -77,11 +80,25 @@ export const useSettingsStore = defineStore('settings', {
       this.categoryTreeSide = data.categoryTreeSide === 'right' ? 'right' : 'left'
       const scale = Math.round(Number(data.fontScale))
       this.fontScale = Number.isFinite(scale) && scale >= 60 && scale <= 120 ? scale : 100
+      this.topMenuVisible = data.topMenuVisible !== false
       const ids = Array.isArray(data.homePostIds)
         ? data.homePostIds.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0)
         : []
       this.homePostIds = ids
       this.hasHomepage = data.hasHomepage === true || ids.length > 0
+      this.topMenuItems = Array.isArray(data.topMenuItems)
+        ? data.topMenuItems.map((item) => {
+          const postId = Number(item.postId)
+          const url = String(item.url || '').trim()
+          return {
+            id: Number(item.id),
+            label: String(item.label || '').trim(),
+            postId: Number.isInteger(postId) && postId > 0 ? postId : null,
+            postTitle: String(item.postTitle || ''),
+            url
+          }
+        }).filter((item) => item.id > 0 && item.label && (item.postId || item.url))
+        : []
       this.apply()
     },
     async load({ force = false } = {}) {

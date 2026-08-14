@@ -22,6 +22,34 @@ const parent = ref(null)
 let view = null
 let applying = false
 
+function selectedText() {
+  if (!view) return ''
+  const selection = view.state.selection.main
+  return view.state.sliceDoc(selection.from, selection.to)
+}
+
+function insertLink({ href, label }) {
+  if (!view) return
+  const selection = view.state.selection.main
+  const text = label || selectedText() || href
+  const escapedHref = props.mode === 'html'
+    ? href.replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+    : href.replace(/\)/g, '\\)')
+  const escapedText = props.mode === 'html'
+    ? text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    : text.replace(/\]/g, '\\]')
+  const insert = props.mode === 'html'
+    ? `<a href="${escapedHref}">${escapedText}</a>`
+    : `[${escapedText}](${escapedHref})`
+  view.dispatch({
+    changes: { from: selection.from, to: selection.to, insert },
+    selection: { anchor: selection.from + insert.length }
+  })
+  view.focus()
+}
+
+defineExpose({ selectedText, insertLink })
+
 async function pasteImage(file) {
   const form = new FormData()
   form.append('image', file)
