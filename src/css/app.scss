@@ -222,6 +222,24 @@ html {
   display: table;
 }
 
+.summernote-holder {
+  .note-editor.note-frame {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .note-toolbar {
+    background: #f8fafc;
+  }
+
+  .note-editable {
+    min-height: 420px;
+    font-size: calc(var(--wiki-font-size) * var(--wiki-font-scale, 1));
+    line-height: var(--wiki-line-height);
+  }
+}
+
 .ckeditor-holder {
   background: white;
   border: 1px solid #e5e7eb;
@@ -524,6 +542,35 @@ html {
 
     .ck.ck-editor__main > .ck-editor__editable {
       min-height: 480px;
+    }
+  }
+
+  .summernote-holder {
+    .note-editor.note-frame,
+    .note-toolbar,
+    .note-editing-area,
+    .note-editable,
+    .note-statusbar,
+    .note-dropdown-menu,
+    .note-modal-content {
+      background: #1b2128;
+      border-color: #3a4149;
+      color: #e5e7eb;
+    }
+
+    .note-toolbar {
+      background: #151a1f;
+    }
+
+    .note-btn {
+      background: #1b2128;
+      border-color: #3a4149;
+      color: #e5e7eb;
+    }
+
+    .note-btn:hover,
+    .note-btn.active {
+      background: #2a3138;
     }
   }
 

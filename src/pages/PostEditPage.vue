@@ -95,6 +95,12 @@
           :key="editorKey"
           v-model="drafts.ckeditor"
         />
+        <SummernoteEditor
+          v-else-if="editorType === 'summernote'"
+          ref="activeEditor"
+          :key="editorKey"
+          v-model="drafts.summernote"
+        />
         <EditorJsEditor
           v-else-if="editorType === 'editorjs'"
           ref="activeEditor"
@@ -180,6 +186,7 @@ import WikiLinkDialog from '@/components/WikiLinkDialog.vue'
 import PostEditActions from '@/components/PostEditActions.vue'
 
 const CkeditorEditor = defineAsyncComponent(() => import('@/components/CkeditorEditor.vue'))
+const SummernoteEditor = defineAsyncComponent(() => import('@/components/SummernoteEditor.vue'))
 const EditorJsEditor = defineAsyncComponent(() => import('@/components/EditorJsEditor.vue'))
 const SourceEditor = defineAsyncComponent(() => import('@/components/SourceEditor.vue'))
 
@@ -202,7 +209,7 @@ const status = ref('draft')
 const categoryId = ref(null)
 const editorType = ref(settings.defaultEditor)
 const previousEditorType = ref(settings.defaultEditor)
-const drafts = ref({ ckeditor: '', editorjs: EMPTY_EDITORJS, markdown: '', html: '' })
+const drafts = ref({ ckeditor: '', summernote: '', editorjs: EMPTY_EDITORJS, markdown: '', html: '' })
 const attachments = ref([])
 const editorKey = ref(0)
 const showPreview = ref(isDesktop.value)
@@ -341,10 +348,8 @@ onMounted(async () => {
       categoryId.value = post.categoryId
       editorType.value = post.editorType
       previousEditorType.value = post.editorType
-      if (post.editorType === 'markdown') drafts.value.markdown = post.content || ''
-      else if (post.editorType === 'html') drafts.value.html = post.content || ''
-      else if (post.editorType === 'ckeditor') drafts.value.ckeditor = post.content || ''
-      else drafts.value.editorjs = post.content || EMPTY_EDITORJS
+      if (post.editorType === 'editorjs') drafts.value.editorjs = post.content || EMPTY_EDITORJS
+      else drafts.value[post.editorType] = post.content || ''
       attachments.value = Array.isArray(post.attachments) ? post.attachments : []
       editorKey.value += 1
     } catch (err) {

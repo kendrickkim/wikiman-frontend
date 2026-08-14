@@ -1,6 +1,6 @@
 <template>
   <div v-if="editorType === 'markdown'" class="wiki-content" v-html="markdownHtml" />
-  <div v-else-if="editorType === 'html' || editorType === 'ckeditor'" class="wiki-content wiki-html" v-html="htmlContent" />
+  <div v-else-if="editorType === 'html' || editorType === 'ckeditor' || editorType === 'summernote'" class="wiki-content wiki-html" v-html="htmlContent" />
   <div v-else class="wiki-content">
     <template v-for="(block, index) in blocks" :key="index">
       <component :is="headingTag(block)" v-if="block.type === 'header'" v-html="safeText(block.data?.text)" />
