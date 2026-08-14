@@ -7,36 +7,15 @@
           {{ status === 'draft' ? '작성중' : '발행' }}
         </q-badge>
         <q-space v-if="isDesktop" />
-        <div v-if="isDesktop" class="wiki-edit-actions">
-          <q-btn
-            outline
-            no-caps
-            color="primary"
-            label="작성중 저장"
-            :loading="saving && savingAs === 'draft'"
-            :disable="saving"
-            @click="save('draft')"
-          />
-          <q-btn
-            unelevated
-            no-caps
-            color="primary"
-            label="발행"
-            :loading="saving && savingAs === 'published'"
-            :disable="saving"
-            @click="save('published')"
-          />
-          <q-btn outline no-caps label="취소" :disable="saving" @click="cancelEdit" />
-          <q-btn
-            v-if="isEdit"
-            outline
-            no-caps
-            color="negative"
-            label="삭제"
-            :disable="saving"
-            @click="deleteCurrent"
-          />
-        </div>
+        <PostEditActions
+          v-if="isDesktop"
+          :saving="saving"
+          :saving-as="savingAs"
+          :is-edit="isEdit"
+          @save="save"
+          @cancel="cancelEdit"
+          @remove="deleteCurrent"
+        />
       </div>
 
       <q-banner v-if="error" class="bg-red-1 text-negative q-mb-md">{{ error }}</q-banner>
@@ -168,42 +147,16 @@
         @submit="insertLink"
       />
 
-      <div v-if="!isDesktop" class="wiki-edit-actions wiki-edit-actions--mobile q-mt-md">
-        <q-btn
-          outline
-          no-caps
-          dense
-          size="sm"
-          color="primary"
-          label="작성중 저장"
-          :loading="saving && savingAs === 'draft'"
-          :disable="saving"
-          @click="save('draft')"
-        />
-        <q-btn
-          unelevated
-          no-caps
-          dense
-          size="sm"
-          color="primary"
-          label="발행"
-          :loading="saving && savingAs === 'published'"
-          :disable="saving"
-          @click="save('published')"
-        />
-        <q-btn outline no-caps dense size="sm" label="취소" :disable="saving" @click="cancelEdit" />
-        <q-btn
-          v-if="isEdit"
-          outline
-          no-caps
-          dense
-          size="sm"
-          color="negative"
-          label="삭제"
-          :disable="saving"
-          @click="deleteCurrent"
-        />
-      </div>
+      <PostEditActions
+        :class="isDesktop ? 'q-mt-lg q-mb-md justify-end' : 'q-mt-lg q-mb-md'"
+        :mobile="!isDesktop"
+        :saving="saving"
+        :saving-as="savingAs"
+        :is-edit="isEdit"
+        @save="save"
+        @cancel="cancelEdit"
+        @remove="deleteCurrent"
+      />
     </div>
   </q-page>
 </template>
@@ -224,6 +177,7 @@ import KeywordSelect from '@/components/KeywordSelect.vue'
 import FileAttachments from '@/components/FileAttachments.vue'
 import PostViewer from '@/components/PostViewer.vue'
 import WikiLinkDialog from '@/components/WikiLinkDialog.vue'
+import PostEditActions from '@/components/PostEditActions.vue'
 
 const CkeditorEditor = defineAsyncComponent(() => import('@/components/CkeditorEditor.vue'))
 const EditorJsEditor = defineAsyncComponent(() => import('@/components/EditorJsEditor.vue'))

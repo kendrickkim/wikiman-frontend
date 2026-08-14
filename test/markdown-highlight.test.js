@@ -28,3 +28,20 @@ test('plantuml 펜스는 하이라이트하지 않는다', () => {
   assert.match(html, /plantuml-block/)
   assert.equal(html.includes('language-plantuml'), false)
 })
+
+test('HTML table 태그를 렌더하고 sanitizer가 유지한다', () => {
+  const source = [
+    '표 예시',
+    '',
+    '<table>',
+    '<thead><tr><th>이름</th><th>값</th></tr></thead>',
+    '<tbody><tr><td>a</td><td>1</td></tr></tbody>',
+    '</table>'
+  ].join('\n')
+  const raw = renderMarkdown(source)
+  const clean = sanitizeHtml(raw)
+  assert.match(clean, /<table>/)
+  assert.match(clean, /<th>/)
+  assert.match(clean, /<td>/)
+  assert.equal(clean.includes('<script'), false)
+})
