@@ -545,33 +545,8 @@ html {
     }
   }
 
-  .summernote-holder {
-    .note-editor.note-frame,
-    .note-toolbar,
-    .note-editing-area,
-    .note-editable,
-    .note-statusbar,
-    .note-dropdown-menu,
-    .note-modal-content {
-      background: #1b2128;
-      border-color: #3a4149;
-      color: #e5e7eb;
-    }
-
-    .note-toolbar {
-      background: #151a1f;
-    }
-
-    .note-btn {
-      background: #1b2128;
-      border-color: #3a4149;
-      color: #e5e7eb;
-    }
-
-    .note-btn:hover,
-    .note-btn.active {
-      background: #2a3138;
-    }
+  .summernote-holder .note-editable {
+    min-height: 480px;
   }
 
   .cm-editor {
@@ -1017,6 +992,78 @@ body.body--dark {
     .ck.ck-editor__main > .ck-editor__editable {
       background: #1b2128;
       color: #e5e7eb;
+    }
+  }
+
+  .summernote-holder {
+    .note-editor.note-frame,
+    .note-editing-area,
+    .note-editable,
+    .note-statusbar,
+    .note-codable,
+    .note-placeholder {
+      background: #1b2128;
+      border-color: #3a4149;
+      color: #e5e7eb;
+    }
+
+    .note-toolbar,
+    .note-toolbar .note-btn-group {
+      background: #151a1f;
+      border-color: #3a4149;
+      color: #e5e7eb;
+    }
+
+    .note-btn,
+    .note-btn i,
+    .note-icon-caret,
+    .note-dropdown-item,
+    .note-dropdown-item a,
+    .note-modal-title,
+    .note-form-label {
+      color: #e5e7eb;
+    }
+
+    .note-btn {
+      background: #1b2128;
+      border-color: #3a4149;
+    }
+
+    .note-btn:hover,
+    .note-btn:focus,
+    .note-btn.active {
+      background: #2a3138;
+      color: #f3f4f6;
+    }
+
+    .note-dropdown-menu,
+    .note-modal-content,
+    .note-modal-header,
+    .note-modal-footer {
+      background: #1b2128;
+      border-color: #3a4149;
+      color: #e5e7eb;
+    }
+
+    .note-dropdown-item:hover {
+      background: #2a3138;
+      color: #f3f4f6;
+    }
+
+    .note-placeholder {
+      background: transparent;
+      color: #9ca3af;
+    }
+
+    .note-form-control,
+    .note-input {
+      background: #151a1f;
+      border-color: #3a4149;
+      color: #e5e7eb;
+    }
+
+    .note-editable a {
+      color: #79c0ff;
     }
   }
 
