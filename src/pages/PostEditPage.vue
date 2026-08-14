@@ -151,6 +151,8 @@
         <q-btn
           outline
           no-caps
+          dense
+          size="sm"
           color="primary"
           label="작성중 저장"
           :loading="saving && savingAs === 'draft'"
@@ -160,17 +162,21 @@
         <q-btn
           unelevated
           no-caps
+          dense
+          size="sm"
           color="primary"
           label="발행"
           :loading="saving && savingAs === 'published'"
           :disable="saving"
           @click="save('published')"
         />
-        <q-btn outline no-caps label="취소" :disable="saving" @click="cancelEdit" />
+        <q-btn outline no-caps dense size="sm" label="취소" :disable="saving" @click="cancelEdit" />
         <q-btn
           v-if="isEdit"
           outline
           no-caps
+          dense
+          size="sm"
           color="negative"
           label="삭제"
           :disable="saving"
@@ -303,7 +309,7 @@ async function leaveTo(path) {
     if (!ok) return false
   }
   bypassLeave.value = true
-  await router.push(path)
+  await router.replace(path || '/')
   return true
 }
 
@@ -422,10 +428,13 @@ async function save(nextStatus) {
       ? await api.patch(`/posts/${route.params.id}`, payload)
       : await api.post('/posts', payload)
     status.value = nextStatus
-    await settings.load({ force: true })
+    await Promise.all([
+      settings.load({ force: true }),
+      wiki.ensureKeywords({ force: true })
+    ])
     $q.notify({ type: 'positive', message: nextStatus === 'published' ? '발행했습니다.' : '작성중으로 저장했습니다.' })
     bypassLeave.value = true
-    router.push(`/posts/${data.post.id}`)
+    await router.replace(`/posts/${data.post.id}`)
   } catch (err) {
     error.value = getErrorMessage(err)
   } finally {

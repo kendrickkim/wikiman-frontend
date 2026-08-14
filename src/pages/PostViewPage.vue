@@ -26,14 +26,22 @@
               outline
               color="primary"
               icon="edit"
-              :label="isDesktop || $q.screen.gt.xs ? '수정' : undefined"
+              no-caps
+              :dense="!isDesktop"
+              :size="isDesktop ? 'md' : 'sm'"
+              :label="isDesktop ? '수정' : undefined"
+              :aria-label="isDesktop ? undefined : '수정'"
               :to="`/posts/${post.id}/edit`"
             />
             <q-btn
               unelevated
               color="negative"
               icon="delete"
-              :label="isDesktop || $q.screen.gt.xs ? '삭제' : undefined"
+              no-caps
+              :dense="!isDesktop"
+              :size="isDesktop ? 'md' : 'sm'"
+              :label="isDesktop ? '삭제' : undefined"
+              :aria-label="isDesktop ? undefined : '삭제'"
               @click="removePost(post)"
             />
           </div>
@@ -61,7 +69,7 @@ import { displayTitle } from '@/utils/title'
 import { formatDate } from '@/utils/format'
 
 const route = useRoute()
-const { $q, isDesktop } = useLayout()
+const { isDesktop } = useLayout()
 const { removePost } = usePostActions()
 const auth = useAuthStore()
 const post = ref(null)

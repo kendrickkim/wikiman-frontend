@@ -68,7 +68,7 @@ const filteredItems = computed(() => {
 onMounted(async () => {
   loading.value = true
   try {
-    await wiki.ensureKeywords()
+    await wiki.ensureKeywords({ force: true })
     items.value = wiki.keywords
   } catch (err) {
     error.value = getErrorMessage(err, '키워드를 불러오지 못했습니다.')

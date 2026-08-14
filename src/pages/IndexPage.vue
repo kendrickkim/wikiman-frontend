@@ -32,14 +32,22 @@
                   outline
                   color="primary"
                   icon="edit"
-                  :label="isDesktop || $q.screen.gt.xs ? '수정' : undefined"
+                  no-caps
+                  :dense="!isDesktop"
+                  :size="isDesktop ? 'md' : 'sm'"
+                  :label="isDesktop ? '수정' : undefined"
+                  :aria-label="isDesktop ? undefined : '수정'"
                   :to="`/posts/${homePost.id}/edit`"
                 />
                 <q-btn
                   unelevated
                   color="negative"
                   icon="delete"
-                  :label="isDesktop || $q.screen.gt.xs ? '삭제' : undefined"
+                  no-caps
+                  :dense="!isDesktop"
+                  :size="isDesktop ? 'md' : 'sm'"
+                  :label="isDesktop ? '삭제' : undefined"
+                  :aria-label="isDesktop ? undefined : '삭제'"
                   @click="onRemoveHome(homePost)"
                 />
               </div>
@@ -79,6 +87,28 @@
           toggle-color="primary"
           :options="statusFilterOptions"
         />
+
+        <div
+          v-if="!loading && !error && total > 0"
+          class="wiki-pagination row items-center justify-between q-mb-md q-gutter-sm"
+        >
+          <div class="text-grey-7 text-caption">
+            {{ pageRangeLabel }}
+          </div>
+          <q-pagination
+            v-model="page"
+            class="wiki-pagination__control"
+            :max="pageCount"
+            :max-pages="isDesktop ? 7 : 4"
+            direction-links
+            :boundary-links="isDesktop"
+            outline
+            color="grey-7"
+            active-color="primary"
+            active-design="unelevated"
+            gutter="sm"
+          />
+        </div>
 
         <div v-if="loading" class="flex flex-center q-pa-xl">
           <q-spinner size="40px" color="primary" />
@@ -161,18 +191,25 @@
           </q-item>
         </q-list>
 
-        <div v-if="!loading && !error && total > 0" class="row items-center justify-between q-mt-md q-gutter-sm">
+        <div
+          v-if="!loading && !error && total > 0"
+          class="wiki-pagination row items-center justify-between q-mt-md q-gutter-sm"
+        >
           <div class="text-grey-7 text-caption">
             {{ pageRangeLabel }}
           </div>
           <q-pagination
             v-model="page"
+            class="wiki-pagination__control"
             :max="pageCount"
             :max-pages="isDesktop ? 7 : 4"
             direction-links
             :boundary-links="isDesktop"
-            unelevated
-            color="primary"
+            outline
+            color="grey-7"
+            active-color="primary"
+            active-design="unelevated"
+            gutter="sm"
           />
         </div>
       </template>

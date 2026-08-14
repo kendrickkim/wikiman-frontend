@@ -41,6 +41,10 @@ export const useWikiStore = defineStore('wiki', {
         : []
       this.keywordsLoaded = true
     },
+    invalidateKeywords() {
+      this.keywordsLoaded = false
+      this.keywordsLoading = null
+    },
     async ensureKeywords({ force = false } = {}) {
       if (this.keywordsLoaded && !force) return
       if (this.keywordsLoading && !force) return this.keywordsLoading

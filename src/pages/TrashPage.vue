@@ -1,8 +1,23 @@
 <template>
   <q-page class="wiki-page">
     <div class="wiki-main">
-      <div :class="isDesktop ? 'text-h4 text-weight-bold q-mb-lg' : 'text-h6 q-mb-md'">휴지통</div>
-      <div class="text-grey-7 q-mb-md">삭제된 글은 여기에 보관됩니다. 복원하거나 완전히 삭제할 수 있습니다.</div>
+      <div class="row items-start justify-between q-gutter-sm q-mb-md">
+        <div>
+          <div :class="isDesktop ? 'text-h4 text-weight-bold' : 'text-h6'">휴지통</div>
+          <div class="text-grey-7 q-mt-xs">삭제된 글은 여기에 보관됩니다. 복원하거나 완전히 삭제할 수 있습니다.</div>
+        </div>
+        <q-btn
+          v-if="auth.canWrite && posts.length"
+          unelevated
+          color="negative"
+          no-caps
+          icon="delete_forever"
+          label="휴지통 비우기"
+          :loading="emptying"
+          :disable="loading"
+          @click="onEmpty"
+        />
+      </div>
 
       <q-banner v-if="error" class="bg-red-1 text-negative q-mb-md">{{ error }}</q-banner>
 
@@ -60,10 +75,11 @@ import { displayTitle } from '@/utils/title'
 import { formatDate } from '@/utils/format'
 
 const { isDesktop } = useLayout()
-const { restorePost, purgePost } = usePostActions()
+const { restorePost, purgePost, emptyTrash } = usePostActions()
 const auth = useAuthStore()
 const posts = ref([])
 const loading = ref(false)
+const emptying = ref(false)
 const error = ref('')
 
 async function load() {
@@ -90,5 +106,15 @@ async function onRestore(post) {
 async function onPurge(post) {
   const removed = await purgePost(post)
   if (removed) await load()
+}
+
+async function onEmpty() {
+  emptying.value = true
+  try {
+    const cleared = await emptyTrash(posts.value.length)
+    if (cleared) await load()
+  } finally {
+    emptying.value = false
+  }
 }
 </script>
