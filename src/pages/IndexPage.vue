@@ -16,7 +16,7 @@
               <div class="wiki-article-head__body">
                 <div :class="['wiki-article-head__title', isDesktop ? 'text-h4 text-weight-bold' : 'text-h5']">{{ displayTitle(homePost.title) }}</div>
                 <div class="text-grey-7 q-mt-sm" :class="isDesktop ? 'text-body2' : 'text-caption'">
-                  {{ homePost.categoryName || '미분류' }} · {{ homePost.authorName }} · {{ formatDate(homePost.updatedAt) }}
+                  {{ homePost.categoryName || '미분류' }} · {{ homePost.authorName }} · 작성 {{ formatDate(homePost.createdAt) }}<template v-if="isModifiedPost(homePost)"> · 수정 {{ formatDate(homePost.updatedAt) }}</template>
                   <q-badge class="q-ml-sm" color="info">홈페이지</q-badge>
                   <q-badge class="q-ml-sm" :color="homePost.status === 'draft' ? 'warning' : 'primary'">
                     {{ homePost.status === 'draft' ? '작성중' : '발행' }}
@@ -141,7 +141,7 @@
                 </q-badge>
               </div>
               <div class="row items-center no-wrap q-gutter-xs">
-                <div class="wiki-post-row__date">{{ formatDate(post.updatedAt) }}</div>
+                <div class="wiki-post-row__date">{{ formatDate(post.createdAt) }}</div>
                 <q-btn
                   v-if="auth.canWrite"
                   flat
@@ -163,7 +163,7 @@
               <q-item-label class="text-subtitle1 text-weight-medium wiki-post-row__title">{{ displayTitle(post.title) }}</q-item-label>
               <q-item-label caption class="wiki-post-row__meta">
                 <span class="wiki-post-row__url">{{ postPath(post) }}</span>
-                <span>{{ post.categoryName || '미분류' }} · {{ post.authorName }} · {{ formatDate(post.updatedAt) }}</span>
+                <span>{{ post.categoryName || '미분류' }} · {{ post.authorName }} · {{ formatDate(post.createdAt) }}</span>
                 <KeywordChips :keywords="post.keywords" :wrap="false" />
               </q-item-label>
             </q-item-section>
@@ -270,11 +270,17 @@ const activeKeyword = computed(() => {
   if (fromParam != null && String(fromParam).trim() !== '') return String(fromParam)
   return String(route.query.keyword || '').trim()
 })
-const listPath = computed(() => (
-  activeKeyword.value
-    ? `/keyword/${encodeURIComponent(activeKeyword.value)}`
-    : '/'
-))
+const activeCategoryId = computed(() => {
+  if (route.path.startsWith('/category/')) {
+    return String(route.params.categoryId || '').trim()
+  }
+  return ''
+})
+const listPath = computed(() => {
+  if (activeKeyword.value) return `/keyword/${encodeURIComponent(activeKeyword.value)}`
+  if (activeCategoryId.value) return `/category/${encodeURIComponent(activeCategoryId.value)}`
+  return '/'
+})
 const page = computed({
   get() {
     const n = Math.floor(Number(route.query.page))
@@ -283,6 +289,7 @@ const page = computed({
   set(value) {
     const next = { ...route.query }
     delete next.keyword
+    delete next.categoryId
     if (!value || value <= 1) delete next.page
     else next.page = String(value)
     router.push({ path: listPath.value, query: next })
@@ -300,7 +307,7 @@ const wantsHomepage = computed(() => (
   settings.loaded
   && settings.hasHomepage
   && route.path === '/'
-  && !route.query.categoryId
+  && !activeCategoryId.value
   && !route.query.q
   && !activeKeyword.value
   && route.query.view !== 'list'
@@ -311,8 +318,8 @@ const showingHome = computed(() => wantsHomepage.value && homePosts.value.length
 const heading = computed(() => {
   if (activeKeyword.value) return `"${activeKeyword.value}" 키워드 글`
   if (route.query.q) return `"${route.query.q}" 검색 결과`
-  if (route.query.categoryId === 'uncategorized') return '미분류'
-  const id = Number(route.query.categoryId)
+  if (activeCategoryId.value === 'uncategorized') return '미분류'
+  const id = Number(activeCategoryId.value)
   const category = wiki.categories.find((c) => c.id === id)
   return category ? category.name : '전체 글'
 })
@@ -320,7 +327,7 @@ const heading = computed(() => {
 const listKey = computed(() => [
   route.path,
   String(route.params.keyword || ''),
-  String(route.query.categoryId || ''),
+  String(activeCategoryId.value || ''),
   String(route.query.q || ''),
   String(route.query.view || ''),
   String(route.query.page || ''),
@@ -339,7 +346,7 @@ async function loadList(signal) {
     page: page.value,
     pageSize: pageSize.value
   }
-  if (route.query.categoryId) params.categoryId = route.query.categoryId
+  if (activeCategoryId.value) params.categoryId = activeCategoryId.value
   if (route.query.q) params.q = route.query.q
   if (activeKeyword.value) params.keyword = activeKeyword.value
   if (statusFilter.value !== 'all') params.status = statusFilter.value
@@ -404,6 +411,10 @@ onBeforeUnmount(() => {
 
 function postPath(post) {
   return `${window.location.origin}/posts/${post.id}`
+}
+
+function isModifiedPost(post) {
+  return Boolean(post?.updatedAt) && formatDate(post.updatedAt) !== formatDate(post.createdAt)
 }
 
 async function onRemove(post) {

@@ -10,7 +10,7 @@
           <div class="wiki-article-head__body">
             <div :class="['wiki-article-head__title', isDesktop ? 'text-h4 text-weight-bold' : 'text-h5']">{{ displayTitle(post.title) }}</div>
             <div class="text-grey-7 q-mt-sm" :class="isDesktop ? 'text-body2' : 'text-caption'">
-              {{ post.categoryName || '미분류' }} · {{ post.authorName }} · {{ formatDate(post.updatedAt) }}
+              {{ post.categoryName || '미분류' }} · {{ post.authorName }} · 작성 {{ formatDate(post.createdAt) }}<template v-if="isModified"> · 수정 {{ formatDate(post.updatedAt) }}</template>
               <q-badge v-if="post.isHomepage" class="q-ml-sm" color="info">홈페이지</q-badge>
               <q-badge class="q-ml-sm" :color="post.status === 'draft' ? 'warning' : 'primary'">
                 {{ post.status === 'draft' ? '작성중' : '발행' }}
@@ -76,6 +76,10 @@ const post = ref(null)
 const loading = ref(false)
 const error = ref('')
 const canEdit = computed(() => auth.canWrite)
+const isModified = computed(() => (
+  Boolean(post.value?.updatedAt)
+  && formatDate(post.value.updatedAt) !== formatDate(post.value.createdAt)
+))
 
 async function load() {
   loading.value = true

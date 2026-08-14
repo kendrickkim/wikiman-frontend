@@ -15,6 +15,10 @@ export default defineRouter(() => {
   })
 
   Router.beforeEach(async (to) => {
+    if (to.query.categoryId && !to.path.startsWith('/category/')) {
+      const { categoryId, ...query } = to.query
+      return { path: `/category/${categoryId}`, query, hash: to.hash }
+    }
     if (!to.meta.requiresWriter && !to.meta.requiresAuth) return true
     const auth = useAuthStore()
     await auth.ensureLoaded()

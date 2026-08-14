@@ -26,7 +26,7 @@
         active-class="wiki-nav-active"
         @click="select('uncategorized')"
       >
-        <q-item-section avatar><q-icon name="inbox" /></q-item-section>
+        <q-item-section avatar><q-icon name="folder_off" /></q-item-section>
         <q-item-section>미분류</q-item-section>
       </q-item>
       <q-item
@@ -157,9 +157,11 @@ const selectedKey = computed(() => {
     return match?.key || 'settings-general'
   }
   if (route.path === '/keywords' || route.path.startsWith('/keyword/')) return 'keywords'
-  const id = route.query.categoryId
-  if (id === 'uncategorized') return 'uncategorized'
-  if (id) return String(id)
+  if (route.path.startsWith('/category/')) {
+    const id = String(route.params.categoryId || '')
+    if (id === 'uncategorized') return 'uncategorized'
+    if (id) return id
+  }
   if (route.query.q || route.query.view === 'list') return 'all'
   if (settings.hasHomepage && route.path === '/') return 'home'
   return 'all'
@@ -224,14 +226,16 @@ function go(query) {
 function select(key) {
   if (key === 'home') go({})
   else if (key === 'all') go(route.query.q ? { q: route.query.q } : (settings.hasHomepage ? { view: 'list' } : {}))
-  else if (key === 'uncategorized') go({ ...pickQ(), categoryId: 'uncategorized' })
+  else if (key === 'uncategorized') {
+    router.push({ path: '/category/uncategorized', query: pickQ() })
+  }
   else if (key === 'keywords') router.push('/keywords')
   else if (key === 'trash') router.push('/trash')
 }
 
 function onTreeSelect(id) {
   if (id == null) return
-  go({ ...pickQ(), categoryId: String(id) })
+  router.push({ path: `/category/${id}`, query: pickQ() })
 }
 
 function pickQ() {
