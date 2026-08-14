@@ -222,6 +222,21 @@ html {
   display: table;
 }
 
+.wiki-edit-meta--desktop {
+  > .q-expansion-item > .q-expansion-item__container > .q-item {
+    display: none;
+  }
+
+  > .q-expansion-item > .q-expansion-item__container > .q-expansion-item__content {
+    padding: 0 !important;
+  }
+}
+
+.wiki-edit-meta-header {
+  border-radius: 8px;
+  min-height: 48px;
+}
+
 .summernote-holder {
   .note-editor.note-frame {
     border: 1px solid #e5e7eb;

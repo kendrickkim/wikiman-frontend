@@ -25,57 +25,75 @@
           <div class="col-12">
             <q-input v-model="title" outlined label="제목" />
           </div>
-          <div class="col-12">
-            <KeywordSelect v-model="keywords" />
-          </div>
-          <div class="col-12">
-            <q-checkbox v-model="isHomepage" label="홈페이지로 사용" />
-            <div class="text-caption text-grey-7 q-ml-lg">
-              여러 글을 지정할 수 있으며, 홈에서는 표시 순서대로 이어서 보입니다.
-            </div>
-            <q-input
-              v-if="isHomepage"
-              v-model.number="homepageSort"
-              type="number"
-              outlined
+          <div class="col-12" :class="{ 'wiki-edit-meta--desktop': isDesktop }">
+            <q-expansion-item
+              v-model="metaExpanded"
               dense
-              class="q-mt-sm q-ml-lg"
-              style="max-width: 220px"
-              label="표시 순서"
-              hint="숫자가 작을수록 위에 표시됩니다."
-              :min="0"
-              :max="9999"
-              step="1"
-            />
-          </div>
-          <div :class="isDesktop ? 'col-4' : 'col-12 col-md-4'">
-            <q-select
-              v-model="visibility"
-              :options="visibilityOptions"
-              emit-value
-              map-options
-              outlined
-              label="공개 범위"
-            />
-          </div>
-          <div :class="isDesktop ? 'col-5' : 'col-12 col-md-8'">
-            <CategorySelect v-model="categoryId" />
-          </div>
-          <div :class="isDesktop ? 'col-3' : 'col-12'">
-            <q-select
-              :model-value="editorType"
-              :options="editorOptions"
-              emit-value
-              map-options
-              outlined
-              label="에디터"
-              @update:model-value="onEditorChange"
-            />
+              :expand-separator="!isDesktop"
+              icon="tune"
+              label="글 설정"
+              :caption="metaSummary"
+              header-class="wiki-edit-meta-header"
+            >
+              <div
+                class="row q-col-gutter-md q-pb-sm"
+                :class="isDesktop ? 'q-pt-none' : 'q-pt-md'"
+              >
+                <div class="col-12">
+                  <KeywordSelect v-model="keywords" />
+                </div>
+                <div class="col-12">
+                  <q-checkbox v-model="isHomepage" label="홈페이지로 사용" />
+                  <div class="text-caption text-grey-7 q-ml-lg">
+                    여러 글을 지정할 수 있으며, 홈에서는 표시 순서대로 이어서 보입니다.
+                  </div>
+                  <q-input
+                    v-if="isHomepage"
+                    v-model.number="homepageSort"
+                    type="number"
+                    outlined
+                    dense
+                    class="q-mt-sm q-ml-lg"
+                    style="max-width: 220px"
+                    label="표시 순서"
+                    hint="숫자가 작을수록 위에 표시됩니다."
+                    :min="0"
+                    :max="9999"
+                    step="1"
+                  />
+                </div>
+                <div :class="isDesktop ? 'col-4' : 'col-12'">
+                  <q-select
+                    v-model="visibility"
+                    :options="visibilityOptions"
+                    emit-value
+                    map-options
+                    outlined
+                    label="공개 범위"
+                  />
+                </div>
+                <div :class="isDesktop ? 'col-5' : 'col-12'">
+                  <CategorySelect v-model="categoryId" />
+                </div>
+                <div :class="isDesktop ? 'col-3' : 'col-12'">
+                  <q-select
+                    :model-value="editorType"
+                    :options="editorOptions"
+                    emit-value
+                    map-options
+                    outlined
+                    label="에디터"
+                    @update:model-value="onEditorChange"
+                  />
+                </div>
+                <div class="col-12">
+                  <FileAttachments v-model="attachments" editable />
+                </div>
+              </div>
+            </q-expansion-item>
           </div>
         </div>
       </q-card>
-
-      <FileAttachments v-model="attachments" editable class="q-mt-md" />
 
       <div class="q-mt-md">
         <div class="row justify-end q-mb-xs">
@@ -168,7 +186,7 @@
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Dialog } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
@@ -213,6 +231,7 @@ const drafts = ref({ ckeditor: '', summernote: '', editorjs: EMPTY_EDITORJS, mar
 const attachments = ref([])
 const editorKey = ref(0)
 const showPreview = ref(isDesktop.value)
+const metaExpanded = ref(isDesktop.value)
 const saving = ref(false)
 const savingAs = ref('')
 const error = ref('')
@@ -235,6 +254,22 @@ const sourceHint = computed(() => (
     : 'Markdown · plantuml · 이미지 붙여넣기'
 ))
 const previewHtml = computed(() => sanitizeHtml(drafts.value.html || ''))
+const metaSummary = computed(() => {
+  const parts = []
+  if (keywords.value.length) parts.push(`키워드 ${keywords.value.length}`)
+  parts.push(visibility.value === 'private' ? '비공개' : '공개')
+  const category = wiki.categories.find((item) => item.id === Number(categoryId.value))
+  parts.push(category?.name || '미분류')
+  const editor = editorOptions.find((item) => item.value === editorType.value)
+  if (editor) parts.push(editor.label)
+  if (isHomepage.value) parts.push('홈페이지')
+  if (attachments.value.length) parts.push(`첨부 ${attachments.value.length}`)
+  return parts.join(' · ')
+})
+
+watch(isDesktop, (desktop) => {
+  metaExpanded.value = desktop
+})
 
 function openLinkDialog() {
   linkInitialLabel.value = activeEditor.value?.selectedText?.() || ''
