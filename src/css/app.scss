@@ -115,6 +115,80 @@ html {
     font-size: 0.85rem;
   }
 
+  pre code.hljs,
+  pre.hljs {
+    display: block;
+    background: transparent;
+    padding: 0;
+    color: inherit;
+  }
+
+  /* highlight.js 토큰 (어두운 pre 배경용) */
+  .hljs-comment,
+  .hljs-quote {
+    color: #9ca3af;
+    font-style: italic;
+  }
+
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-addition {
+    color: #c084fc;
+  }
+
+  .hljs-number,
+  .hljs-string,
+  .hljs-meta .hljs-meta-string,
+  .hljs-literal,
+  .hljs-doctag,
+  .hljs-regexp {
+    color: #86efac;
+  }
+
+  .hljs-title,
+  .hljs-section,
+  .hljs-name,
+  .hljs-selector-id,
+  .hljs-selector-class {
+    color: #93c5fd;
+  }
+
+  .hljs-attribute,
+  .hljs-attr,
+  .hljs-variable,
+  .hljs-template-variable,
+  .hljs-class .hljs-title,
+  .hljs-type {
+    color: #fcd34d;
+  }
+
+  .hljs-symbol,
+  .hljs-bullet,
+  .hljs-link,
+  .hljs-meta,
+  .hljs-selector-attr,
+  .hljs-selector-pseudo {
+    color: #67e8f9;
+  }
+
+  .hljs-built_in,
+  .hljs-builtin-name,
+  .hljs-deletion {
+    color: #fda4af;
+  }
+
+  .hljs-params {
+    color: #e5e7eb;
+  }
+
+  .hljs-emphasis {
+    font-style: italic;
+  }
+
+  .hljs-strong {
+    font-weight: 700;
+  }
+
   img, svg {
     max-width: 100%;
     height: auto;
@@ -286,7 +360,9 @@ html {
 
 .wiki-preview-card {
   min-height: 240px;
+  max-height: min(70vh, 720px);
   padding: 12px 16px;
+  overflow: auto;
 }
 
 .ce-block__content,

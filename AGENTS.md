@@ -25,6 +25,7 @@ Vue 3 · Quasar 2 · Pinia · Vue Router · JavaScript. Node 22.22+.
 - 카테고리는 공개/비공개. 비공개 카테고리(및 상위가 비공개인 하위)의 글은 로그인 후에만 목록·본문 조회.
 - 왼쪽 카테고리 트리 기본 펼침은 사이트 관리 → 일반의 `categoryTreeExpand`(`expanded`|`collapsed`|`root`).
 - 글 작성·수정: CKEditor 기본, Editor.js·Markdown·HTML 선택. 카테고리 선택 옆에서 카테고리 관리.
+- Markdown 코드 펜스(````js` 등)는 highlight.js로 언어별 하이라이트합니다. `plantuml`/`puml`은 기존처럼 다이어그램으로 렌더합니다.
 - 액션 버튼(저장·발행·취소·삭제) 높이를 `wiki-edit-actions`로 맞춥니다.
 - 사이트 관리(`/settings`)는 일반·카테고리·홈페이지·첨부파일·백업/복구 메뉴로 나뉩니다.
 - 글자 스케일은 사이트 관리 → 일반에서 선택(60~120%, 기본 100). `--wiki-font-scale`은 `html` 변수로 두고, 실제 크기는 `.wiki-content`와 편집 영역에만 적용합니다.

@@ -130,8 +130,17 @@
               />
             </div>
             <div v-if="showPreview && isDesktop" class="col-6">
-              <q-card flat bordered class="wiki-content wiki-preview-card" :class="{ 'wiki-html': editorType === 'html' }">
-                <div v-html="previewHtml" />
+              <q-card flat bordered class="wiki-preview-card">
+                <PostViewer
+                  v-if="editorType === 'markdown'"
+                  editor-type="markdown"
+                  :content="drafts.markdown"
+                />
+                <div
+                  v-else
+                  class="wiki-content wiki-html"
+                  v-html="previewHtml"
+                />
               </q-card>
             </div>
           </div>
@@ -181,12 +190,12 @@ import { useWikiStore } from '@/stores/wiki'
 import { useLayout } from '@/composables/useLayout'
 import { usePostActions } from '@/composables/usePostActions'
 import { useSettingsStore } from '@/stores/settings'
-import { renderMarkdown } from '@/utils/markdown'
 import { sanitizeHtml } from '@/utils/sanitize'
 import { EDITOR_OPTIONS } from '@/utils/editors'
 import CategorySelect from '@/components/CategorySelect.vue'
 import KeywordSelect from '@/components/KeywordSelect.vue'
 import FileAttachments from '@/components/FileAttachments.vue'
+import PostViewer from '@/components/PostViewer.vue'
 
 const CkeditorEditor = defineAsyncComponent(() => import('@/components/CkeditorEditor.vue'))
 const EditorJsEditor = defineAsyncComponent(() => import('@/components/EditorJsEditor.vue'))
@@ -233,11 +242,7 @@ const sourceHint = computed(() => (
     ? 'HTML · 이미지 붙여넣기'
     : 'Markdown · plantuml · 이미지 붙여넣기'
 ))
-const previewHtml = computed(() => (
-  editorType.value === 'html'
-    ? sanitizeHtml(drafts.value.html)
-    : sanitizeHtml(renderMarkdown(drafts.value.markdown))
-))
+const previewHtml = computed(() => sanitizeHtml(drafts.value.html || ''))
 
 function editorContent() {
   if (editorType.value === 'editorjs') {
