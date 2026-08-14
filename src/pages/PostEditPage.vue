@@ -107,8 +107,14 @@
             @click="openLinkDialog"
           />
         </div>
+        <TextareaEditor
+          v-if="editorType === 'textarea'"
+          ref="activeEditor"
+          :key="editorKey"
+          v-model="drafts.textarea"
+        />
         <CkeditorEditor
-          v-if="editorType === 'ckeditor'"
+          v-else-if="editorType === 'ckeditor'"
           ref="activeEditor"
           :key="editorKey"
           v-model="drafts.ckeditor"
@@ -118,6 +124,12 @@
           ref="activeEditor"
           :key="editorKey"
           v-model="drafts.summernote"
+        />
+        <TuiEditor
+          v-else-if="editorType === 'tui'"
+          ref="activeEditor"
+          :key="editorKey"
+          v-model="drafts.tui"
         />
         <EditorJsEditor
           v-else-if="editorType === 'editorjs'"
@@ -205,6 +217,8 @@ import PostEditActions from '@/components/PostEditActions.vue'
 
 const CkeditorEditor = defineAsyncComponent(() => import('@/components/CkeditorEditor.vue'))
 const SummernoteEditor = defineAsyncComponent(() => import('@/components/SummernoteEditor.vue'))
+const TuiEditor = defineAsyncComponent(() => import('@/components/TuiEditor.vue'))
+const TextareaEditor = defineAsyncComponent(() => import('@/components/TextareaEditor.vue'))
 const EditorJsEditor = defineAsyncComponent(() => import('@/components/EditorJsEditor.vue'))
 const SourceEditor = defineAsyncComponent(() => import('@/components/SourceEditor.vue'))
 
@@ -225,9 +239,9 @@ const homepageSort = ref(0)
 const visibility = ref('public')
 const status = ref('draft')
 const categoryId = ref(null)
-const editorType = ref(settings.defaultEditor)
-const previousEditorType = ref(settings.defaultEditor)
-const drafts = ref({ ckeditor: '', summernote: '', editorjs: EMPTY_EDITORJS, markdown: '', html: '' })
+const editorType = ref(settings.defaultEditorFor(isDesktop.value))
+const previousEditorType = ref(settings.defaultEditorFor(isDesktop.value))
+const drafts = ref({ textarea: '', ckeditor: '', summernote: '', tui: '', editorjs: EMPTY_EDITORJS, markdown: '', html: '' })
 const attachments = ref([])
 const editorKey = ref(0)
 const showPreview = ref(isDesktop.value)
@@ -363,8 +377,9 @@ removeLeaveGuard = router.beforeEach(async (to, from) => {
 onMounted(async () => {
   // 새 글은 로딩 중에도 이탈 확인이 되도록 기준 스냅샷을 먼저 잡습니다.
   if (!isEdit.value) {
-    editorType.value = settings.defaultEditor
-    previousEditorType.value = settings.defaultEditor
+    const preferred = settings.defaultEditorFor(isDesktop.value)
+    editorType.value = preferred
+    previousEditorType.value = preferred
     savedSnapshot.value = snapshot()
     leaveReady.value = true
   }
@@ -394,8 +409,9 @@ onMounted(async () => {
     leaveReady.value = true
   } else {
     const dirtyAlready = isDirty.value
-    editorType.value = settings.defaultEditor
-    previousEditorType.value = settings.defaultEditor
+    const preferred = settings.defaultEditorFor(isDesktop.value)
+    editorType.value = preferred
+    previousEditorType.value = preferred
     if (!dirtyAlready) {
       savedSnapshot.value = snapshot()
       editorKey.value += 1

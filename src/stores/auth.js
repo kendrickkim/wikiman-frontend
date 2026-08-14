@@ -1,9 +1,21 @@
 import { defineStore } from 'pinia'
 import { api } from '@/utils/api'
 
+const TOKEN_KEY = 'wikiman_token'
+const TOKEN_MAX_AGE = 60 * 60 * 24 * 7
+
+function syncAuthCookie(token) {
+  if (typeof document === 'undefined') return
+  if (token) {
+    document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; Path=/; Max-Age=${TOKEN_MAX_AGE}; SameSite=Lax`
+  } else {
+    document.cookie = `${TOKEN_KEY}=; Path=/; Max-Age=0; SameSite=Lax`
+  }
+}
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: localStorage.getItem('wikiman_token') || '',
+    token: localStorage.getItem(TOKEN_KEY) || '',
     user: null,
     loaded: false,
     canRegister: false,
@@ -17,12 +29,14 @@ export const useAuthStore = defineStore('auth', {
     setSession(token, user) {
       this.token = token
       this.user = user
-      localStorage.setItem('wikiman_token', token)
+      localStorage.setItem(TOKEN_KEY, token)
+      syncAuthCookie(token)
     },
     logout() {
       this.token = ''
       this.user = null
-      localStorage.removeItem('wikiman_token')
+      localStorage.removeItem(TOKEN_KEY)
+      syncAuthCookie('')
     },
     async loadStatus() {
       try {
@@ -35,9 +49,12 @@ export const useAuthStore = defineStore('auth', {
     async restore() {
       await this.loadStatus()
       if (!this.token) {
+        syncAuthCookie('')
         this.loaded = true
         return
       }
+      // 기존 세션도 이미지(<img>) 요청에 인증이 실리도록 쿠키를 맞춥니다.
+      syncAuthCookie(this.token)
       try {
         const { data } = await api.get('/auth/me')
         this.user = data.user

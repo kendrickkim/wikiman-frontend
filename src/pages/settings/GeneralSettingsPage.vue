@@ -105,7 +105,7 @@
           </div>
 
           <div>
-            <div class="text-body2 q-mb-sm">기본 작성 방식</div>
+            <div class="text-body2 q-mb-sm">기본 작성 방식 (데스크톱)</div>
             <q-btn-toggle
               v-model="form.defaultEditor"
               unelevated
@@ -114,6 +114,19 @@
               :spread="!isDesktop"
               :options="editorOptions"
             />
+          </div>
+
+          <div>
+            <div class="text-body2 q-mb-sm">기본 작성 방식 (모바일)</div>
+            <q-btn-toggle
+              v-model="form.defaultEditorMobile"
+              unelevated
+              no-caps
+              toggle-color="primary"
+              :spread="!isDesktop"
+              :options="editorOptions"
+            />
+            <div class="text-caption text-grey-7 q-mt-xs">새 글 작성 시 화면 크기에 맞는 에디터가 기본으로 선택됩니다.</div>
           </div>
 
           <q-input
@@ -152,6 +165,7 @@ const form = reactive({
   theme: settings.theme,
   plantumlServer: settings.plantumlServer,
   defaultEditor: settings.defaultEditor,
+  defaultEditorMobile: settings.defaultEditorMobile,
   favicon: settings.favicon,
   categoryTreeExpand: settings.categoryTreeExpand,
   categoryTreeSide: settings.categoryTreeSide,
@@ -183,6 +197,7 @@ onMounted(async () => {
   form.theme = settings.theme
   form.plantumlServer = settings.plantumlServer
   form.defaultEditor = settings.defaultEditor
+  form.defaultEditorMobile = settings.defaultEditorMobile
   form.favicon = settings.favicon
   form.categoryTreeExpand = settings.categoryTreeExpand
   form.categoryTreeSide = settings.categoryTreeSide
@@ -239,6 +254,7 @@ async function save() {
       theme: form.theme,
       plantumlServer: form.plantumlServer,
       defaultEditor: form.defaultEditor,
+      defaultEditorMobile: form.defaultEditorMobile,
       favicon: form.favicon,
       categoryTreeExpand: form.categoryTreeExpand,
       categoryTreeSide: form.categoryTreeSide,

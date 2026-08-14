@@ -1,5 +1,6 @@
 <template>
-  <div v-if="editorType === 'markdown'" class="wiki-content" v-html="markdownHtml" />
+  <div v-if="editorType === 'textarea'" class="wiki-content wiki-plaintext">{{ content }}</div>
+  <div v-else-if="editorType === 'markdown' || editorType === 'tui'" class="wiki-content" v-html="markdownHtml" />
   <div v-else-if="editorType === 'html' || editorType === 'ckeditor' || editorType === 'summernote'" class="wiki-content wiki-html" v-html="htmlContent" />
   <div v-else class="wiki-content">
     <template v-for="(block, index) in blocks" :key="index">

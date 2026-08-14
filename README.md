@@ -100,6 +100,6 @@ npm run check   # lint + test + PWA 빌드
 ## 동작 개요
 
 - 카테고리 트리, 글 목록·검색, 키워드
-- 에디터: CKEditor / Summernote / Editor.js / Markdown / HTML
+- 에디터: 텍스트 / CKEditor / Summernote / TUI Editor / Editor.js / Markdown / HTML
 - 작성중·발행, 공개·비공개
 - 글 작성·사이트 관리는 작성자만 가능

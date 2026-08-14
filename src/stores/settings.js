@@ -44,6 +44,7 @@ export const useSettingsStore = defineStore('settings', {
     theme: 'light',
     plantumlServer: 'https://www.plantuml.com/plantuml',
     defaultEditor: 'ckeditor',
+    defaultEditorMobile: 'ckeditor',
     favicon: '',
     maxAttachmentMb: 20,
     categoryTreeExpand: 'expanded',
@@ -61,6 +62,9 @@ export const useSettingsStore = defineStore('settings', {
     showTopMenu: (state) => state.topMenuVisible && state.topMenuItems.length > 0
   },
   actions: {
+    defaultEditorFor(desktop) {
+      return desktop ? this.defaultEditor : this.defaultEditorMobile
+    },
     apply() {
       Dark.set(this.theme === 'dark')
       document.title = this.siteTitle
@@ -72,6 +76,7 @@ export const useSettingsStore = defineStore('settings', {
       this.theme = data.theme === 'dark' ? 'dark' : 'light'
       this.plantumlServer = data.plantumlServer || 'https://www.plantuml.com/plantuml'
       this.defaultEditor = normalizeEditorType(data.defaultEditor)
+      this.defaultEditorMobile = normalizeEditorType(data.defaultEditorMobile || data.defaultEditor)
       this.favicon = typeof data.favicon === 'string' ? data.favicon : ''
       const mb = Math.round(Number(data.maxAttachmentMb))
       this.maxAttachmentMb = Number.isFinite(mb) && mb >= 1 && mb <= 200 ? mb : 20
