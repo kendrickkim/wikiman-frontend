@@ -48,7 +48,7 @@ import {
 } from 'ckeditor5'
 import translations from 'ckeditor5/translations/ko.js'
 import 'ckeditor5/ckeditor5.css'
-import { api } from '@/utils/api'
+import { api, getErrorMessage } from '@/utils/api'
 
 const model = defineModel({ type: String, default: '' })
 let editorInstance = null
@@ -96,10 +96,14 @@ class UploadAdapter {
     const file = await this.loader.file
     const form = new FormData()
     form.append('image', file)
-    const { data } = await api.post('/uploads', form)
-    const url = data.file?.url || data.url
-    if (!url) throw new Error('이미지 업로드에 실패했습니다.')
-    return { default: url }
+    try {
+      const { data } = await api.post('/uploads', form)
+      const url = data.file?.url || data.url
+      if (!url) throw new Error('이미지 업로드에 실패했습니다.')
+      return { default: url }
+    } catch (err) {
+      throw new Error(getErrorMessage(err, '이미지 업로드에 실패했습니다.'))
+    }
   }
 
   abort() {}

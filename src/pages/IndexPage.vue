@@ -279,6 +279,7 @@ const activeCategoryId = computed(() => {
 const listPath = computed(() => {
   if (activeKeyword.value) return `/keyword/${encodeURIComponent(activeKeyword.value)}`
   if (activeCategoryId.value) return `/category/${encodeURIComponent(activeCategoryId.value)}`
+  if (route.path === '/list') return '/list'
   return '/'
 })
 const page = computed({
@@ -290,6 +291,7 @@ const page = computed({
     const next = { ...route.query }
     delete next.keyword
     delete next.categoryId
+    delete next.view
     if (!value || value <= 1) delete next.page
     else next.page = String(value)
     router.push({ path: listPath.value, query: next })

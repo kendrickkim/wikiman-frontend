@@ -4,6 +4,7 @@ const routes = [
     component: () => import('@/layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('@/pages/IndexPage.vue') },
+      { path: 'list', component: () => import('@/pages/IndexPage.vue') },
       { path: 'category/:categoryId', component: () => import('@/pages/IndexPage.vue') },
       { path: 'posts/new', component: () => import('@/pages/PostEditPage.vue'), meta: { requiresWriter: true } },
       { path: 'posts/:id/edit', component: () => import('@/pages/PostEditPage.vue'), meta: { requiresWriter: true } },

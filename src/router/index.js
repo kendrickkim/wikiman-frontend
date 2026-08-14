@@ -19,6 +19,10 @@ export default defineRouter(() => {
       const { categoryId, ...query } = to.query
       return { path: `/category/${categoryId}`, query, hash: to.hash }
     }
+    if (to.path === '/' && to.query.view === 'list') {
+      const { view, ...query } = to.query
+      return { path: '/list', query, hash: to.hash }
+    }
     if (!to.meta.requiresWriter && !to.meta.requiresAuth) return true
     const auth = useAuthStore()
     await auth.ensureLoaded()

@@ -162,6 +162,7 @@ const selectedKey = computed(() => {
     if (id === 'uncategorized') return 'uncategorized'
     if (id) return id
   }
+  if (route.path === '/list') return 'all'
   if (route.query.q || route.query.view === 'list') return 'all'
   if (settings.hasHomepage && route.path === '/') return 'home'
   return 'all'
@@ -225,7 +226,9 @@ function go(query) {
 
 function select(key) {
   if (key === 'home') go({})
-  else if (key === 'all') go(route.query.q ? { q: route.query.q } : (settings.hasHomepage ? { view: 'list' } : {}))
+  else if (key === 'all') {
+    router.push({ path: '/list', query: route.query.q ? { q: route.query.q } : {} })
+  }
   else if (key === 'uncategorized') {
     router.push({ path: '/category/uncategorized', query: pickQ() })
   }
