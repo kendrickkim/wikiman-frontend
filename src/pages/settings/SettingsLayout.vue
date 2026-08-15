@@ -19,6 +19,7 @@ const SETTINGS_SECTIONS = [
   { to: '/settings/top-menu', label: '상단 메뉴' },
   { to: '/settings/categories', label: '카테고리' },
   { to: '/settings/homepage', label: '홈페이지' },
+  { to: '/settings/blog', label: '블로그' },
   { to: '/settings/quick-posts', label: '간단 포스트' },
   { to: '/settings/attachments', label: '첨부파일' },
   { to: '/settings/data', label: '데이터관리' }

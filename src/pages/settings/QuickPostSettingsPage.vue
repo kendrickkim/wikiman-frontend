@@ -27,6 +27,7 @@
             <q-select
               v-model="quickPostEditor"
               outlined
+              dense
               emit-value
               map-options
               :options="EDITOR_OPTIONS"
@@ -42,6 +43,7 @@
             <q-select
               v-model="promoteEditor"
               outlined
+              dense
               emit-value
               map-options
               :options="promoteEditorOptions"
@@ -57,6 +59,7 @@
             <q-select
               v-model="promoteSourceMode"
               outlined
+              dense
               emit-value
               map-options
               :options="promoteSourceOptions"

@@ -14,6 +14,29 @@ export function usePostActions() {
     return wiki.ensureKeywords({ force: true })
   }
 
+  function publishPost(post) {
+    if (!post?.id || post.status === 'published') return Promise.resolve(false)
+    return new Promise((resolve) => {
+      $q.dialog({
+        title: '글 발행',
+        message: `"${displayTitle(post.title)}"을(를) 발행할까요?`,
+        persistent: true,
+        cancel: { label: '취소', flat: true },
+        ok: { label: '발행', color: 'primary', unelevated: true }
+      }).onOk(async () => {
+        try {
+          const { data } = await api.patch(`/posts/${post.id}`, { status: 'published' })
+          await refreshKeywords()
+          $q.notify({ type: 'positive', message: '발행했습니다.' })
+          resolve(data.post || true)
+        } catch (err) {
+          $q.notify({ type: 'negative', message: getErrorMessage(err) })
+          resolve(false)
+        }
+      }).onCancel(() => resolve(false))
+    })
+  }
+
   function removePost(post, { redirect = true } = {}) {
     return new Promise((resolve) => {
       $q.dialog({
@@ -114,5 +137,5 @@ export function usePostActions() {
     })
   }
 
-  return { removePost, restorePost, purgePost, emptyTrash }
+  return { publishPost, removePost, restorePost, purgePost, emptyTrash }
 }

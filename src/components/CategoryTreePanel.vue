@@ -2,7 +2,7 @@
   <div class="wiki-nav">
     <q-list v-if="showNav" dense>
       <q-item
-        v-if="settings.hasHomepage"
+        v-if="settings.hasHomepage || settings.blogMode"
         clickable
         :active="selectedKey === 'home'"
         active-class="wiki-nav-active"
@@ -138,6 +138,7 @@ const settingsMenu = [
   { key: 'settings-top-menu', to: '/settings/top-menu', label: '상단 메뉴', icon: 'view_week' },
   { key: 'settings-categories', to: '/settings/categories', label: '카테고리', icon: 'folder' },
   { key: 'settings-homepage', to: '/settings/homepage', label: '홈페이지', icon: 'home' },
+  { key: 'settings-blog', to: '/settings/blog', label: '블로그', icon: 'rss_feed' },
   { key: 'settings-quick-posts', to: '/settings/quick-posts', label: '간단 포스트', icon: 'edit_note' },
   { key: 'settings-attachments', to: '/settings/attachments', label: '첨부파일', icon: 'attach_file' },
   { key: 'settings-data', to: '/settings/data', label: '데이터관리', icon: 'storage' }
@@ -177,7 +178,7 @@ const selectedKey = computed(() => {
   }
   if (route.path === '/list') return 'all'
   if (route.query.q || route.query.view === 'list') return 'all'
-  if (settings.hasHomepage && route.path === '/') return 'home'
+  if ((settings.hasHomepage || settings.blogMode) && route.path === '/') return 'home'
   return 'all'
 })
 

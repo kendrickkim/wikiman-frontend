@@ -16,6 +16,28 @@ export function buildCategoryTree(categories) {
   return build(0)
 }
 
+/** blockedIds에 든 노드와 그 하위를 트리에서 제외합니다. */
+export function pruneCategoryTree(nodes, blockedIds) {
+  const blocked = blockedIds instanceof Set ? blockedIds : new Set(blockedIds || [])
+  const walk = (list) => (list || [])
+    .filter((node) => !blocked.has(node.id))
+    .map((node) => ({ ...node, children: walk(node.children) }))
+  return walk(nodes)
+}
+
+export function findCategoryPath(categories, categoryId) {
+  const byId = new Map(categories.map((category) => [category.id, category]))
+  const names = []
+  let current = byId.get(Number(categoryId))
+  const seen = new Set()
+  while (current && !seen.has(current.id)) {
+    seen.add(current.id)
+    names.unshift(current.name)
+    current = current.parent_id ? byId.get(current.parent_id) : null
+  }
+  return names
+}
+
 export function buildCategoryFlatOptions(categories) {
   const byParent = new Map()
   for (const category of categories) {

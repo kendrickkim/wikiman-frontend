@@ -49,9 +49,14 @@ export const useSettingsStore = defineStore('settings', {
     maxAttachmentMb: 20,
     categoryTreeExpand: 'expanded',
     categoryTreeSide: 'left',
+    rightMenuDefaultOpen: true,
     fontScale: 100,
     topMenuVisible: true,
     mobileQuickPostEnabled: false,
+    blogMode: false,
+    blogShowHomepage: false,
+    blogPostsPerPage: 10,
+    codeLineNumbers: false,
     quickPostEditor: 'textarea',
     quickPostPromoteSourceMode: 'ask',
     quickPostPromoteEditor: 'ask',
@@ -89,10 +94,18 @@ export const useSettingsStore = defineStore('settings', {
       const treeExpand = String(data.categoryTreeExpand || '')
       this.categoryTreeExpand = ['expanded', 'collapsed', 'root'].includes(treeExpand) ? treeExpand : 'expanded'
       this.categoryTreeSide = data.categoryTreeSide === 'right' ? 'right' : 'left'
+      this.rightMenuDefaultOpen = data.rightMenuDefaultOpen !== false
       const scale = Math.round(Number(data.fontScale))
       this.fontScale = Number.isFinite(scale) && scale >= 60 && scale <= 120 ? scale : 100
       this.topMenuVisible = data.topMenuVisible !== false
       this.mobileQuickPostEnabled = data.mobileQuickPostEnabled === true
+      this.blogMode = data.blogMode === true
+      this.blogShowHomepage = data.blogShowHomepage === true
+      const blogPageSize = Math.round(Number(data.blogPostsPerPage))
+      this.blogPostsPerPage = Number.isFinite(blogPageSize) && blogPageSize >= 1 && blogPageSize <= 100
+        ? blogPageSize
+        : 10
+      this.codeLineNumbers = data.codeLineNumbers === true
       this.quickPostEditor = normalizeEditorType(data.quickPostEditor, 'textarea')
       this.quickPostPromoteSourceMode = ['ask', 'delete', 'keep'].includes(data.quickPostPromoteSourceMode)
         ? data.quickPostPromoteSourceMode

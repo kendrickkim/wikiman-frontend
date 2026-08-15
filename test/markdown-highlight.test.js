@@ -29,6 +29,29 @@ test('plantuml 펜스는 하이라이트하지 않는다', () => {
   assert.equal(html.includes('language-plantuml'), false)
 })
 
+test('코드 블록에 복사 버튼을 붙이고 sanitizer가 유지한다', () => {
+  const raw = renderMarkdown(fence('js', 'const x = 1'))
+  assert.match(raw, /wiki-code-block/)
+  assert.match(raw, /wiki-code-copy/)
+  const clean = sanitizeHtml(raw)
+  assert.match(clean, /<button type="button" class="wiki-code-copy"/)
+  assert.match(clean, />복사</)
+})
+
+test('코드 라인 번호 옵션이 켜지면 줄 번호를 붙인다', () => {
+  const off = renderMarkdown(fence('js', 'const a = 1\nconst b = 2'))
+  assert.equal(off.includes('wiki-code--lined'), false)
+  assert.equal(off.includes('wiki-code-line__num'), false)
+
+  const on = renderMarkdown(fence('js', 'const a = 1\nconst b = 2'), { codeLineNumbers: true })
+  assert.match(on, /wiki-code--lined/)
+  assert.match(on, /wiki-code-line__num">1</)
+  assert.match(on, /wiki-code-line__num">2</)
+  const clean = sanitizeHtml(on)
+  assert.match(clean, /wiki-code-line__num">1</)
+  assert.match(clean, /wiki-code-line__content/)
+})
+
 test('HTML table 태그를 렌더하고 sanitizer가 유지한다', () => {
   const source = [
     '표 예시',

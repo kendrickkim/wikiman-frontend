@@ -1,6 +1,6 @@
 const ALLOWED_TAGS = new Set([
   'a', 'p', 'br', 'div', 'span', 'strong', 'b', 'em', 'i', 'u', 's', 'strike',
-  'del', 'ins', 'sub', 'sup', 'mark', 'small', 'blockquote', 'pre', 'code',
+  'del', 'ins', 'sub', 'sup', 'mark', 'small', 'blockquote', 'pre', 'code', 'button',
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'hr', 'img',
   'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col',
   'figure', 'figcaption', 'section', 'article', 'header', 'footer', 'nav', 'main',
@@ -11,6 +11,7 @@ const VOID_TAGS = new Set(['br', 'hr', 'img', 'col'])
 const GLOBAL_ATTRS = new Set(['class', 'id', 'title'])
 const TAG_ATTRS = {
   a: new Set(['href', 'target', 'rel', 'name']),
+  button: new Set(['type']),
   img: new Set(['src', 'alt', 'width', 'height', 'loading']),
   td: new Set(['colspan', 'rowspan', 'align']),
   th: new Set(['colspan', 'rowspan', 'align', 'scope']),
@@ -71,9 +72,20 @@ export function sanitizeHtml(input) {
     const name = String(rawName || '').toLowerCase()
     if (name === 'script' || name === 'style' || name === 'iframe' || name === 'object'
       || name === 'embed' || name === 'form' || name === 'input' || name === 'textarea'
-      || name === 'button' || name === 'link' || name === 'meta' || name === 'base'
+      || name === 'link' || name === 'meta' || name === 'base'
       || name === 'svg' || name === 'math' || name === 'video' || name === 'audio') {
       return ''
+    }
+    if (name === 'button') {
+      if (closing) return '</button>'
+      const attrs = parseAttrs(rawAttrs || '', name)
+      const classAttr = attrs.find((item) => item.startsWith('class=')) || ''
+      if (!/wiki-code-copy/.test(classAttr)) return ''
+      const safe = attrs.filter((item) => (
+        item.startsWith('type=') || item.startsWith('class=') || item.startsWith('title=')
+      ))
+      if (!safe.some((item) => item.startsWith('type='))) safe.unshift('type="button"')
+      return `<button ${safe.join(' ')}>`
     }
     if (!ALLOWED_TAGS.has(name)) return ''
     if (closing) return `</${name}>`

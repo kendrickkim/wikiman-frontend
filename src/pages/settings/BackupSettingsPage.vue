@@ -2,81 +2,87 @@
   <div class="q-gutter-md">
     <q-banner v-if="error" class="bg-red-1 text-negative">{{ error }}</q-banner>
 
-    <q-card flat bordered>
-      <q-card-section>
-        <div class="text-subtitle1 text-weight-medium">백업</div>
-        <div class="text-grey-7 text-caption q-mt-xs">
-          데이터베이스와 첨부파일을 <code>.wkmbak</code> 파일로 묶어 내려받습니다.
-          파일 앞머리에 Wikiman 식별 헤더와 형식 버전이 들어 있습니다.
-        </div>
-      </q-card-section>
-      <q-card-section>
-        <q-btn
-          unelevated
-          no-caps
-          color="primary"
-          icon="download"
-          label="백업 다운로드"
-          :loading="downloading"
-          :disable="downloading || restoring"
-          @click="downloadBackup"
-        />
-      </q-card-section>
-    </q-card>
+    <div class="wiki-split">
+      <div>
+        <q-card flat bordered class="full-height">
+          <q-card-section>
+            <div class="text-subtitle1 text-weight-medium">백업</div>
+            <div class="text-grey-7 text-caption q-mt-xs">
+              데이터베이스와 첨부파일을 <code>.wkmbak</code> 파일로 묶어 내려받습니다.
+              파일 앞머리에 Wikiman 식별 헤더와 형식 버전이 들어 있습니다.
+            </div>
+          </q-card-section>
+          <q-card-section>
+            <q-btn
+              unelevated
+              no-caps
+              color="primary"
+              icon="download"
+              label="백업 다운로드"
+              :loading="downloading"
+              :disable="downloading || restoring"
+              @click="downloadBackup"
+            />
+          </q-card-section>
+        </q-card>
+      </div>
 
-    <q-card flat bordered>
-      <q-card-section>
-        <div class="text-subtitle1 text-weight-medium">복구</div>
-        <div class="text-grey-7 text-caption q-mt-xs">
-          백업 파일을 올리면 헤더·버전·DB 구조를 확인한 뒤, 현재 데이터를 전부 덮어씁니다.
-          복구하면 되돌릴 수 없습니다.
-        </div>
-      </q-card-section>
-      <q-card-section>
-        <div v-if="inspectInfo" class="q-mb-md">
-          <div class="text-body2">형식 버전 {{ inspectInfo.formatVersion }} · 스키마 {{ inspectInfo.schemaVersion }}</div>
-          <div class="text-body2 q-mt-xs">
-            생성 {{ formatDate(inspectInfo.createdAt, 19) || '-' }} ·
-            파일 {{ inspectInfo.fileCount }}개 ·
-            첨부 {{ inspectInfo.uploadCount }}개 ·
-            {{ formatBytes(inspectInfo.totalBytes) }}
-          </div>
-          <div class="text-caption text-positive q-mt-xs">구조 검사를 통과했습니다.</div>
-        </div>
+      <div>
+        <q-card flat bordered class="full-height">
+          <q-card-section>
+            <div class="text-subtitle1 text-weight-medium">복구</div>
+            <div class="text-grey-7 text-caption q-mt-xs">
+              백업 파일을 올리면 헤더·버전·DB 구조를 확인한 뒤, 현재 데이터를 전부 덮어씁니다.
+              복구하면 되돌릴 수 없습니다.
+            </div>
+          </q-card-section>
+          <q-card-section>
+            <div v-if="inspectInfo" class="q-mb-md">
+              <div class="text-body2">형식 버전 {{ inspectInfo.formatVersion }} · 스키마 {{ inspectInfo.schemaVersion }}</div>
+              <div class="text-body2 q-mt-xs">
+                생성 {{ formatDate(inspectInfo.createdAt, 19) || '-' }} ·
+                파일 {{ inspectInfo.fileCount }}개 ·
+                첨부 {{ inspectInfo.uploadCount }}개 ·
+                {{ formatBytes(inspectInfo.totalBytes) }}
+              </div>
+              <div class="text-caption text-positive q-mt-xs">구조 검사를 통과했습니다.</div>
+            </div>
 
-        <div class="row items-center q-gutter-sm">
-          <q-btn
-            outline
-            no-caps
-            color="primary"
-            icon="upload_file"
-            label="백업 파일 선택"
-            :loading="inspecting"
-            :disable="downloading || restoring || inspecting"
-            @click="pickBackup"
-          />
-          <q-btn
-            v-if="inspectInfo"
-            unelevated
-            no-caps
-            color="negative"
-            icon="restore"
-            label="이 백업으로 복구"
-            :loading="restoring"
-            :disable="downloading || restoring || inspecting || !pendingFile"
-            @click="confirmRestore"
-          />
-        </div>
-        <div v-if="pendingName" class="text-caption text-grey-7 q-mt-sm">선택: {{ pendingName }}</div>
-        <input
-          ref="inputEl"
-          type="file"
-          accept=".wkmbak,application/octet-stream"
-          style="display: none"
-          @change="onPick"
-        >
-      </q-card-section>
-    </q-card>
+            <div class="row items-center q-gutter-sm">
+              <q-btn
+                outline
+                no-caps
+                color="primary"
+                icon="upload_file"
+                label="백업 파일 선택"
+                :loading="inspecting"
+                :disable="downloading || restoring || inspecting"
+                @click="pickBackup"
+              />
+              <q-btn
+                v-if="inspectInfo"
+                unelevated
+                no-caps
+                color="negative"
+                icon="restore"
+                label="이 백업으로 복구"
+                :loading="restoring"
+                :disable="downloading || restoring || inspecting || !pendingFile"
+                @click="confirmRestore"
+              />
+            </div>
+            <div v-if="pendingName" class="text-caption text-grey-7 q-mt-sm">선택: {{ pendingName }}</div>
+            <input
+              ref="inputEl"
+              type="file"
+              accept=".wkmbak,application/octet-stream"
+              style="display: none"
+              @change="onPick"
+            >
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
 
     <q-card flat bordered>
       <q-card-section>
@@ -368,3 +374,17 @@ async function restoreBackup() {
   }
 }
 </script>
+
+<style scoped>
+.wiki-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 1024px) {
+  .wiki-split {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+</style>

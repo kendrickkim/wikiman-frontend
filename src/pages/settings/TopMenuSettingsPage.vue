@@ -63,6 +63,8 @@
                 emit-value
                 map-options
                 use-input
+                fill-input
+                hide-selected
                 input-debounce="150"
                 label="연결할 글"
                 :options="filteredPostOptions"
@@ -123,7 +125,6 @@
                       unelevated
                       toggle-color="primary"
                       :options="linkTypeOptions"
-                      @update:model-value="(value) => onLinkTypeChange(item, value)"
                     />
                   </div>
                   <div class="col-12 col-md-7">
@@ -134,10 +135,15 @@
                       dense
                       emit-value
                       map-options
+                      use-input
+                      fill-input
+                      hide-selected
+                      input-debounce="150"
                       label="연결할 글"
-                      :options="postOptions"
+                      :options="filteredPostOptions"
                       option-value="id"
                       option-label="label"
+                      @filter="filterPosts"
                     />
                     <q-input
                       v-else
@@ -278,14 +284,6 @@ function mapLoadedItem(item) {
   }
 }
 
-function onLinkTypeChange(item, value) {
-  if (value === 'post') {
-    item.url = ''
-  } else {
-    item.postId = null
-  }
-}
-
 async function load() {
   loading.value = true
   error.value = ''
@@ -330,6 +328,13 @@ function filterPosts(value, update) {
   })
 }
 
+function ensureMenuUrl(raw) {
+  const url = String(raw || '').trim()
+  if (!url) return ''
+  if (url.startsWith('/') || /^https?:\/\//i.test(url)) return url
+  return `https://${url}`
+}
+
 function addItem() {
   if (!canAdd.value) return
   items.value.push({
@@ -337,7 +342,7 @@ function addItem() {
     label: newItem.label.trim(),
     linkType: newItem.linkType,
     postId: newItem.linkType === 'post' ? Number(newItem.postId) : null,
-    url: newItem.linkType === 'url' ? newItem.url.trim() : ''
+    url: newItem.linkType === 'url' ? ensureMenuUrl(newItem.url) : ''
   })
   newItem.label = ''
   newItem.linkType = 'post'
@@ -361,7 +366,9 @@ function toPayloadItem(item) {
   if (item.linkType === 'post') {
     return { label, postId: Number(item.postId) }
   }
-  return { label, url: String(item.url || '').trim() }
+  const url = ensureMenuUrl(item.url)
+  item.url = url
+  return { label, url }
 }
 
 async function save() {

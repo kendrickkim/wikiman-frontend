@@ -79,55 +79,78 @@
           </div>
 
           <div>
-            <div class="text-body2 q-mb-sm">카테고리 트리</div>
-            <q-btn-toggle
-              v-model="form.categoryTreeExpand"
-              unelevated
-              no-caps
-              toggle-color="primary"
-              :spread="!isDesktop"
-              :options="treeExpandOptions"
+            <q-toggle
+              v-model="form.codeLineNumbers"
+              label="Markdown 코드 라인 번호"
+              color="primary"
             />
-            <div class="text-caption text-grey-7 q-mt-xs">사이드 메뉴 카테고리의 기본 펼침 상태입니다.</div>
+            <div class="text-caption text-grey-7 q-mt-xs">
+              켜면 Markdown 코드 블록 왼쪽에 줄 번호를 표시합니다.
+            </div>
+          </div>
+
+          <div class="wiki-split">
+            <div>
+              <div class="text-body2 q-mb-sm">카테고리 트리</div>
+              <q-btn-toggle
+                v-model="form.categoryTreeExpand"
+                unelevated
+                no-caps
+                toggle-color="primary"
+                :spread="!isDesktop"
+                :options="treeExpandOptions"
+              />
+              <div class="text-caption text-grey-7 q-mt-xs">사이드 메뉴 카테고리의 기본 펼침 상태입니다.</div>
+            </div>
+            <div>
+              <div class="text-body2 q-mb-sm">카테고리 트리 위치</div>
+              <q-btn-toggle
+                v-model="form.categoryTreeSide"
+                unelevated
+                no-caps
+                toggle-color="primary"
+                :spread="!isDesktop"
+                :options="treeSideOptions"
+              />
+              <div class="text-caption text-grey-7 q-mt-xs">데스크톱에서 카테고리 트리만 오른쪽/왼쪽으로 옮깁니다. 홈·전체 글 등 메뉴는 항상 왼쪽에 둡니다.</div>
+              <q-toggle
+                v-model="form.rightMenuDefaultOpen"
+                class="q-mt-sm"
+                label="오른쪽 메뉴 기본으로 열기"
+                color="primary"
+                :disable="form.categoryTreeSide !== 'right'"
+              />
+              <div class="text-caption text-grey-7 q-mt-xs">
+                카테고리 트리를 오른쪽에 둔 경우, 페이지를 열 때 오른쪽 패널을 기본으로 펼칠지 정합니다.
+              </div>
+            </div>
           </div>
 
           <div>
-            <div class="text-body2 q-mb-sm">카테고리 트리 위치</div>
-            <q-btn-toggle
-              v-model="form.categoryTreeSide"
-              unelevated
-              no-caps
-              toggle-color="primary"
-              :spread="!isDesktop"
-              :options="treeSideOptions"
-            />
-            <div class="text-caption text-grey-7 q-mt-xs">데스크톱에서 카테고리 트리만 오른쪽/왼쪽으로 옮깁니다. 홈·전체 글 등 메뉴는 항상 왼쪽에 둡니다.</div>
-          </div>
-
-          <div>
-            <div class="text-body2 q-mb-sm">기본 작성 방식 (데스크톱)</div>
-            <q-select
-              v-model="form.defaultEditor"
-              outlined
-              dense
-              emit-value
-              map-options
-              :options="editorOptions"
-              style="max-width: 280px"
-            />
-          </div>
-
-          <div>
-            <div class="text-body2 q-mb-sm">기본 작성 방식 (모바일)</div>
-            <q-select
-              v-model="form.defaultEditorMobile"
-              outlined
-              dense
-              emit-value
-              map-options
-              :options="editorOptions"
-              style="max-width: 280px"
-            />
+            <div class="wiki-split">
+              <div>
+                <div class="text-body2 q-mb-sm">기본 작성 방식 (데스크톱)</div>
+                <q-select
+                  v-model="form.defaultEditor"
+                  outlined
+                  dense
+                  emit-value
+                  map-options
+                  :options="editorOptions"
+                />
+              </div>
+              <div>
+                <div class="text-body2 q-mb-sm">기본 작성 방식 (모바일)</div>
+                <q-select
+                  v-model="form.defaultEditorMobile"
+                  outlined
+                  dense
+                  emit-value
+                  map-options
+                  :options="editorOptions"
+                />
+              </div>
+            </div>
             <div class="text-caption text-grey-7 q-mt-xs">새 글 작성 시 화면 크기에 맞는 에디터가 기본으로 선택됩니다.</div>
           </div>
 
@@ -171,7 +194,9 @@ const form = reactive({
   favicon: settings.favicon,
   categoryTreeExpand: settings.categoryTreeExpand,
   categoryTreeSide: settings.categoryTreeSide,
-  fontScale: settings.fontScale
+  rightMenuDefaultOpen: settings.rightMenuDefaultOpen,
+  fontScale: settings.fontScale,
+  codeLineNumbers: settings.codeLineNumbers
 })
 
 const themeOptions = [
@@ -203,7 +228,9 @@ onMounted(async () => {
   form.favicon = settings.favicon
   form.categoryTreeExpand = settings.categoryTreeExpand
   form.categoryTreeSide = settings.categoryTreeSide
+  form.rightMenuDefaultOpen = settings.rightMenuDefaultOpen
   form.fontScale = settings.fontScale
+  form.codeLineNumbers = settings.codeLineNumbers
 })
 
 function pickFavicon() {
@@ -260,8 +287,12 @@ async function save() {
       favicon: form.favicon,
       categoryTreeExpand: form.categoryTreeExpand,
       categoryTreeSide: form.categoryTreeSide,
-      fontScale: form.fontScale
+      rightMenuDefaultOpen: form.rightMenuDefaultOpen,
+      fontScale: form.fontScale,
+      codeLineNumbers: form.codeLineNumbers
     })
+    form.rightMenuDefaultOpen = settings.rightMenuDefaultOpen
+    form.codeLineNumbers = settings.codeLineNumbers
     $q.notify({ type: 'positive', message: '설정을 저장했습니다.' })
   } catch (err) {
     error.value = getErrorMessage(err)
@@ -270,3 +301,17 @@ async function save() {
   }
 }
 </script>
+
+<style scoped>
+.wiki-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 1024px) {
+  .wiki-split {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+</style>

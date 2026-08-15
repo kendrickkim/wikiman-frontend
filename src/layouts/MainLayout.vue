@@ -235,6 +235,9 @@
 
     <q-page-container>
       <router-view />
+      <div class="wiki-powered-by" aria-hidden="false">
+        Powered by Wikiman
+      </div>
     </q-page-container>
   </q-layout>
 </template>
@@ -261,6 +264,9 @@ const search = ref(String(route.query.q || ''))
 const drawerWidth = computed(() => (isDesktop.value ? 300 : Math.min(300, $q.screen.width - 24)))
 const treeOnRight = computed(() => isDesktop.value && settings.categoryTreeSide === 'right')
 const layoutView = computed(() => (treeOnRight.value ? 'hHh LpR fFf' : 'hHh lpR fFf'))
+const defaultRightDrawerOpen = computed(() => (
+  treeOnRight.value && settings.rightMenuDefaultOpen !== false
+))
 const headerClass = computed(() => {
   const layout = isDesktop.value ? 'wiki-header wiki-header--desktop' : 'wiki-header wiki-header--mobile'
   return settings.isDark
@@ -274,18 +280,23 @@ const drawerClass = computed(() => {
 
 onMounted(async () => {
   leftDrawer.value = isDesktop.value
-  rightDrawer.value = isDesktop.value && settings.categoryTreeSide === 'right'
+  rightDrawer.value = false
   await Promise.all([auth.ensureLoaded(), wiki.ensureLoaded(), settings.ensureLoaded()])
-  if (treeOnRight.value) rightDrawer.value = true
+  leftDrawer.value = isDesktop.value
+  rightDrawer.value = defaultRightDrawerOpen.value
 })
 
 watch(isDesktop, (desktop) => {
   leftDrawer.value = desktop
-  rightDrawer.value = desktop && settings.categoryTreeSide === 'right'
+  rightDrawer.value = desktop ? defaultRightDrawerOpen.value : false
 })
 
-watch(treeOnRight, (onRight) => {
-  rightDrawer.value = onRight
+watch(treeOnRight, () => {
+  rightDrawer.value = defaultRightDrawerOpen.value
+})
+
+watch(() => settings.rightMenuDefaultOpen, () => {
+  if (treeOnRight.value) rightDrawer.value = defaultRightDrawerOpen.value
 })
 
 watch(() => route.fullPath, () => {

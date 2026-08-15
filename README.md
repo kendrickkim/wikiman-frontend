@@ -144,7 +144,10 @@ npm run check   # lint + test + PWA 빌드
 ## 동작 개요
 
 - 카테고리 트리, 글 목록·검색, 키워드
-- 에디터: 텍스트 / CKEditor / Summernote / TUI Editor / Editor.js / Markdown / HTML
+- 홈: 홈페이지 지정 글, 또는 블로그 모드(최근 발행 본문 피드). 블로그에서 홈페이지 글 선표시 가능
+- 에디터: 텍스트 / CKEditor / Summernote / TUI Editor / Editor.js / Markdown / HTML (전환 시 본문 이어받기)
+- Markdown: 하이라이트·라인 번호·코드 복사, PlantUML
 - 모바일 간단 포스트: 설정에서 켜면 모바일 홈 상단에 접을 수 있는 간단 입력창이 보인다. 목록은 사이드 메뉴의 간단 포스트.
-- 작성중·발행, 공개·비공개
+- 초안·발행, 공개·비공개. 초안 보기에서 발행 가능
 - 글 작성·사이트 관리는 작성자만 가능
+- 사이트 관리: 일반·카테고리·홈페이지·블로그·간단 포스트·첨부파일·데이터관리

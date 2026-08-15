@@ -4,7 +4,7 @@
       outline
       no-caps
       color="primary"
-      label="작성중 저장"
+      label="초안 저장"
       :dense="mobile"
       :size="mobile ? 'sm' : undefined"
       :loading="saving && savingAs === 'draft'"

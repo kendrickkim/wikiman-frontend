@@ -35,6 +35,18 @@
             />
             <template v-if="canEdit">
               <q-btn
+                v-if="post.status === 'draft'"
+                unelevated
+                color="primary"
+                icon="publish"
+                no-caps
+                :dense="!isDesktop"
+                :size="isDesktop ? 'md' : 'sm'"
+                :label="isDesktop ? '발행' : undefined"
+                :aria-label="isDesktop ? undefined : '발행'"
+                @click="onPublish"
+              />
+              <q-btn
                 outline
                 color="primary"
                 icon="edit"
@@ -87,7 +99,7 @@ import { formatDate } from '@/utils/format'
 const $q = useQuasar()
 const route = useRoute()
 const { isDesktop } = useLayout()
-const { removePost } = usePostActions()
+const { removePost, publishPost } = usePostActions()
 const auth = useAuthStore()
 const post = ref(null)
 const loading = ref(false)
@@ -97,6 +109,16 @@ const isModified = computed(() => (
   Boolean(post.value?.updatedAt)
   && formatDate(post.value.updatedAt) !== formatDate(post.value.createdAt)
 ))
+
+async function onPublish() {
+  if (!post.value) return
+  const updated = await publishPost(post.value)
+  if (updated && typeof updated === 'object') {
+    post.value = updated
+  } else if (updated) {
+    post.value = { ...post.value, status: 'published' }
+  }
+}
 
 async function copyLink() {
   if (!post.value?.id) return

@@ -33,123 +33,159 @@
     <div class="col-12 col-md-7">
       <div class="category-manager-form" :style="paneStyle">
       <template v-if="tickedIds.length">
-        <div class="category-manager-bulk">
-          <div class="row items-center">
-            <div class="text-subtitle2 col">체크한 카테고리 {{ tickedIds.length }}개</div>
-            <q-btn flat dense no-caps label="선택 해제" :disable="bulkWorking" @click="tickedIds = []" />
-          </div>
-          <q-select
-            v-model="bulkParentId"
-            :options="bulkMoveOptions"
-            emit-value
-            map-options
-            dense
-            outlined
-            label="이동할 상위 카테고리"
-            class="q-mt-sm"
-          />
-          <div class="row q-gutter-sm q-mt-sm">
-            <q-btn
-              color="primary"
-              unelevated
-              no-caps
-              label="한번에 이동"
-              :loading="bulkWorking"
-              @click="bulkMove"
-            />
-            <q-btn
-              color="negative"
-              outline
-              no-caps
-              label="한번에 삭제"
+        <div class="wiki-half">
+          <div class="category-manager-bulk">
+            <div class="row items-center">
+              <div class="text-subtitle2 col">체크한 카테고리 {{ tickedIds.length }}개</div>
+              <q-btn flat dense no-caps label="선택 해제" :disable="bulkWorking" @click="tickedIds = []" />
+            </div>
+            <CategoryTreeSelect
+              v-model="bulkParentId"
+              label="이동할 상위 카테고리"
+              dense
+              :blocked-ids="bulkBlockedIds"
               :disable="bulkWorking"
-              @click="bulkRemove"
+              class="q-mt-sm"
             />
-          </div>
-          <div class="text-caption text-grey-7 q-mt-xs">
-            삭제하면 각 카테고리의 하위 카테고리와 글은 상위 카테고리로 옮겨집니다.
+            <div class="wiki-btn-row q-mt-sm">
+              <q-btn
+                color="primary"
+                unelevated
+                no-caps
+                label="한번에 이동"
+                :loading="bulkWorking"
+                @click="bulkMove"
+              />
+              <q-btn
+                color="negative"
+                outline
+                no-caps
+                label="한번에 삭제"
+                :disable="bulkWorking"
+                @click="bulkRemove"
+              />
+            </div>
+            <div class="text-caption text-grey-7 q-mt-xs">
+              삭제하면 각 카테고리의 하위 카테고리와 글은 상위 카테고리로 옮겨집니다.
+            </div>
           </div>
         </div>
         <q-separator class="q-my-lg" />
       </template>
 
-      <q-form class="q-gutter-sm" @submit.prevent="createCategory">
-        <div class="text-subtitle2">새 카테고리</div>
-        <q-input v-model="createName" dense outlined label="이름" />
-        <q-select
-          v-model="createParentId"
-          :options="parentOptions"
-          emit-value
-          map-options
-          dense
-          outlined
-          label="상위 카테고리"
-        />
-        <div>
-          <div class="text-body2 q-mb-xs">공개 범위</div>
-          <q-btn-toggle
-            v-model="createVisibility"
-            unelevated
-            no-caps
-            toggle-color="primary"
-            class="wiki-visibility-toggle"
-            :options="visibilityOptions"
+      <div class="wiki-half">
+        <q-form @submit.prevent="createCategory">
+          <div class="text-subtitle2">새 카테고리</div>
+          <q-input v-model="createName" dense outlined label="이름" class="q-mt-sm" />
+          <CategoryTreeSelect
+            v-model="createParentId"
+            label="상위 카테고리"
+            dense
+            class="q-mt-sm"
           />
-        </div>
-        <q-btn type="submit" color="primary" label="추가" unelevated />
-      </q-form>
+          <div class="q-mt-sm">
+            <div class="text-body2 q-mb-xs">공개 범위</div>
+            <q-btn-toggle
+              v-model="createVisibility"
+              unelevated
+              no-caps
+              toggle-color="primary"
+              class="wiki-visibility-toggle"
+              :options="visibilityOptions"
+            />
+          </div>
+          <q-btn type="submit" color="primary" label="추가" unelevated class="q-mt-md" />
+        </q-form>
+      </div>
 
       <q-separator class="q-my-lg" />
 
       <template v-if="selected">
-        <div class="text-subtitle2">선택한 카테고리</div>
-        <q-input v-model="editName" dense outlined label="이름" class="q-mt-sm" />
-        <div class="q-mt-sm">
-          <div class="text-body2 q-mb-xs">공개 범위</div>
-          <q-btn-toggle
-            v-model="editVisibility"
-            unelevated
-            no-caps
-            toggle-color="primary"
-            class="wiki-visibility-toggle"
-            :options="visibilityOptions"
-          />
-          <div class="text-caption text-grey-7 q-mt-xs">
-            비공개 카테고리의 글은 로그인한 사용자만 목록·본문을 볼 수 있습니다.
+        <div class="wiki-split">
+          <div>
+            <div class="text-subtitle2">선택한 카테고리 수정/삭제</div>
+            <q-input v-model="editName" dense outlined label="이름" class="q-mt-sm" />
+            <div class="q-mt-sm">
+              <div class="text-body2 q-mb-xs">공개 범위</div>
+              <q-btn-toggle
+                v-model="editVisibility"
+                unelevated
+                no-caps
+                toggle-color="primary"
+                class="wiki-visibility-toggle"
+                :options="visibilityOptions"
+              />
+              <div class="text-caption text-grey-7 q-mt-xs">
+                비공개 카테고리의 글은 로그인한 사용자만 목록·본문을 볼 수 있습니다.
+              </div>
+            </div>
+            <div class="row q-gutter-sm q-mt-sm">
+              <q-btn color="primary" outline label="저장" @click="saveCategory" />
+              <q-btn color="negative" flat label="삭제" @click="removeCategory" />
+            </div>
           </div>
-        </div>
-        <div class="row q-gutter-sm q-mt-sm">
-          <q-btn color="primary" outline label="저장" @click="saveCategory" />
-          <q-btn color="negative" flat label="삭제" @click="removeCategory" />
+
+          <div>
+            <div class="text-subtitle2">카테고리 이동</div>
+            <div class="text-caption text-grey-7 q-mt-xs">
+              현재 위치: {{ currentLocationLabel }}
+            </div>
+            <CategoryTreeSelect
+              v-model="editParentId"
+              label="이동할 상위 카테고리"
+              dense
+              :blocked-ids="selectedBlockedIds"
+              class="q-mt-sm"
+            />
+            <div class="text-caption text-grey-7 q-mt-xs">
+              다른 카테고리의 하위로 옮기거나, 최상위로 이동할 수 있습니다.
+            </div>
+            <q-btn
+              class="q-mt-sm"
+              color="primary"
+              unelevated
+              label="이동"
+              :disable="!canMove"
+              @click="moveCategory"
+            />
+          </div>
         </div>
 
         <q-separator class="q-my-lg" />
 
-        <div class="text-subtitle2">카테고리 이동</div>
+        <div class="text-subtitle2">글 일괄 이동</div>
         <div class="text-caption text-grey-7 q-mt-xs">
-          현재 위치: {{ currentLocationLabel }}
+          이 카테고리에 속한 글을 다른 카테고리(또는 미분류)로 옮깁니다.
+          현재 {{ postMoveCount }}개.
         </div>
-        <q-select
-          v-model="editParentId"
-          :options="moveOptions"
-          emit-value
-          map-options
+        <CategoryTreeSelect
+          v-model="postTargetCategoryId"
+          label="이동할 카테고리"
           dense
-          outlined
-          label="이동할 상위 카테고리"
+          root-label="미분류"
+          empty-icon="folder_off"
+          :empty-value="null"
           class="q-mt-sm"
         />
-        <div class="text-caption text-grey-7 q-mt-xs">
-          다른 카테고리의 하위로 옮기거나, 최상위로 이동할 수 있습니다.
-        </div>
-        <q-btn
+        <q-toggle
+          v-model="postIncludeDescendants"
           class="q-mt-sm"
+          dense
           color="primary"
-          unelevated
-          label="이동"
-          :disable="!canMove"
-          @click="moveCategory"
+          label="하위 카테고리의 글도 함께 이동"
         />
+        <div class="q-mt-md">
+          <q-btn
+            color="primary"
+            outline
+            unelevated
+            no-caps
+            label="글 이동"
+            :loading="postMoving"
+            :disable="!canMovePosts"
+            @click="movePosts"
+          />
+        </div>
       </template>
       <div v-else class="text-grey-7">{{ $q.screen.lt.md ? '위에서 카테고리를 선택하세요.' : '왼쪽에서 카테고리를 선택하세요.' }}</div>
       </div>
@@ -162,6 +198,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
 import { useWikiStore } from '@/stores/wiki'
+import CategoryTreeSelect from './CategoryTreeSelect.vue'
 
 const emit = defineEmits(['saved'])
 
@@ -177,6 +214,10 @@ const createVisibility = ref('public')
 const editName = ref('')
 const editParentId = ref(0)
 const editVisibility = ref('public')
+const postTargetCategoryId = ref(null)
+const postIncludeDescendants = ref(false)
+const postMoving = ref(false)
+const postStats = ref({ direct: 0, withDescendants: 0 })
 const panelRoot = ref(null)
 const paneMaxHeight = ref('')
 const paneStyle = computed(() => (
@@ -190,10 +231,6 @@ const visibilityOptions = [
 
 const selected = computed(() => wiki.categories.find((c) => c.id === Number(selectedId.value)) || null)
 const treeNodes = computed(() => wiki.tree)
-const parentOptions = computed(() => [
-  { label: '최상위', value: 0 },
-  ...wiki.flatOptions.map((c) => ({ label: c.label, value: c.id }))
-])
 
 function descendantIdSet(categoryId) {
   const children = new Map()
@@ -213,18 +250,9 @@ function descendantIdSet(categoryId) {
   return ids
 }
 
-const moveOptions = computed(() => {
-  if (!selected.value) {
-    return [{ label: '최상위', value: 0 }]
-  }
-  const blocked = descendantIdSet(selected.value.id)
-  return [
-    { label: '최상위', value: 0 },
-    ...wiki.flatOptions
-      .filter((category) => !blocked.has(category.id))
-      .map((category) => ({ label: category.label, value: category.id }))
-  ]
-})
+const selectedBlockedIds = computed(() => (
+  selected.value ? descendantIdSet(selected.value.id) : new Set()
+))
 
 const bulkBlockedIds = computed(() => {
   // 선택한 카테고리 자신과 그 하위로는 이동할 수 없습니다(순환 방지)
@@ -234,13 +262,6 @@ const bulkBlockedIds = computed(() => {
   }
   return blocked
 })
-
-const bulkMoveOptions = computed(() => [
-  { label: '최상위', value: 0 },
-  ...wiki.flatOptions
-    .filter((category) => !bulkBlockedIds.value.has(category.id))
-    .map((category) => ({ label: category.label, value: category.id }))
-])
 
 const currentLocationLabel = computed(() => {
   if (!selected.value) return ''
@@ -255,11 +276,41 @@ const canMove = computed(() => {
   return Number(editParentId.value || 0) !== Number(current)
 })
 
+const postMoveCount = computed(() => (
+  postIncludeDescendants.value
+    ? postStats.value.withDescendants
+    : postStats.value.direct
+))
+
+const canMovePosts = computed(() => {
+  if (!selected.value || postMoving.value) return false
+  if (postMoveCount.value <= 0) return false
+  const target = postTargetCategoryId.value
+  if (target == null) return true
+  return Number(target) !== Number(selected.value.id) || postIncludeDescendants.value
+})
+
 watch(selected, (value) => {
   editName.value = value?.name || ''
   editParentId.value = value?.parent_id ?? 0
   editVisibility.value = value?.visibility === 'private' ? 'private' : 'public'
+  postTargetCategoryId.value = null
+  postIncludeDescendants.value = false
+  postStats.value = { direct: 0, withDescendants: 0 }
+  if (value) loadPostStats(value.id)
 })
+
+async function loadPostStats(categoryId) {
+  try {
+    const { data } = await api.get(`/categories/${categoryId}/post-stats`)
+    postStats.value = {
+      direct: Number(data.direct) || 0,
+      withDescendants: Number(data.withDescendants) || 0
+    }
+  } catch {
+    postStats.value = { direct: 0, withDescendants: 0 }
+  }
+}
 
 function toParentId(value) {
   const id = Number(value)
@@ -302,10 +353,8 @@ watch(() => wiki.categories.length, fitPaneHeight)
 watch(selectedId, fitPaneHeight)
 watch(() => tickedIds.value.length, fitPaneHeight)
 
-watch(bulkMoveOptions, (options) => {
-  if (!options.some((option) => option.value === bulkParentId.value)) {
-    bulkParentId.value = 0
-  }
+watch(bulkBlockedIds, (blocked) => {
+  if (blocked.has(Number(bulkParentId.value))) bulkParentId.value = 0
 })
 
 async function notifyError(err) {
@@ -365,6 +414,39 @@ async function moveCategory() {
   } catch (err) {
     notifyError(err)
   }
+}
+
+function movePosts() {
+  if (!selected.value || !canMovePosts.value) return
+  const targetId = postTargetCategoryId.value == null ? null : Number(postTargetCategoryId.value)
+  const targetLabel = targetId
+    ? wiki.categories.find((category) => category.id === targetId)?.name || '선택한 카테고리'
+    : '미분류'
+  const scope = postIncludeDescendants.value ? '하위 카테고리 포함' : '이 카테고리만'
+  $q.dialog({
+    title: '글 일괄 이동',
+    message: `"${selected.value.name}"의 글 ${postMoveCount.value}개(${scope})를 "${targetLabel}"(으)로 옮길까요?`,
+    cancel: true,
+    persistent: true
+  }).onOk(async () => {
+    postMoving.value = true
+    try {
+      const { data } = await api.post(`/categories/${selected.value.id}/reassign-posts`, {
+        targetCategoryId: targetId,
+        includeDescendants: postIncludeDescendants.value
+      })
+      await loadPostStats(selected.value.id)
+      emit('saved')
+      $q.notify({
+        type: 'positive',
+        message: `${data.moved || 0}개 글을 "${targetLabel}"(으)로 옮겼습니다.`
+      })
+    } catch (err) {
+      notifyError(err)
+    } finally {
+      postMoving.value = false
+    }
+  })
 }
 
 function tickedCategoryIds() {
@@ -496,5 +578,32 @@ function removeCategory() {
 
 .wiki-visibility-toggle :deep(.q-btn:last-child) {
   margin-right: 0;
+}
+
+.wiki-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.wiki-half {
+  width: 100%;
+}
+
+.wiki-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (min-width: 1024px) {
+  .wiki-split {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .wiki-half {
+    width: 50%;
+    max-width: 50%;
+  }
 }
 </style>

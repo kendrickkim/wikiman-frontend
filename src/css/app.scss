@@ -28,6 +28,36 @@ html {
   width: 100%;
 }
 
+/* q-page는 기본으로 화면 높이를 채우므로, 아래 문구가 붙으면 항상 스크롤이 생긴다.
+   컨테이너를 세로 flex로 두고 page가 남은 높이를 채우게 한다. */
+.q-page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.q-page-container > .q-page {
+  min-height: 0 !important;
+  flex: 1 1 auto;
+}
+
+.wiki-powered-by {
+  width: 100%;
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.38);
+  user-select: none;
+  flex: 0 0 auto;
+}
+
+body.body--dark .wiki-powered-by {
+  color: rgba(255, 255, 255, 0.38);
+}
+
 .wiki-content {
   font-size: calc(var(--wiki-font-size) * var(--wiki-font-scale, 1));
   line-height: var(--wiki-line-height);
@@ -230,12 +260,87 @@ body.body--dark {
     font-size: 0.85rem;
   }
 
+  .wiki-code-block {
+    position: relative;
+    margin: 0.85em 0;
+  }
+
+  .wiki-code-block > pre {
+    margin: 0;
+  }
+
+  .wiki-code-copy {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 1;
+    min-height: 0;
+    padding: 2px 7px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 4px;
+    background: rgba(17, 24, 39, 0.82);
+    color: #e5e7eb;
+    font-size: 0.68rem;
+    line-height: 1.3;
+    cursor: pointer;
+    opacity: 0.72;
+    transition: opacity 0.15s ease, background 0.15s ease;
+  }
+
+  .wiki-code-block:hover .wiki-code-copy,
+  .wiki-code-copy:focus-visible {
+    opacity: 1;
+  }
+
+  .wiki-code-copy:hover,
+  .wiki-code-copy--done {
+    background: rgba(37, 99, 235, 0.9);
+    border-color: transparent;
+  }
+
   pre code.hljs,
   pre.hljs {
     display: block;
     background: transparent;
     padding: 0;
     color: inherit;
+  }
+
+  pre.wiki-code--lined {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  pre.wiki-code--lined > code {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .wiki-code-line {
+    display: table-row;
+  }
+
+  .wiki-code-line__num,
+  .wiki-code-line__content {
+    display: table-cell;
+    vertical-align: top;
+    line-height: 1.55;
+  }
+
+  .wiki-code-line__num {
+    width: 1%;
+    padding: 0 0.75em;
+    text-align: right;
+    user-select: none;
+    color: #9ca3af;
+    border-right: 1px solid #374151;
+    white-space: nowrap;
+  }
+
+  .wiki-code-line__content {
+    padding: 0 14px 0 0.85em;
+    white-space: pre;
   }
 
   /* highlight.js 토큰 (어두운 pre 배경용) */
@@ -651,6 +756,11 @@ body.body--dark {
     max-width: 1380px;
   }
 
+  .wiki-powered-by {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
   .wiki-content {
     h1 { font-size: 2rem; }
     h2 { font-size: 1.5rem; }
@@ -870,6 +980,10 @@ body.body--dark {
 
 .wiki-article-head__title {
   line-height: 1.25;
+}
+
+a.wiki-article-head__title {
+  text-decoration: none;
 }
 
 .wiki-article-actions {

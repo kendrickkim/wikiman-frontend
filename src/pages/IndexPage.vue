@@ -63,6 +63,172 @@
         </template>
       </template>
 
+      <template v-else-if="showingBlogHome">
+        <div v-if="loading" class="flex flex-center q-pa-xl">
+          <q-spinner size="40px" color="primary" />
+        </div>
+        <q-banner v-else-if="error" class="bg-red-1 text-negative q-mb-md">{{ error }}</q-banner>
+        <q-card v-else-if="!homePosts.length && !posts.length" flat bordered class="q-pa-lg text-center text-grey-7">
+          표시할 글이 없습니다.
+        </q-card>
+        <template v-else>
+          <div
+            v-for="(homePost, index) in homePosts"
+            :key="`home-${homePost.id}`"
+            :class="index ? 'q-mt-xl' : ''"
+          >
+            <div class="wiki-article-head">
+              <div class="wiki-article-head__body">
+                <router-link :to="`/posts/${homePost.id}`" class="wiki-article-head__title text-primary" :class="isDesktop ? 'text-h4 text-weight-bold' : 'text-h5'">
+                  {{ displayTitle(homePost.title) }}
+                </router-link>
+                <div class="text-grey-7 q-mt-sm" :class="isDesktop ? 'text-body2' : 'text-caption'">
+                  {{ homePost.categoryName || '미분류' }} · {{ homePost.authorName }} · 작성 {{ formatDate(homePost.createdAt) }}<template v-if="isModifiedPost(homePost)"> · 수정 {{ formatDate(homePost.updatedAt) }}</template>
+                  <q-badge class="q-ml-sm" color="info">홈페이지</q-badge>
+                  <q-badge class="q-ml-sm" :color="homePost.status === 'draft' ? 'warning' : 'primary'">
+                    {{ homePost.status === 'draft' ? '작성중' : '발행' }}
+                  </q-badge>
+                  <q-badge v-if="homePost.status === 'published'" class="q-ml-sm" :color="homePost.visibility === 'private' ? 'grey' : 'positive'">
+                    {{ homePost.visibility === 'private' ? '비공개' : '공개' }}
+                  </q-badge>
+                </div>
+                <KeywordChips class="q-mt-sm" :keywords="homePost.keywords" />
+              </div>
+              <div class="wiki-article-actions">
+                <q-btn
+                  outline
+                  color="primary"
+                  icon="content_copy"
+                  no-caps
+                  :dense="!isDesktop"
+                  :size="isDesktop ? 'md' : 'sm'"
+                  :label="isDesktop ? '링크 복사' : undefined"
+                  :aria-label="isDesktop ? undefined : '링크 복사'"
+                  @click="copyLink(homePost)"
+                />
+                <template v-if="auth.canWrite">
+                  <q-btn
+                    outline
+                    color="primary"
+                    icon="edit"
+                    no-caps
+                    :dense="!isDesktop"
+                    :size="isDesktop ? 'md' : 'sm'"
+                    :label="isDesktop ? '수정' : undefined"
+                    :aria-label="isDesktop ? undefined : '수정'"
+                    :to="`/posts/${homePost.id}/edit`"
+                  />
+                  <q-btn
+                    unelevated
+                    color="negative"
+                    icon="delete"
+                    no-caps
+                    :dense="!isDesktop"
+                    :size="isDesktop ? 'md' : 'sm'"
+                    :label="isDesktop ? '삭제' : undefined"
+                    :aria-label="isDesktop ? undefined : '삭제'"
+                    @click="onRemoveHome(homePost)"
+                  />
+                </template>
+              </div>
+            </div>
+            <q-card flat bordered class="wiki-article-card wiki-article-body">
+              <PostViewer :editor-type="homePost.editorType" :content="homePost.content" />
+            </q-card>
+            <PostLinkPreviews :content="homePost.content" extra-class="q-mt-md" />
+            <FileAttachments :model-value="homePost.attachments || []" card-class="q-mt-md" />
+          </div>
+
+          <div
+            v-for="(post, index) in posts"
+            :key="post.id"
+            :class="(homePosts.length || index) ? 'q-mt-xl' : ''"
+          >
+            <div class="wiki-article-head">
+              <div class="wiki-article-head__body">
+                <router-link :to="`/posts/${post.id}`" class="wiki-article-head__title text-primary" :class="isDesktop ? 'text-h4 text-weight-bold' : 'text-h5'">
+                  {{ displayTitle(post.title) }}
+                </router-link>
+                <div class="text-grey-7 q-mt-sm" :class="isDesktop ? 'text-body2' : 'text-caption'">
+                  {{ post.categoryName || '미분류' }} · {{ post.authorName }} · 작성 {{ formatDate(post.createdAt) }}<template v-if="isModifiedPost(post)"> · 수정 {{ formatDate(post.updatedAt) }}</template>
+                  <q-badge class="q-ml-sm" :color="post.status === 'draft' ? 'warning' : 'primary'">
+                    {{ post.status === 'draft' ? '작성중' : '발행' }}
+                  </q-badge>
+                  <q-badge v-if="post.status === 'published'" class="q-ml-sm" :color="post.visibility === 'private' ? 'grey' : 'positive'">
+                    {{ post.visibility === 'private' ? '비공개' : '공개' }}
+                  </q-badge>
+                </div>
+                <KeywordChips class="q-mt-sm" :keywords="post.keywords" />
+              </div>
+              <div class="wiki-article-actions">
+                <q-btn
+                  outline
+                  color="primary"
+                  icon="content_copy"
+                  no-caps
+                  :dense="!isDesktop"
+                  :size="isDesktop ? 'md' : 'sm'"
+                  :label="isDesktop ? '링크 복사' : undefined"
+                  :aria-label="isDesktop ? undefined : '링크 복사'"
+                  @click="copyLink(post)"
+                />
+                <template v-if="auth.canWrite">
+                  <q-btn
+                    outline
+                    color="primary"
+                    icon="edit"
+                    no-caps
+                    :dense="!isDesktop"
+                    :size="isDesktop ? 'md' : 'sm'"
+                    :label="isDesktop ? '수정' : undefined"
+                    :aria-label="isDesktop ? undefined : '수정'"
+                    :to="`/posts/${post.id}/edit`"
+                  />
+                  <q-btn
+                    unelevated
+                    color="negative"
+                    icon="delete"
+                    no-caps
+                    :dense="!isDesktop"
+                    :size="isDesktop ? 'md' : 'sm'"
+                    :label="isDesktop ? '삭제' : undefined"
+                    :aria-label="isDesktop ? undefined : '삭제'"
+                    @click="onRemove(post)"
+                  />
+                </template>
+              </div>
+            </div>
+            <q-card flat bordered class="wiki-article-card wiki-article-body">
+              <PostViewer :editor-type="post.editorType" :content="post.content" />
+            </q-card>
+            <PostLinkPreviews :content="post.content" extra-class="q-mt-md" />
+            <FileAttachments :model-value="post.attachments || []" card-class="q-mt-md" />
+          </div>
+
+          <div
+            v-if="total > 0"
+            class="wiki-pagination row items-center justify-between q-mt-xl q-gutter-sm"
+          >
+            <div class="text-grey-7 text-caption">
+              {{ pageRangeLabel }}
+            </div>
+            <q-pagination
+              v-model="page"
+              class="wiki-pagination__control"
+              :max="pageCount"
+              :max-pages="isDesktop ? 7 : 4"
+              direction-links
+              :boundary-links="isDesktop"
+              outline
+              color="grey-7"
+              active-color="primary"
+              active-design="unelevated"
+              gutter="sm"
+            />
+          </div>
+        </template>
+      </template>
+
       <template v-else>
         <div class="row items-center q-mb-md q-gutter-sm">
           <div :class="isDesktop ? 'text-h4 text-weight-bold col' : 'text-h6 text-weight-medium col'">
@@ -302,35 +468,48 @@ const page = computed({
     router.push({ path: listPath.value, query: next })
   }
 })
-const pageCount = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value) || 1))
-const pageRangeLabel = computed(() => {
-  if (!total.value) return ''
-  const start = (page.value - 1) * pageSize.value + 1
-  const end = Math.min(total.value, page.value * pageSize.value)
-  return `${start}–${end} / ${total.value}개`
-})
 
-const wantsHomepage = computed(() => (
-  settings.loaded
-  && settings.hasHomepage
-  && route.path === '/'
+const isHomeRoot = computed(() => (
+  route.path === '/'
   && !activeCategoryId.value
   && !route.query.q
   && !activeKeyword.value
   && route.query.view !== 'list'
 ))
 
+const wantsBlogHome = computed(() => (
+  settings.loaded
+  && settings.blogMode
+  && isHomeRoot.value
+))
+
+const wantsHomepage = computed(() => (
+  settings.loaded
+  && !settings.blogMode
+  && settings.hasHomepage
+  && isHomeRoot.value
+))
+
 const showingHome = computed(() => wantsHomepage.value && homePosts.value.length > 0)
+const showingBlogHome = computed(() => wantsBlogHome.value)
+
+const effectivePageSize = computed(() => (
+  wantsBlogHome.value ? settings.blogPostsPerPage : pageSize.value
+))
+
+const pageCount = computed(() => Math.max(1, Math.ceil(total.value / effectivePageSize.value) || 1))
+const pageRangeLabel = computed(() => {
+  if (!total.value) return ''
+  const start = (page.value - 1) * effectivePageSize.value + 1
+  const end = Math.min(total.value, page.value * effectivePageSize.value)
+  return `${start}–${end} / ${total.value}개`
+})
 
 const showQuickComposer = computed(() => (
   !isDesktop.value
   && settings.mobileQuickPostEnabled
   && auth.canWrite
-  && route.path === '/'
-  && !activeCategoryId.value
-  && !route.query.q
-  && !activeKeyword.value
-  && route.query.view !== 'list'
+  && isHomeRoot.value
 ))
 
 const heading = computed(() => {
@@ -350,7 +529,11 @@ const listKey = computed(() => [
   String(route.query.view || ''),
   String(route.query.page || ''),
   String(pageSize.value),
+  String(settings.blogMode ? '1' : '0'),
+  String(settings.blogShowHomepage ? '1' : '0'),
+  String(settings.blogPostsPerPage),
   String(settings.hasHomepage),
+  settings.homePostIds.join(','),
   settings.loaded ? '1' : '0',
   auth.user?.id || '',
   statusFilter.value
@@ -375,6 +558,40 @@ async function loadList(signal) {
   if (data.page && data.page !== page.value) page.value = data.page
 }
 
+async function loadBlogFeed(signal) {
+  const params = {
+    page: page.value,
+    pageSize: settings.blogPostsPerPage,
+    status: 'published',
+    includeContent: 1
+  }
+  const feedReq = api.get('/posts', { params, signal })
+  let pinned = []
+  if (settings.blogShowHomepage && page.value === 1) {
+    try {
+      const { data: homeData } = await api.get('/posts/homepage', { signal })
+      pinned = Array.isArray(homeData.posts) ? homeData.posts : []
+    } catch (err) {
+      if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError' || err?.name === 'AbortError') throw err
+      pinned = []
+    }
+  }
+  const { data } = await feedReq
+  const pinnedIds = settings.blogShowHomepage
+    ? new Set([
+      ...pinned.map((post) => Number(post.id)),
+      ...settings.homePostIds.map((id) => Number(id))
+    ].filter((id) => Number.isFinite(id) && id > 0))
+    : new Set()
+  const feedPosts = Array.isArray(data.posts) ? data.posts : []
+  posts.value = pinnedIds.size
+    ? feedPosts.filter((post) => !pinnedIds.has(Number(post.id)))
+    : feedPosts
+  total.value = Number(data.total) || 0
+  homePosts.value = page.value === 1 ? pinned : []
+  if (data.page && data.page !== page.value) page.value = data.page
+}
+
 async function load() {
   if (!settings.loaded) {
     loading.value = true
@@ -387,6 +604,10 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
+    if (wantsBlogHome.value) {
+      await loadBlogFeed(signal)
+      return
+    }
     if (wantsHomepage.value) {
       try {
         const { data } = await api.get('/posts/homepage', { signal })
@@ -429,6 +650,29 @@ onBeforeUnmount(() => {
 
 function postPath(post) {
   return `${window.location.origin}/posts/${post.id}`
+}
+
+async function copyLink(post) {
+  if (!post?.id) return
+  const url = postPath(post)
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url)
+    } else {
+      const input = document.createElement('input')
+      input.value = url
+      input.setAttribute('readonly', '')
+      input.style.position = 'fixed'
+      input.style.opacity = '0'
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+    }
+    $q.notify({ type: 'positive', message: '링크를 복사했습니다.' })
+  } catch {
+    $q.notify({ type: 'negative', message: '링크를 복사하지 못했습니다.' })
+  }
 }
 
 function isModifiedPost(post) {

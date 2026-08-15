@@ -123,33 +123,57 @@ function highlightCode(code, language) {
   return { lang: '', html: escapeHtml(code) }
 }
 
+function wrapCodeLines(html) {
+  const normalized = String(html || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+  const lines = normalized.split('\n')
+  if (lines.length > 1 && lines[lines.length - 1] === '') lines.pop()
+  if (!lines.length) lines.push('')
+  return lines.map((line, index) => (
+    `<span class="wiki-code-line">`
+    + `<span class="wiki-code-line__num">${index + 1}</span>`
+    + `<span class="wiki-code-line__content">${line || ' '}</span>`
+    + `</span>`
+  )).join('')
+}
+
+function renderCodeFence(code, language, { codeLineNumbers = false } = {}) {
+  const info = String(language || '').trim().toLowerCase().split(/\s+/)[0]
+  if (info === 'plantuml' || info === 'puml') return ''
+  const { lang, html } = highlightCode(code, info)
+  const className = lang
+    ? `hljs language-${escapeHtml(lang)}`
+    : 'hljs'
+  const body = codeLineNumbers ? wrapCodeLines(html) : html
+  const preClass = codeLineNumbers ? 'hljs wiki-code--lined' : 'hljs'
+  return (
+    `<div class="wiki-code-block">`
+    + `<button type="button" class="wiki-code-copy" title="복사">복사</button>`
+    + `<pre class="${preClass}"><code class="${className}">${body}</code></pre>`
+    + `</div>`
+  )
+}
+
 const md = new MarkdownIt({
   html: true,
   linkify: true,
   breaks: true,
   highlight(code, language) {
-    const info = String(language || '').trim().toLowerCase().split(/\s+/)[0]
-    if (info === 'plantuml' || info === 'puml') return ''
-    const { lang, html } = highlightCode(code, info)
-    const className = lang
-      ? `hljs language-${escapeHtml(lang)}`
-      : 'hljs'
-    return `<pre class="hljs"><code class="${className}">${html}</code></pre>`
+    return renderCodeFence(code, language)
   }
 })
 
-const defaultFence = md.renderer.rules.fence || ((tokens, idx, options, env, slf) => slf.renderToken(tokens, idx, options))
-
-md.renderer.rules.fence = (tokens, idx, options, env, slf) => {
+md.renderer.rules.fence = (tokens, idx, options, env) => {
   const token = tokens[idx]
   const info = (token.info || '').trim().toLowerCase().split(/\s+/)[0]
   if (info === 'plantuml' || info === 'puml') {
     const encoded = plantumlEncoder.encode(token.content || '')
     return `<div class="plantuml-block"><img src="/api/plantuml/${encoded}" alt="PlantUML" /></div>`
   }
-  return defaultFence(tokens, idx, options, env, slf)
+  return renderCodeFence(token.content || '', info, {
+    codeLineNumbers: env?.codeLineNumbers === true
+  })
 }
 
-export function renderMarkdown(source) {
-  return md.render(source || '')
+export function renderMarkdown(source, { codeLineNumbers = false } = {}) {
+  return md.render(source || '', { codeLineNumbers: codeLineNumbers === true })
 }

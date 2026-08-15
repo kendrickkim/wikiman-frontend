@@ -62,7 +62,7 @@
                     step="1"
                   />
                 </div>
-                <div :class="isDesktop ? 'col-4' : 'col-12'">
+                <div :class="isDesktop ? 'col-3' : 'col-12'">
                   <q-select
                     v-model="visibility"
                     :options="visibilityOptions"
@@ -72,7 +72,7 @@
                     label="공개 범위"
                   />
                 </div>
-                <div :class="isDesktop ? 'col-5' : 'col-12'">
+                <div :class="isDesktop ? 'col-6' : 'col-12'">
                   <CategorySelect v-model="categoryId" />
                 </div>
                 <div :class="isDesktop ? 'col-3' : 'col-12'">
@@ -210,6 +210,7 @@ import { usePostActions } from '@/composables/usePostActions'
 import { useSettingsStore } from '@/stores/settings'
 import { sanitizeHtml } from '@/utils/sanitize'
 import { EDITOR_OPTIONS } from '@/utils/editors'
+import { convertEditorContent, editorKind, hasEditorContent } from '@/utils/editorConvert'
 import CategorySelect from '@/components/CategorySelect.vue'
 import KeywordSelect from '@/components/KeywordSelect.vue'
 import FileAttachments from '@/components/FileAttachments.vue'
@@ -443,13 +444,26 @@ async function deleteCurrent() {
 }
 
 function onEditorChange(next) {
-  if (next === previousEditorType.value) return
+  const from = previousEditorType.value
+  if (next === from) return
+  const current = from === 'editorjs' ? drafts.value.editorjs : drafts.value[from]
+  const hasSource = hasEditorContent(current, from)
+  const hasTarget = hasEditorContent(drafts.value[next], next)
+  let message = '에디터를 바꿉니다. 각 에디터의 초안은 따로 유지됩니다.'
+  if (hasSource && hasTarget) {
+    message = '바꾸려는 에디터에 이미 초안이 있어 현재 내용은 옮기지 않습니다. 각 초안은 그대로 유지됩니다.'
+  } else if (hasSource && editorKind(from) === editorKind(next)) {
+    message = '에디터를 바꾸면 현재 내용을 그대로 옮깁니다.'
+  } else if (hasSource) {
+    message = '에디터를 바꾸면 현재 내용을 옮깁니다. 형식이 달라 HTML이나 일반 텍스트로 바뀔 수 있습니다.'
+  }
   $q.dialog({
     title: '에디터 변경',
-    message: '에디터를 바꾸면 내용은 변환되지 않습니다. 각 에디터의 초안은 따로 유지됩니다.',
+    message,
     cancel: true,
     persistent: true
   }).onOk(() => {
+    if (hasSource && !hasTarget) drafts.value[next] = convertEditorContent(current, from, next)
     editorType.value = next
     previousEditorType.value = next
     editorKey.value += 1
@@ -481,7 +495,7 @@ async function save(nextStatus) {
       settings.load({ force: true }),
       wiki.ensureKeywords({ force: true })
     ])
-    $q.notify({ type: 'positive', message: nextStatus === 'published' ? '발행했습니다.' : '작성중으로 저장했습니다.' })
+    $q.notify({ type: 'positive', message: nextStatus === 'published' ? '발행했습니다.' : '초안으로 저장했습니다.' })
     bypassLeave.value = true
     await router.replace(`/posts/${data.post.id}`)
   } catch (err) {

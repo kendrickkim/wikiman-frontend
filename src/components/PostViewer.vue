@@ -1,7 +1,19 @@
 <template>
-  <div v-if="editorType === 'textarea'" class="wiki-content wiki-plaintext">{{ content }}</div>
-  <div v-else-if="editorType === 'markdown' || editorType === 'tui'" class="wiki-content" v-html="markdownHtml" />
-  <div v-else-if="editorType === 'html' || editorType === 'ckeditor' || editorType === 'summernote'" class="wiki-content wiki-html" v-html="htmlContent" />
+  <div
+    v-if="editorType === 'textarea'"
+    class="wiki-content wiki-plaintext"
+  >{{ content }}</div>
+  <div
+    v-else-if="editorType === 'markdown' || editorType === 'tui'"
+    class="wiki-content"
+    v-html="markdownHtml"
+    @click="onContentClick"
+  />
+  <div
+    v-else-if="editorType === 'html' || editorType === 'ckeditor' || editorType === 'summernote'"
+    class="wiki-content wiki-html"
+    v-html="htmlContent"
+  />
   <div v-else class="wiki-content">
     <template v-for="(block, index) in blocks" :key="index">
       <component :is="headingTag(block)" v-if="block.type === 'header'" v-html="safeText(block.data?.text)" />
@@ -31,15 +43,21 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useQuasar } from 'quasar'
 import { renderMarkdown } from '@/utils/markdown'
 import { sanitizeHtml } from '@/utils/sanitize'
+import { useSettingsStore } from '@/stores/settings'
 
 const props = defineProps({
   editorType: { type: String, default: 'ckeditor' },
   content: { type: String, default: '' }
 })
 
-const markdownHtml = computed(() => sanitizeHtml(renderMarkdown(props.content)))
+const $q = useQuasar()
+const settings = useSettingsStore()
+const markdownHtml = computed(() => sanitizeHtml(renderMarkdown(props.content, {
+  codeLineNumbers: settings.codeLineNumbers
+})))
 const htmlContent = computed(() => sanitizeHtml(props.content || ''))
 const blocks = computed(() => {
   try {
@@ -48,6 +66,53 @@ const blocks = computed(() => {
     return []
   }
 })
+
+function codeTextFromBlock(block) {
+  const lined = block.querySelectorAll('.wiki-code-line__content')
+  if (lined.length) {
+    return Array.from(lined).map((el) => el.textContent || '').join('\n')
+  }
+  const code = block.querySelector('pre code, code')
+  return code?.textContent || ''
+}
+
+async function copyText(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text)
+    return
+  }
+  const input = document.createElement('textarea')
+  input.value = text
+  input.setAttribute('readonly', '')
+  input.style.position = 'fixed'
+  input.style.opacity = '0'
+  document.body.appendChild(input)
+  input.select()
+  document.execCommand('copy')
+  document.body.removeChild(input)
+}
+
+async function onContentClick(event) {
+  const btn = event.target.closest?.('.wiki-code-copy')
+  if (!btn) return
+  event.preventDefault()
+  const block = btn.closest('.wiki-code-block')
+  if (!block) return
+  const text = codeTextFromBlock(block)
+  try {
+    await copyText(text)
+    const prev = btn.textContent
+    btn.textContent = '복사됨'
+    btn.classList.add('wiki-code-copy--done')
+    window.setTimeout(() => {
+      btn.textContent = prev || '복사'
+      btn.classList.remove('wiki-code-copy--done')
+    }, 1200)
+    $q.notify({ type: 'positive', message: '코드를 복사했습니다.' })
+  } catch {
+    $q.notify({ type: 'negative', message: '코드를 복사하지 못했습니다.' })
+  }
+}
 
 function headingTag(block) {
   const level = Math.min(Math.max(Number(block.data?.level) || 2, 1), 6)

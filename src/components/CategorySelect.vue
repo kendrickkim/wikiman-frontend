@@ -1,15 +1,13 @@
 <template>
-  <div class="category-select row no-wrap items-stretch q-gutter-sm">
-    <q-select
+  <div class="category-select row no-wrap items-start q-gutter-sm">
+    <CategoryTreeSelect
       class="col"
       :model-value="modelValue"
-      :options="options"
-      emit-value
-      map-options
-      outlined
-      :dense="!isDesktop"
-      clearable
       label="카테고리"
+      root-label="미분류"
+      empty-icon="folder_off"
+      :empty-value="null"
+      :dense="!isDesktop"
       @update:model-value="$emit('update:modelValue', $event)"
     />
     <q-btn
@@ -21,7 +19,7 @@
       unelevated
       icon="account_tree"
       :label="isDesktop ? '관리' : undefined"
-      :aria-label="'카테고리 관리'"
+      aria-label="카테고리 관리"
       @click="managerOpen = true"
     />
     <CategoryManagerDialog v-model="managerOpen" @saved="onSaved" />
@@ -34,6 +32,7 @@ import { useWikiStore } from '@/stores/wiki'
 import { useAuthStore } from '@/stores/auth'
 import { useLayout } from '@/composables/useLayout'
 import CategoryManagerDialog from './CategoryManagerDialog.vue'
+import CategoryTreeSelect from './CategoryTreeSelect.vue'
 
 const props = defineProps({
   modelValue: { type: [Number, String], default: null }
@@ -45,7 +44,6 @@ const wiki = useWikiStore()
 const auth = useAuthStore()
 const managerOpen = ref(false)
 const canManage = computed(() => auth.canWrite)
-const options = computed(() => wiki.flatOptions.map((c) => ({ label: c.label, value: c.id })))
 
 function onSaved() {
   const id = props.modelValue
