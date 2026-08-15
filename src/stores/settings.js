@@ -51,6 +51,7 @@ export const useSettingsStore = defineStore('settings', {
     categoryTreeSide: 'left',
     fontScale: 100,
     topMenuVisible: true,
+    mobileQuickPostEnabled: false,
     homePostIds: [],
     hasHomepage: false,
     topMenuItems: [],
@@ -86,6 +87,7 @@ export const useSettingsStore = defineStore('settings', {
       const scale = Math.round(Number(data.fontScale))
       this.fontScale = Number.isFinite(scale) && scale >= 60 && scale <= 120 ? scale : 100
       this.topMenuVisible = data.topMenuVisible !== false
+      this.mobileQuickPostEnabled = data.mobileQuickPostEnabled === true
       const ids = Array.isArray(data.homePostIds)
         ? data.homePostIds.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0)
         : []

@@ -41,6 +41,16 @@
       <q-item
         v-if="auth.canWrite"
         clickable
+        :active="selectedKey === 'quick-posts'"
+        active-class="wiki-nav-active"
+        @click="select('quick-posts')"
+      >
+        <q-item-section avatar><q-icon name="edit_note" /></q-item-section>
+        <q-item-section>간단 포스트</q-item-section>
+      </q-item>
+      <q-item
+        v-if="auth.canWrite"
+        clickable
         :active="selectedKey === 'trash'"
         active-class="wiki-nav-active"
         @click="select('trash')"
@@ -137,6 +147,7 @@ const NAV_KEYS = new Set([
   'home',
   'uncategorized',
   'keywords',
+  'quick-posts',
   'trash',
   ...settingsMenu.map((item) => item.key)
 ])
@@ -152,6 +163,7 @@ const expanded = ref([])
 
 const selectedKey = computed(() => {
   if (route.path === '/trash') return 'trash'
+  if (route.path.startsWith('/quick-posts')) return 'quick-posts'
   if (route.path.startsWith('/settings')) {
     const match = settingsMenu.find((item) => route.path.startsWith(item.to))
     return match?.key || 'settings-general'
@@ -233,6 +245,7 @@ function select(key) {
     router.push({ path: '/category/uncategorized', query: pickQ() })
   }
   else if (key === 'keywords') router.push('/keywords')
+  else if (key === 'quick-posts') router.push('/quick-posts')
   else if (key === 'trash') router.push('/trash')
 }
 
