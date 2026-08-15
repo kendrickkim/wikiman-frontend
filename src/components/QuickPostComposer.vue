@@ -20,6 +20,18 @@
 
         <div class="row q-gutter-sm q-mt-md items-center">
           <q-btn
+            flat
+            dense
+            no-caps
+            color="primary"
+            :label="t('remaining.k050')"
+            to="/quick-posts"
+          />
+          <q-space />
+          <div v-if="speechListening" class="text-caption text-negative">
+            {{ t('speech.listening') }}
+          </div>
+          <q-btn
             v-if="speechSupported"
             round
             dense
@@ -34,18 +46,6 @@
               {{ speechListening ? t('speech.stop') : t('speech.start') }}
             </q-tooltip>
           </q-btn>
-          <div v-if="speechListening" class="text-caption text-negative">
-            {{ t('speech.listening') }}
-          </div>
-          <q-btn
-            flat
-            dense
-            no-caps
-            color="primary"
-            :label="t('remaining.k050')"
-            to="/quick-posts"
-          />
-          <q-space />
           <q-btn
             unelevated
             no-caps
