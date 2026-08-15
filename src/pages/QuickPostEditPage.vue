@@ -1,8 +1,6 @@
 <template>
   <q-page class="wiki-page">
     <div class="wiki-main">
-      <q-banner v-if="error" class="bg-red-1 text-negative q-mb-md">{{ error }}</q-banner>
-
       <q-card flat bordered :class="isDesktop ? 'q-pa-lg' : 'q-pa-md'">
         <div class="row items-center q-mb-md">
           <div class="text-subtitle1 text-weight-medium col">
@@ -19,35 +17,36 @@
           />
         </div>
 
-        <QuickPostBodyEditor
-          :key="editorKey"
+        <QuickPostFormFields
+          ref="formRef"
           v-model="content"
+          :error="error"
           :editor-key="editorKey"
-        />
-
-        <PostLinkPreviews :content="content" :max-links="5" extra-class="q-mt-md" />
-
-        <div class="row q-gutter-sm q-mt-md" :class="isDesktop ? 'justify-end' : ''">
-          <q-btn
-            v-if="isEdit"
-            outline
-            no-caps
-            color="primary"
-            :label="t('remaining.k054')"
-            :loading="promoting"
-            :disable="saving || !canSave"
-            @click="promoteDialog = true"
-          />
-          <q-btn
-            unelevated
-            no-caps
-            color="primary"
-            :label="isEdit ? t('common.save') : t('remaining.k051')"
-            :loading="saving"
-            :disable="promoting || !canSave"
-            @click="save"
-          />
-        </div>
+          :actions-class="isDesktop ? 'justify-end' : ''"
+          :actions-space="!isDesktop"
+        >
+          <template #actions-end>
+            <q-btn
+              v-if="isEdit"
+              outline
+              no-caps
+              color="primary"
+              :label="t('remaining.k054')"
+              :loading="promoting"
+              :disable="saving || !canSave"
+              @click="promoteDialog = true"
+            />
+            <q-btn
+              unelevated
+              no-caps
+              color="primary"
+              :label="isEdit ? t('common.save') : t('remaining.k051')"
+              :loading="saving"
+              :disable="promoting || !canSave"
+              @click="save"
+            />
+          </template>
+        </QuickPostFormFields>
       </q-card>
 
       <QuickPostPromoteDialog
@@ -61,25 +60,27 @@
 
 <script setup>
 import { useI18n } from '@/i18n'
-
-const { t } = useI18n()
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
 import { useLayout } from '@/composables/useLayout'
 import { useSettingsStore } from '@/stores/settings'
-import { emptyQuickPostContent, hasQuickPostContent } from '@/utils/quickPostContent'
-import PostLinkPreviews from '@/components/PostLinkPreviews.vue'
-import QuickPostBodyEditor from '@/components/QuickPostBodyEditor.vue'
+import {
+  emptyQuickPostContent,
+  hasQuickPostContent
+} from '@/utils/quickPostContent'
+import QuickPostFormFields from '@/components/QuickPostFormFields.vue'
 import QuickPostPromoteDialog from '@/components/QuickPostPromoteDialog.vue'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const $q = useQuasar()
 const { isDesktop } = useLayout()
 const settings = useSettingsStore()
 
+const formRef = ref(null)
 const content = ref('')
 const editorKey = ref(0)
 const saving = ref(false)
@@ -87,7 +88,7 @@ const promoting = ref(false)
 const promoteDialog = ref(false)
 const error = ref('')
 const isEdit = computed(() => Boolean(route.params.id))
-const editorType = computed(() => settings.quickPostEditor || 'textarea')
+const editorType = computed(() => settings.quickPostEditor || 'tui')
 const canSave = computed(() => hasQuickPostContent(content.value, editorType.value))
 
 function resetContent() {
@@ -117,6 +118,7 @@ async function save() {
     $q.notify({ type: 'negative', message: t('remaining.k048') })
     return
   }
+  formRef.value?.stopSpeech()
   saving.value = true
   error.value = ''
   try {
@@ -137,6 +139,7 @@ async function save() {
 
 async function promote({ editorType: promoteEditorType, keepSource }) {
   if (!isEdit.value) return
+  formRef.value?.stopSpeech()
   promoting.value = true
   error.value = ''
   try {

@@ -59,7 +59,7 @@ export const useSettingsStore = defineStore('settings', {
     blogShowHomepage: false,
     blogPostsPerPage: 10,
     codeLineNumbers: false,
-    quickPostEditor: 'textarea',
+    quickPostEditor: 'tui',
     quickPostPromoteSourceMode: 'ask',
     quickPostPromoteEditor: 'ask',
     linkPreviewCacheTtlDays: 10,
@@ -113,7 +113,7 @@ export const useSettingsStore = defineStore('settings', {
         ? blogPageSize
         : 10
       this.codeLineNumbers = data.codeLineNumbers === true
-      this.quickPostEditor = normalizeEditorType(data.quickPostEditor, 'textarea')
+      this.quickPostEditor = normalizeEditorType(data.quickPostEditor, 'tui')
       this.quickPostPromoteSourceMode = ['ask', 'delete', 'keep'].includes(data.quickPostPromoteSourceMode)
         ? data.quickPostPromoteSourceMode
         : 'ask'

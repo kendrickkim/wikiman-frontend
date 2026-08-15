@@ -21,6 +21,8 @@
       v-else-if="editorType === 'tui'"
       :key="editorKey"
       v-model="model"
+      hide-toolbar
+      :height="compact ? '220px' : '360px'"
     />
     <EditorJsEditor
       v-else-if="editorType === 'editorjs'"
@@ -65,7 +67,7 @@ const props = defineProps({
 
 const model = defineModel({ type: String, default: '' })
 const settings = useSettingsStore()
-const editorType = computed(() => normalizeEditorType(settings.quickPostEditor, 'textarea'))
+const editorType = computed(() => normalizeEditorType(settings.quickPostEditor, 'tui'))
 const textareaStyle = computed(() => (
   props.compact
     ? 'min-height: 160px; line-height: 1.5;'

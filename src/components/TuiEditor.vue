@@ -1,5 +1,5 @@
 <template>
-  <div class="tui-holder">
+  <div class="tui-holder" :class="{ 'tui-holder--no-toolbar': hideToolbar }">
     <div ref="holder" />
   </div>
 </template>
@@ -14,6 +14,11 @@ import '@toast-ui/editor/dist/toastui-editor.css'
 import '@toast-ui/editor/dist/theme/toastui-editor-dark.css'
 import { api, getErrorMessage } from '@/utils/api'
 import { useSettingsStore } from '@/stores/settings'
+
+const props = defineProps({
+  hideToolbar: { type: Boolean, default: false },
+  height: { type: String, default: '480px' }
+})
 
 const model = defineModel({ type: String, default: '' })
 const $q = useQuasar()
@@ -55,7 +60,7 @@ onMounted(async () => {
   if (!holder.value) return
   editor = new Editor({
     el: holder.value,
-    height: '480px',
+    height: props.height,
     initialEditType: 'wysiwyg',
     previewStyle: 'vertical',
     initialValue: model.value || '',
@@ -63,6 +68,8 @@ onMounted(async () => {
     usageStatistics: false,
     theme: settings.isDark ? 'dark' : 'light',
     placeholder: t('remaining.k032'),
+    hideModeSwitch: props.hideToolbar,
+    ...(props.hideToolbar ? { toolbarItems: [] } : {}),
     hooks: {
       async addImageBlobHook(blob, callback) {
         try {
@@ -100,3 +107,26 @@ onBeforeUnmount(() => {
   editor = null
 })
 </script>
+
+<style scoped>
+.tui-holder--no-toolbar :deep(.toastui-editor-defaultUI-toolbar),
+.tui-holder--no-toolbar :deep(.toastui-editor-toolbar),
+.tui-holder--no-toolbar :deep(.toastui-editor-mode-switch),
+.tui-holder--no-toolbar :deep(.toastui-editor-dropdown-toolbar) {
+  display: none !important;
+}
+
+.tui-holder--no-toolbar :deep(.toastui-editor-defaultUI .ProseMirror) {
+  padding: 8px 10px;
+  height: 100%;
+}
+
+.tui-holder--no-toolbar :deep(.toastui-editor-ww-container .toastui-editor-contents),
+.tui-holder--no-toolbar :deep(.toastui-editor-md-container .toastui-editor-md-preview) {
+  padding: 8px 10px 0;
+}
+
+.tui-holder--no-toolbar :deep(.toastui-editor-contents p) {
+  margin: 4px 0;
+}
+</style>
