@@ -65,7 +65,51 @@ npm run build:pwa
 - 결과물: `dist/pwa/` (`index.html`, `manifest.json`, `sw.js` 등)
 - `/api`는 서비스 워커에서 캐시하지 않습니다 (`NetworkOnly`)
 - 설치·오프라인 동작은 **HTTPS**(또는 localhost)에서 확인하세요
-- history 라우팅이므로 서버는 모든 경로를 `index.html`로 돌려줘야 합니다 (백엔드 호스팅이 처리)
+- history 라우팅이므로 서버는 모든 경로를 `index.html`로 돌려줘야 합니다 (**백엔드 호스트**가 처리). Nginx에서 `try_files … /index.html`로 직접 폴백하지 마세요.
+
+## Nginx 프록시 (공유 메타 / Open Graph)
+
+빌드된 `index.html`의 기본 `og:*`는 사이트 공통 값입니다. 글별 제목·설명·이미지는 프론트 JS가 아니라 **백엔드 호스트(`HOST_PORT`, 기본 `:80`)** 가 URL(`/posts/123`)을 보고 HTML에 넣습니다. 크롤러는 JS를 실행하지 않으므로, 프록시는 HTML을 정적 빌드로 주지 말고 백엔드 호스트로 넘겨야 합니다.
+
+권장 배포: `npm run build:backend` → 백엔드 `npm start` → 프록시는 **`:80`(호스트)** 로 전달.
+
+### Nginx Proxy Manager
+
+1. **Proxy Hosts → Details**
+   - Forward Hostname / IP: 백엔드가 돌아가는 호스트
+   - Forward Port: **`80`** (호스트. API만 `:85`로 두면 OG가 바뀌지 않음)
+   - Cache Assets: 끔 권장
+2. **(선택) Custom Locations**
+   - `/api`만 API 포트(`85`)로 보낼 수 있음. 그 외(`/`, `/posts/...`)는 Details의 `:80`으로 유지
+3. **Advanced → Custom Nginx Configuration**에 아래를 추가합니다.
+
+```nginx
+# HTML·글 URL은 캐시하지 않음 (크롤러가 낡은 OG를 받지 않게)
+proxy_cache_bypass $http_upgrade;
+proxy_no_cache 1;
+
+# 절대 URL(og:url, og:image)용
+proxy_set_header X-Forwarded-Proto $scheme;
+proxy_set_header X-Forwarded-Host  $host;
+proxy_set_header Host $host;
+```
+
+하지 말 것:
+
+- `try_files … /index.html`로 SPA 폴백을 프록시에서 처리하기
+- `root` / `alias`로 `dist/pwa`를 OpenResty가 직접 서빙하기
+
+백엔드 `.env`에 `PUBLIC_URL=https://your.domain`을 두면 canonical·이미지 절대 URL이 안정적입니다.
+
+확인:
+
+```bash
+curl -sI https://your.domain/posts/123
+# X-Powered-By: Express → 백엔드 호스트까지 도달
+
+curl -s https://your.domain/posts/123 | findstr /i "og:title"
+# 글 제목 한 줄만 (사이트 기본 제목과 중복되면 안 됨)
+```
 
 ### 아이콘
 
