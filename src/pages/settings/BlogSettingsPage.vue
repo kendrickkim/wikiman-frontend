@@ -13,6 +13,17 @@
         <q-card-section class="q-gutter-lg">
           <div>
             <q-toggle
+              v-model="blogMode"
+              :label="t('blog.mode')"
+              color="primary"
+            />
+            <div class="text-caption text-grey-7 q-mt-xs">
+              {{ t('blog.modeHint') }}
+            </div>
+          </div>
+
+          <div>
+            <q-toggle
               v-model="blogShowHomepage"
               :label="t('blog.showHomepage')"
               color="primary"
@@ -20,17 +31,6 @@
             />
             <div class="text-caption text-grey-7 q-mt-xs">
               {{ t('blog.showHomepageHint') }}
-            </div>
-          </div>
-
-          <div>
-            <q-toggle
-              v-model="blogMode"
-              :label="t('blog.mode')"
-              color="primary"
-            />
-            <div class="text-caption text-grey-7 q-mt-xs">
-              {{ t('blog.modeHint') }}
             </div>
           </div>
 

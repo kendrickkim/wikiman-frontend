@@ -527,7 +527,7 @@ export default {
     k113: "Could not save TTL settings.",
     k114: "Could not clear the cache.",
     k115: "Database and attachments",
-    k116: "Cached addresses: ",
+    k116: "Cached link card addresses: ",
     k117: "",
     k118: "Could not load homepage posts.",
     k119: "Homepage order saved.",
