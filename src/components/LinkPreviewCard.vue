@@ -2,9 +2,10 @@
   <a
     v-if="preview"
     class="wiki-link-card"
-    :href="preview.url"
-    target="_blank"
-    rel="noopener noreferrer"
+    :href="targetUrl"
+    :target="internalRoute ? undefined : '_blank'"
+    :rel="internalRoute ? undefined : 'noopener noreferrer'"
+    @click="openLink"
   >
     <div v-if="preview.image" class="wiki-link-card__image">
       <img :src="preview.image" alt="" loading="lazy" @error="onImageError">
@@ -19,21 +20,27 @@
 </template>
 
 <script setup>
-import { useI18n } from '@/i18n'
-
-const { t } = useI18n()
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from '@/i18n'
 import { api } from '@/utils/api'
+import { internalRouteForUrl } from '@/utils/urls'
 
 const props = defineProps({
   url: { type: String, required: true }
 })
 
+const router = useRouter()
+const { t } = useI18n()
 const emit = defineEmits(['resolved'])
 
 const preview = ref(null)
 const loading = ref(false)
 const failed = ref(false)
+const targetUrl = computed(() => preview.value?.url || props.url)
+const internalRoute = computed(() => (
+  typeof window === 'undefined' ? '' : internalRouteForUrl(targetUrl.value, window.location.origin)
+))
 
 const host = computed(() => {
   try {
@@ -63,6 +70,14 @@ async function load() {
 
 function onImageError(event) {
   event.target.style.display = 'none'
+}
+
+function openLink(event) {
+  if (!internalRoute.value || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return
+  }
+  event.preventDefault()
+  router.push(internalRoute.value)
 }
 
 watch(() => props.url, () => {

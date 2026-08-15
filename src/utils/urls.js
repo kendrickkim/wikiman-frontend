@@ -43,6 +43,20 @@ export function normalizeUrlKey(raw) {
   }
 }
 
+export function internalRouteForUrl(raw, currentOrigin) {
+  const cleaned = cleanUrl(raw)
+  const origin = String(currentOrigin || '').trim()
+  if (!cleaned || !origin) return ''
+  try {
+    const target = new URL(cleaned, origin)
+    const current = new URL(origin)
+    if (!['http:', 'https:'].includes(target.protocol) || target.origin !== current.origin) return ''
+    return `${target.pathname}${target.search}${target.hash}` || '/'
+  } catch {
+    return ''
+  }
+}
+
 function isImageUrl(raw) {
   try {
     return IMAGE_EXT_RE.test(new URL(cleanUrl(raw)).pathname)
