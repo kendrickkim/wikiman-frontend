@@ -32,7 +32,7 @@
           dense
           outlined
           clearable
-          placeholder="카테고리 검색"
+          :placeholder="t('remaining.k029')"
           class="q-mb-xs"
         >
           <template #prepend>
@@ -76,13 +76,11 @@
                   dense
                   color="grey-7"
                   class="q-ml-sm"
-                >
-                  비공개
-                </q-badge>
+                >{{ t('visibility.privateShort') }}</q-badge>
               </div>
             </template>
           </q-tree>
-          <div v-else class="text-grey-7 q-pa-sm">선택할 수 있는 카테고리가 없습니다.</div>
+          <div v-else class="text-grey-7 q-pa-sm">{{ t('remaining.k030') }}</div>
         </div>
       </div>
     </q-menu>
@@ -90,6 +88,9 @@
 </template>
 
 <script setup>
+import { t as translate, useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { computed, ref, watch } from 'vue'
 import { useWikiStore } from '@/stores/wiki'
 import { findCategoryPath, pruneCategoryTree } from '@/utils/categories'
@@ -100,7 +101,7 @@ const props = defineProps({
   blockedIds: { type: [Array, Set], default: () => [] },
   dense: { type: Boolean, default: false },
   disable: { type: Boolean, default: false },
-  rootLabel: { type: String, default: '최상위' },
+  rootLabel: { type: String, default: translate('remaining.k012') },
   emptyValue: { default: 0 },
   emptyIcon: { type: String, default: 'home' }
 })

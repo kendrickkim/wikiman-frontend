@@ -1,8 +1,8 @@
 <template>
   <q-card flat bordered>
     <q-card-section>
-      <div class="text-subtitle1 text-weight-medium">카테고리</div>
-      <div class="text-grey-7 text-caption q-mt-xs">추가, 이름 변경, 이동, 삭제를 여기서 할 수 있습니다.</div>
+      <div class="text-subtitle1 text-weight-medium">{{ t('categories.title') }}</div>
+      <div class="text-grey-7 text-caption q-mt-xs">{{ t('categories.description') }}</div>
     </q-card-section>
     <q-card-section>
       <CategoryManagerPanel />
@@ -11,6 +11,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { onMounted } from 'vue'
 import { useWikiStore } from '@/stores/wiki'
 import CategoryManagerPanel from '@/components/CategoryManagerPanel.vue'

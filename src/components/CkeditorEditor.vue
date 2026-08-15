@@ -10,6 +10,9 @@
 </template>
 
 <script setup>
+import { getLocale, useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { Ckeditor } from '@ckeditor/ckeditor5-vue'
 import {
   Alignment,
@@ -46,7 +49,7 @@ import {
   Underline,
   Undo
 } from 'ckeditor5'
-import translations from 'ckeditor5/translations/ko.js'
+import koTranslations from 'ckeditor5/translations/ko.js'
 import 'ckeditor5/ckeditor5.css'
 import { api, getErrorMessage } from '@/utils/api'
 
@@ -99,10 +102,10 @@ class UploadAdapter {
     try {
       const { data } = await api.post('/uploads', form)
       const url = data.file?.url || data.url
-      if (!url) throw new Error('이미지 업로드에 실패했습니다.')
+      if (!url) throw new Error(t('remaining.k031'))
       return { default: url }
     } catch (err) {
-      throw new Error(getErrorMessage(err, '이미지 업로드에 실패했습니다.'))
+      throw new Error(getErrorMessage(err, t('remaining.k031')))
     }
   }
 
@@ -113,11 +116,14 @@ function UploadAdapterPlugin(editor) {
   editor.plugins.get('FileRepository').createUploadAdapter = (loader) => new UploadAdapter(loader)
 }
 
+const editorLocale = getLocale()
+const isEnglish = editorLocale.startsWith('en')
+
 const config = {
   licenseKey: 'GPL',
-  language: 'ko',
-  translations: [translations],
-  placeholder: '글을 작성하세요. 이미지는 붙여넣기할 수 있습니다.',
+  language: isEnglish ? 'en' : 'ko',
+  translations: isEnglish ? [] : [koTranslations],
+  placeholder: t('remaining.k032'),
   extraPlugins: [UploadAdapterPlugin],
   plugins: [
     Essentials,
@@ -189,10 +195,10 @@ const config = {
   },
   heading: {
     options: [
-      { model: 'paragraph', title: '본문', class: 'ck-heading_paragraph' },
-      { model: 'heading1', view: 'h1', title: '제목 1', class: 'ck-heading_heading1' },
-      { model: 'heading2', view: 'h2', title: '제목 2', class: 'ck-heading_heading2' },
-      { model: 'heading3', view: 'h3', title: '제목 3', class: 'ck-heading_heading3' }
+      { model: 'paragraph', title: t('remaining.k033'), class: 'ck-heading_paragraph' },
+      { model: 'heading1', view: 'h1', title: t('remaining.k034'), class: 'ck-heading_heading1' },
+      { model: 'heading2', view: 'h2', title: t('remaining.k035'), class: 'ck-heading_heading2' },
+      { model: 'heading3', view: 'h3', title: t('remaining.k036'), class: 'ck-heading_heading3' }
     ]
   },
   image: {

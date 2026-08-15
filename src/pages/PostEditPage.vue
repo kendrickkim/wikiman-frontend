@@ -2,9 +2,9 @@
   <q-page class="wiki-page">
     <div class="wiki-main wiki-main--wide">
       <div :class="isDesktop ? 'wiki-edit-toolbar' : 'row items-center q-mb-md'">
-        <div class="text-h6">{{ isEdit ? '글 수정' : '새 글' }}</div>
+        <div class="text-h6">{{ isEdit ? t('posts.editPost') : t('posts.newPost') }}</div>
         <q-badge class="q-ml-sm" :color="status === 'draft' ? 'warning' : 'primary'">
-          {{ status === 'draft' ? '작성중' : '발행' }}
+          {{ status === 'draft' ? t('status.draft') : t('posts.publish') }}
         </q-badge>
         <q-space v-if="isDesktop" />
         <PostEditActions
@@ -23,7 +23,7 @@
       <q-card flat bordered :class="isDesktop ? 'q-pa-lg' : 'q-pa-md'">
         <div class="row q-col-gutter-md">
           <div class="col-12">
-            <q-input v-model="title" outlined label="제목" />
+            <q-input v-model="title" outlined :label="t('posts.title')" />
           </div>
           <div class="col-12" :class="{ 'wiki-edit-meta--desktop': isDesktop }">
             <q-expansion-item
@@ -31,7 +31,7 @@
               dense
               :expand-separator="!isDesktop"
               icon="tune"
-              label="글 설정"
+              :label="t('posts.postSettings')"
               :caption="metaSummary"
               header-class="wiki-edit-meta-header"
             >
@@ -43,10 +43,8 @@
                   <KeywordSelect v-model="keywords" />
                 </div>
                 <div class="col-12">
-                  <q-checkbox v-model="isHomepage" label="홈페이지로 사용" />
-                  <div class="text-caption text-grey-7 q-ml-lg">
-                    여러 글을 지정할 수 있으며, 홈에서는 표시 순서대로 이어서 보입니다.
-                  </div>
+                  <q-checkbox v-model="isHomepage" :label="t('posts.useAsHomepage')" />
+                  <div class="text-caption text-grey-7 q-ml-lg">{{ t('posts.homepageHint') }}</div>
                   <q-input
                     v-if="isHomepage"
                     v-model.number="homepageSort"
@@ -55,8 +53,8 @@
                     dense
                     class="q-mt-sm q-ml-lg"
                     style="max-width: 220px"
-                    label="표시 순서"
-                    hint="숫자가 작을수록 위에 표시됩니다."
+                    :label="t('posts.displayOrder')"
+                    :hint="t('posts.displayOrderHint')"
                     :min="0"
                     :max="9999"
                     step="1"
@@ -69,7 +67,7 @@
                     emit-value
                     map-options
                     outlined
-                    label="공개 범위"
+                    :label="t('categories.visibility')"
                   />
                 </div>
                 <div :class="isDesktop ? 'col-6' : 'col-12'">
@@ -82,7 +80,7 @@
                     emit-value
                     map-options
                     outlined
-                    label="에디터"
+                    :label="t('posts.editor')"
                     @update:model-value="onEditorChange"
                   />
                 </div>
@@ -103,7 +101,7 @@
             no-caps
             color="primary"
             icon="link"
-            label="링크 추가"
+            :label="t('posts.addLink')"
             @click="openLinkDialog"
           />
         </div>
@@ -140,7 +138,7 @@
         <div v-else>
           <div class="row items-center q-mb-xs">
             <div class="text-caption text-grey-7 col">{{ sourceHint }}</div>
-            <q-toggle v-if="isDesktop" v-model="showPreview" label="미리보기" />
+            <q-toggle v-if="isDesktop" v-model="showPreview" :label="t('posts.preview')" />
           </div>
           <div class="row q-col-gutter-x-md">
             <div :class="showPreview && isDesktop ? 'col-6' : 'col-12'">
@@ -200,6 +198,7 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Dialog } from 'quasar'
@@ -209,7 +208,7 @@ import { useLayout } from '@/composables/useLayout'
 import { usePostActions } from '@/composables/usePostActions'
 import { useSettingsStore } from '@/stores/settings'
 import { sanitizeHtml } from '@/utils/sanitize'
-import { EDITOR_OPTIONS } from '@/utils/editors'
+import { editorOptions as makeEditorOptions } from '@/utils/editors'
 import { convertEditorContent, editorKind, hasEditorContent } from '@/utils/editorConvert'
 import CategorySelect from '@/components/CategorySelect.vue'
 import KeywordSelect from '@/components/KeywordSelect.vue'
@@ -219,6 +218,7 @@ import PostLinkPreviews from '@/components/PostLinkPreviews.vue'
 import WikiLinkDialog from '@/components/WikiLinkDialog.vue'
 import PostEditActions from '@/components/PostEditActions.vue'
 
+const { t } = useI18n()
 const CkeditorEditor = defineAsyncComponent(() => import('@/components/CkeditorEditor.vue'))
 const SummernoteEditor = defineAsyncComponent(() => import('@/components/SummernoteEditor.vue'))
 const TuiEditor = defineAsyncComponent(() => import('@/components/TuiEditor.vue'))
@@ -261,27 +261,27 @@ const leaveReady = ref(false)
 const bypassLeave = ref(false)
 let leaveConfirming = null
 
-const visibilityOptions = [
-  { label: '전체 공개', value: 'public' },
-  { label: '비공개 (작성자만)', value: 'private' }
-]
-const editorOptions = EDITOR_OPTIONS
+const visibilityOptions = computed(() => [
+  { label: t('visibility.public'), value: 'public' },
+  { label: t('visibility.private'), value: 'private' }
+])
+const editorOptions = computed(() => makeEditorOptions())
 const sourceHint = computed(() => (
   editorType.value === 'html'
-    ? 'HTML · 이미지 붙여넣기'
-    : 'Markdown · plantuml · 이미지 붙여넣기'
+    ? t('posts.htmlCapabilities')
+    : t('posts.markdownCapabilities')
 ))
 const previewHtml = computed(() => sanitizeHtml(drafts.value.html || ''))
 const metaSummary = computed(() => {
   const parts = []
-  if (keywords.value.length) parts.push(`키워드 ${keywords.value.length}`)
-  parts.push(visibility.value === 'private' ? '비공개' : '공개')
+  if (keywords.value.length) parts.push(t('common.keywords', { count: keywords.value.length }))
+  parts.push(visibility.value === 'private' ? t('visibility.privateShort') : t('visibility.publicShort'))
   const category = wiki.categories.find((item) => item.id === Number(categoryId.value))
-  parts.push(category?.name || '미분류')
-  const editor = editorOptions.find((item) => item.value === editorType.value)
+  parts.push(category?.name || t('common.uncategorized'))
+  const editor = editorOptions.value.find((item) => item.value === editorType.value)
   if (editor) parts.push(editor.label)
-  if (isHomepage.value) parts.push('홈페이지')
-  if (attachments.value.length) parts.push(`첨부 ${attachments.value.length}`)
+  if (isHomepage.value) parts.push(t('posts.homepageBadge'))
+  if (attachments.value.length) parts.push(t('posts.attachmentCount', { count: attachments.value.length }))
   return parts.join(' · ')
 })
 
@@ -334,11 +334,11 @@ function confirmLeave() {
   if (leaveConfirming) return leaveConfirming
   leaveConfirming = new Promise((resolve) => {
     Dialog.create({
-      title: '저장하지 않은 내용',
-      message: '저장하지 않은 내용이 있습니다. 이 페이지를 나가면 사라집니다.',
+      title: t('posts.leaveUnsaved'),
+      message: t('posts.leaveUnsavedMessage'),
       persistent: true,
-      cancel: { label: '머무르기', flat: true },
-      ok: { label: '나가기', color: 'negative', unelevated: true }
+      cancel: { label: t('posts.stay'), flat: true },
+      ok: { label: t('posts.leave'), color: 'negative', unelevated: true }
     }).onOk(() => resolve(true))
       .onCancel(() => resolve(false))
   }).finally(() => {
@@ -435,7 +435,7 @@ onBeforeUnmount(() => {
 async function deleteCurrent() {
   const removed = await removePost({
     id: Number(route.params.id),
-    title: title.value.trim() || '이 글'
+    title: title.value.trim() || t('posts.thisPost')
   }, { redirect: false })
   if (removed) {
     bypassLeave.value = true
@@ -449,16 +449,16 @@ function onEditorChange(next) {
   const current = from === 'editorjs' ? drafts.value.editorjs : drafts.value[from]
   const hasSource = hasEditorContent(current, from)
   const hasTarget = hasEditorContent(drafts.value[next], next)
-  let message = '에디터를 바꿉니다. 각 에디터의 초안은 따로 유지됩니다.'
+  let message = t('posts.editorChangeSeparate')
   if (hasSource && hasTarget) {
-    message = '바꾸려는 에디터에 이미 초안이 있어 현재 내용은 옮기지 않습니다. 각 초안은 그대로 유지됩니다.'
+    message = t('posts.editorChangeExisting')
   } else if (hasSource && editorKind(from) === editorKind(next)) {
-    message = '에디터를 바꾸면 현재 내용을 그대로 옮깁니다.'
+    message = t('posts.editorChangeSameFormat')
   } else if (hasSource) {
-    message = '에디터를 바꾸면 현재 내용을 옮깁니다. 형식이 달라 HTML이나 일반 텍스트로 바뀔 수 있습니다.'
+    message = t('posts.editorChangeConvert')
   }
   $q.dialog({
-    title: '에디터 변경',
+    title: t('posts.editorChangeTitle'),
     message,
     cancel: true,
     persistent: true
@@ -495,7 +495,7 @@ async function save(nextStatus) {
       settings.load({ force: true }),
       wiki.ensureKeywords({ force: true })
     ])
-    $q.notify({ type: 'positive', message: nextStatus === 'published' ? '발행했습니다.' : '초안으로 저장했습니다.' })
+    $q.notify({ type: 'positive', message: nextStatus === 'published' ? t('status.publishedNotice') : t('status.savedDraft') })
     bypassLeave.value = true
     await router.replace(`/posts/${data.post.id}`)
   } catch (err) {

@@ -3,11 +3,13 @@ import { useRouter } from 'vue-router'
 import { api, getErrorMessage } from '@/utils/api'
 import { displayTitle } from '@/utils/title'
 import { useWikiStore } from '@/stores/wiki'
+import { useI18n } from '@/i18n'
 
 export function usePostActions() {
   const $q = useQuasar()
   const router = useRouter()
   const wiki = useWikiStore()
+  const { t } = useI18n()
 
   function refreshKeywords() {
     wiki.invalidateKeywords()
@@ -18,16 +20,16 @@ export function usePostActions() {
     if (!post?.id || post.status === 'published') return Promise.resolve(false)
     return new Promise((resolve) => {
       $q.dialog({
-        title: '글 발행',
-        message: `"${displayTitle(post.title)}"을(를) 발행할까요?`,
+        title: t('posts.publishDialogTitle'),
+        message: t('posts.publishDialogMessage', { title: displayTitle(post.title) }),
         persistent: true,
-        cancel: { label: '취소', flat: true },
-        ok: { label: '발행', color: 'primary', unelevated: true }
+        cancel: { label: t('common.cancel'), flat: true },
+        ok: { label: t('posts.publish'), color: 'primary', unelevated: true }
       }).onOk(async () => {
         try {
           const { data } = await api.patch(`/posts/${post.id}`, { status: 'published' })
           await refreshKeywords()
-          $q.notify({ type: 'positive', message: '발행했습니다.' })
+          $q.notify({ type: 'positive', message: t('status.publishedNotice') })
           resolve(data.post || true)
         } catch (err) {
           $q.notify({ type: 'negative', message: getErrorMessage(err) })
@@ -40,16 +42,16 @@ export function usePostActions() {
   function removePost(post, { redirect = true } = {}) {
     return new Promise((resolve) => {
       $q.dialog({
-        title: '휴지통으로 이동',
-        message: `"${displayTitle(post.title)}"을(를) 휴지통으로 이동할까요?`,
+        title: t('posts.moveTrashTitle'),
+        message: t('posts.moveTrashMessage', { title: displayTitle(post.title) }),
         persistent: true,
-        cancel: { label: '취소', flat: true },
-        ok: { label: '휴지통으로', color: 'negative', unelevated: true }
+        cancel: { label: t('common.cancel'), flat: true },
+        ok: { label: t('posts.moveToTrash'), color: 'negative', unelevated: true }
       }).onOk(async () => {
         try {
           await api.delete(`/posts/${post.id}`)
           await refreshKeywords()
-          $q.notify({ type: 'positive', message: '휴지통으로 이동했습니다.' })
+          $q.notify({ type: 'positive', message: t('posts.movedToTrash') })
           if (redirect) {
             if (window.history.state?.back != null) router.back()
             else router.push('/')
@@ -66,16 +68,16 @@ export function usePostActions() {
   function restorePost(post, { redirect = false } = {}) {
     return new Promise((resolve) => {
       $q.dialog({
-        title: '글 복원',
-        message: `"${displayTitle(post.title)}"을(를) 복원할까요?`,
+        title: t('posts.restoreTitle'),
+        message: t('posts.restoreMessage', { title: displayTitle(post.title) }),
         persistent: true,
-        cancel: { label: '취소', flat: true },
-        ok: { label: '복원', color: 'primary', unelevated: true }
+        cancel: { label: t('common.cancel'), flat: true },
+        ok: { label: t('common.restore'), color: 'primary', unelevated: true }
       }).onOk(async () => {
         try {
           const { data } = await api.post(`/posts/${post.id}/restore`)
           await refreshKeywords()
-          $q.notify({ type: 'positive', message: '복원했습니다.' })
+          $q.notify({ type: 'positive', message: t('posts.restored') })
           if (redirect) router.push(`/posts/${post.id}`)
           resolve(data.post || true)
         } catch (err) {
@@ -89,16 +91,16 @@ export function usePostActions() {
   function purgePost(post) {
     return new Promise((resolve) => {
       $q.dialog({
-        title: '완전히 삭제',
-        message: `"${displayTitle(post.title)}"을(를) 완전히 삭제할까요? 이 작업은 되돌릴 수 없습니다.`,
+        title: t('posts.purgeTitle'),
+        message: t('posts.purgeMessage', { title: displayTitle(post.title) }),
         persistent: true,
-        cancel: { label: '취소', flat: true },
-        ok: { label: '삭제', color: 'negative', unelevated: true }
+        cancel: { label: t('common.cancel'), flat: true },
+        ok: { label: t('common.delete'), color: 'negative', unelevated: true }
       }).onOk(async () => {
         try {
           await api.delete(`/posts/${post.id}/permanent`)
           await refreshKeywords()
-          $q.notify({ type: 'positive', message: '완전히 삭제했습니다.' })
+          $q.notify({ type: 'positive', message: t('posts.purged') })
           resolve(true)
         } catch (err) {
           $q.notify({ type: 'negative', message: getErrorMessage(err) })
@@ -112,13 +114,13 @@ export function usePostActions() {
     const n = Number(count) || 0
     return new Promise((resolve) => {
       $q.dialog({
-        title: '휴지통 비우기',
+        title: t('posts.emptyTrashTitle'),
         message: n > 0
-          ? `휴지통의 글 ${n}개를 모두 완전히 삭제할까요? 이 작업은 되돌릴 수 없습니다.`
-          : '휴지통의 글을 모두 완전히 삭제할까요? 이 작업은 되돌릴 수 없습니다.',
+          ? t('posts.emptyTrashCountMessage', { count: n })
+          : t('posts.emptyTrashMessage'),
         persistent: true,
-        cancel: { label: '취소', flat: true },
-        ok: { label: '비우기', color: 'negative', unelevated: true }
+        cancel: { label: t('common.cancel'), flat: true },
+        ok: { label: t('posts.emptyTrash'), color: 'negative', unelevated: true }
       }).onOk(async () => {
         try {
           const { data } = await api.delete('/posts/trash')
@@ -126,7 +128,7 @@ export function usePostActions() {
           const deleted = Number(data?.deleted) || 0
           $q.notify({
             type: 'positive',
-            message: deleted > 0 ? `휴지통에서 ${deleted}개를 삭제했습니다.` : '휴지통이 비어 있습니다.'
+            message: deleted > 0 ? t('posts.trashDeleted', { count: deleted }) : t('posts.trashEmpty')
           })
           resolve(true)
         } catch (err) {

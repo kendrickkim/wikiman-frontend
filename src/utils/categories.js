@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js'
 export function buildCategoryTree(categories) {
   const byParent = new Map()
   for (const category of categories) {
@@ -48,7 +49,7 @@ export function buildCategoryFlatOptions(categories) {
   const rows = []
   const walk = (parentId, depth) => {
     for (const category of byParent.get(parentId) || []) {
-      const suffix = category.visibility === 'private' ? ' (비공개)' : ''
+      const suffix = category.visibility === 'private' ? t('remaining.k158') : ''
       rows.push({
         id: category.id,
         name: category.name,

@@ -20,13 +20,11 @@
                 dense
                 color="grey-7"
                 class="q-ml-sm"
-              >
-                비공개
-              </q-badge>
+              >{{ t('visibility.privateShort') }}</q-badge>
             </div>
           </template>
         </q-tree>
-        <div v-if="!treeNodes.length" class="text-grey-7 q-mt-sm">아직 카테고리가 없습니다.</div>
+        <div v-if="!treeNodes.length" class="text-grey-7 q-mt-sm">{{ t('remaining.k021') }}</div>
       </div>
     </div>
 
@@ -36,12 +34,12 @@
         <div class="wiki-half">
           <div class="category-manager-bulk">
             <div class="row items-center">
-              <div class="text-subtitle2 col">체크한 카테고리 {{ tickedIds.length }}개</div>
-              <q-btn flat dense no-caps label="선택 해제" :disable="bulkWorking" @click="tickedIds = []" />
+              <div class="text-subtitle2 col">{{ t('extra.selectedCategories', { count: tickedIds.length }) }}</div>
+              <q-btn flat dense no-caps :label="t('remaining.k002')" :disable="bulkWorking" @click="tickedIds = []" />
             </div>
             <CategoryTreeSelect
               v-model="bulkParentId"
-              label="이동할 상위 카테고리"
+              :label="t('remaining.k003')"
               dense
               :blocked-ids="bulkBlockedIds"
               :disable="bulkWorking"
@@ -52,7 +50,7 @@
                 color="primary"
                 unelevated
                 no-caps
-                label="한번에 이동"
+                :label="t('remaining.k004')"
                 :loading="bulkWorking"
                 @click="bulkMove"
               />
@@ -60,14 +58,12 @@
                 color="negative"
                 outline
                 no-caps
-                label="한번에 삭제"
+                :label="t('remaining.k005')"
                 :disable="bulkWorking"
                 @click="bulkRemove"
               />
             </div>
-            <div class="text-caption text-grey-7 q-mt-xs">
-              삭제하면 각 카테고리의 하위 카테고리와 글은 상위 카테고리로 옮겨집니다.
-            </div>
+            <div class="text-caption text-grey-7 q-mt-xs">{{ t('remaining.k022') }}</div>
           </div>
         </div>
         <q-separator class="q-my-lg" />
@@ -75,16 +71,16 @@
 
       <div class="wiki-half">
         <q-form @submit.prevent="createCategory">
-          <div class="text-subtitle2">새 카테고리</div>
-          <q-input v-model="createName" dense outlined label="이름" class="q-mt-sm" />
+          <div class="text-subtitle2">{{ t('remaining.k023') }}</div>
+          <q-input v-model="createName" dense outlined :label="t('remaining.k006')" class="q-mt-sm" />
           <CategoryTreeSelect
             v-model="createParentId"
-            label="상위 카테고리"
+            :label="t('categories.parent')"
             dense
             class="q-mt-sm"
           />
           <div class="q-mt-sm">
-            <div class="text-body2 q-mb-xs">공개 범위</div>
+            <div class="text-body2 q-mb-xs">{{ t('categories.visibility') }}</div>
             <q-btn-toggle
               v-model="createVisibility"
               unelevated
@@ -94,7 +90,7 @@
               :options="visibilityOptions"
             />
           </div>
-          <q-btn type="submit" color="primary" label="추가" unelevated class="q-mt-md" />
+          <q-btn type="submit" color="primary" :label="t('common.add')" unelevated class="q-mt-md" />
         </q-form>
       </div>
 
@@ -103,10 +99,10 @@
       <template v-if="selected">
         <div class="wiki-split">
           <div>
-            <div class="text-subtitle2">선택한 카테고리 수정/삭제</div>
-            <q-input v-model="editName" dense outlined label="이름" class="q-mt-sm" />
+            <div class="text-subtitle2">{{ t('remaining.k024') }}</div>
+            <q-input v-model="editName" dense outlined :label="t('remaining.k006')" class="q-mt-sm" />
             <div class="q-mt-sm">
-              <div class="text-body2 q-mb-xs">공개 범위</div>
+              <div class="text-body2 q-mb-xs">{{ t('categories.visibility') }}</div>
               <q-btn-toggle
                 v-model="editVisibility"
                 unelevated
@@ -115,36 +111,32 @@
                 class="wiki-visibility-toggle"
                 :options="visibilityOptions"
               />
-              <div class="text-caption text-grey-7 q-mt-xs">
-                비공개 카테고리의 글은 로그인한 사용자만 목록·본문을 볼 수 있습니다.
-              </div>
+              <div class="text-caption text-grey-7 q-mt-xs">{{ t('remaining.k025') }}</div>
             </div>
             <div class="row q-gutter-sm q-mt-sm">
-              <q-btn color="primary" outline label="저장" @click="saveCategory" />
-              <q-btn color="negative" flat label="삭제" @click="removeCategory" />
+              <q-btn color="primary" outline :label="t('common.save')" @click="saveCategory" />
+              <q-btn color="negative" flat :label="t('dialogs.delete')" @click="removeCategory" />
             </div>
           </div>
 
           <div>
-            <div class="text-subtitle2">카테고리 이동</div>
+            <div class="text-subtitle2">{{ t('remaining.k026') }}</div>
             <div class="text-caption text-grey-7 q-mt-xs">
-              현재 위치: {{ currentLocationLabel }}
+              {{ t('extra.currentLocation', { location: currentLocationLabel }) }}
             </div>
             <CategoryTreeSelect
               v-model="editParentId"
-              label="이동할 상위 카테고리"
+              :label="t('remaining.k003')"
               dense
               :blocked-ids="selectedBlockedIds"
               class="q-mt-sm"
             />
-            <div class="text-caption text-grey-7 q-mt-xs">
-              다른 카테고리의 하위로 옮기거나, 최상위로 이동할 수 있습니다.
-            </div>
+            <div class="text-caption text-grey-7 q-mt-xs">{{ t('remaining.k027') }}</div>
             <q-btn
               class="q-mt-sm"
               color="primary"
               unelevated
-              label="이동"
+              :label="t('common.move')"
               :disable="!canMove"
               @click="moveCategory"
             />
@@ -153,16 +145,16 @@
 
         <q-separator class="q-my-lg" />
 
-        <div class="text-subtitle2">글 일괄 이동</div>
+        <div class="text-subtitle2">{{ t('remaining.k018') }}</div>
         <div class="text-caption text-grey-7 q-mt-xs">
-          이 카테고리에 속한 글을 다른 카테고리(또는 미분류)로 옮깁니다.
-          현재 {{ postMoveCount }}개.
+          {{ t('extra.categoryPostMoveDescription') }}
+          {{ t('extra.currentPostCount', { count: postMoveCount }) }}
         </div>
         <CategoryTreeSelect
           v-model="postTargetCategoryId"
-          label="이동할 카테고리"
+          :label="t('remaining.k007')"
           dense
-          root-label="미분류"
+          root-:label="t('common.uncategorized')"
           empty-icon="folder_off"
           :empty-value="null"
           class="q-mt-sm"
@@ -172,7 +164,7 @@
           class="q-mt-sm"
           dense
           color="primary"
-          label="하위 카테고리의 글도 함께 이동"
+          :label="t('remaining.k008')"
         />
         <div class="q-mt-md">
           <q-btn
@@ -180,20 +172,23 @@
             outline
             unelevated
             no-caps
-            label="글 이동"
+            :label="t('remaining.k009')"
             :loading="postMoving"
             :disable="!canMovePosts"
             @click="movePosts"
           />
         </div>
       </template>
-      <div v-else class="text-grey-7">{{ $q.screen.lt.md ? '위에서 카테고리를 선택하세요.' : '왼쪽에서 카테고리를 선택하세요.' }}</div>
+      <div v-else class="text-grey-7">{{ $q.screen.lt.md ? t('remaining.k010') : t('remaining.k011') }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
@@ -225,8 +220,8 @@ const paneStyle = computed(() => (
 ))
 
 const visibilityOptions = [
-  { label: '공개', value: 'public' },
-  { label: '비공개', value: 'private' }
+  { label: t('visibility.publicShort'), value: 'public' },
+  { label: t('visibility.privateShort'), value: 'private' }
 ]
 
 const selected = computed(() => wiki.categories.find((c) => c.id === Number(selectedId.value)) || null)
@@ -265,9 +260,9 @@ const bulkBlockedIds = computed(() => {
 
 const currentLocationLabel = computed(() => {
   if (!selected.value) return ''
-  if (selected.value.parent_id == null) return '최상위'
+  if (selected.value.parent_id == null) return t('remaining.k012')
   const parent = wiki.categories.find((category) => category.id === selected.value.parent_id)
-  return parent ? `${parent.name} 하위` : '최상위'
+  return parent ? t('extra.childOf', { name: parent.name }) : t('remaining.k012')
 })
 
 const canMove = computed(() => {
@@ -378,7 +373,7 @@ async function createCategory() {
     createParentId.value = 0
     createVisibility.value = 'public'
     await reload()
-    $q.notify({ type: 'positive', message: '카테고리를 추가했습니다.' })
+    $q.notify({ type: 'positive', message: t('remaining.k013') })
   } catch (err) {
     notifyError(err)
   }
@@ -392,7 +387,7 @@ async function saveCategory() {
       visibility: editVisibility.value
     })
     await reload()
-    $q.notify({ type: 'positive', message: '카테고리를 저장했습니다.' })
+    $q.notify({ type: 'positive', message: t('categories.saved') })
   } catch (err) {
     notifyError(err)
   }
@@ -402,14 +397,14 @@ async function moveCategory() {
   if (!selected.value || !canMove.value) return
   const parentId = toParentId(editParentId.value)
   const targetLabel = parentId
-    ? wiki.categories.find((category) => category.id === parentId)?.name || '선택한 카테고리'
-    : '최상위'
+    ? wiki.categories.find((category) => category.id === parentId)?.name || t('remaining.k014')
+    : t('remaining.k012')
   try {
     await api.patch(`/categories/${selected.value.id}`, { parentId })
     await reload()
     $q.notify({
       type: 'positive',
-      message: parentId ? `"${targetLabel}" 아래로 이동했습니다.` : '최상위로 이동했습니다.'
+      message: parentId ? t('extra.movedUnder', { name: targetLabel }) : t('remaining.k015')
     })
   } catch (err) {
     notifyError(err)
@@ -420,12 +415,12 @@ function movePosts() {
   if (!selected.value || !canMovePosts.value) return
   const targetId = postTargetCategoryId.value == null ? null : Number(postTargetCategoryId.value)
   const targetLabel = targetId
-    ? wiki.categories.find((category) => category.id === targetId)?.name || '선택한 카테고리'
-    : '미분류'
-  const scope = postIncludeDescendants.value ? '하위 카테고리 포함' : '이 카테고리만'
+    ? wiki.categories.find((category) => category.id === targetId)?.name || t('remaining.k014')
+    : t('common.uncategorized')
+  const scope = postIncludeDescendants.value ? t('remaining.k016') : t('remaining.k017')
   $q.dialog({
-    title: '글 일괄 이동',
-    message: `"${selected.value.name}"의 글 ${postMoveCount.value}개(${scope})를 "${targetLabel}"(으)로 옮길까요?`,
+    title: t('remaining.k018'),
+    message: t('extra.confirmMovePosts', { name: selected.value.name, count: postMoveCount.value, scope, target: targetLabel }),
     cancel: true,
     persistent: true
   }).onOk(async () => {
@@ -439,7 +434,7 @@ function movePosts() {
       emit('saved')
       $q.notify({
         type: 'positive',
-        message: `${data.moved || 0}개 글을 "${targetLabel}"(으)로 옮겼습니다.`
+        message: t('extra.movedPosts', { count: data.moved || 0, target: targetLabel })
       })
     } catch (err) {
       notifyError(err)
@@ -459,12 +454,12 @@ async function bulkMove() {
   if (!ids.length) return
   const parentId = toParentId(bulkParentId.value)
   if (parentId && bulkBlockedIds.value.has(parentId)) {
-    $q.notify({ type: 'negative', message: '선택한 카테고리의 하위로는 이동할 수 없습니다.' })
+    $q.notify({ type: 'negative', message: t('remaining.k019') })
     return
   }
   const targetLabel = parentId
-    ? wiki.categories.find((category) => category.id === parentId)?.name || '선택한 카테고리'
-    : '최상위'
+    ? wiki.categories.find((category) => category.id === parentId)?.name || t('remaining.k014')
+    : t('remaining.k012')
   bulkWorking.value = true
   let moved = 0
   try {
@@ -478,12 +473,12 @@ async function bulkMove() {
     $q.notify({
       type: 'positive',
       message: parentId
-        ? `${moved}개 카테고리를 "${targetLabel}" 아래로 이동했습니다.`
-        : `${moved}개 카테고리를 최상위로 이동했습니다.`
+        ? t('extra.movedCategoriesUnder', { count: moved, target: targetLabel })
+        : t('extra.movedCategoriesTop', { count: moved })
     })
   } catch (err) {
     await reload()
-    $q.notify({ type: 'negative', message: `${moved}개 이동 후 실패했습니다. ${getErrorMessage(err)}` })
+    $q.notify({ type: 'negative', message: t('extra.moveFailedAfter', { count: moved, error: getErrorMessage(err) }) })
   } finally {
     bulkWorking.value = false
   }
@@ -493,8 +488,8 @@ function bulkRemove() {
   const ids = tickedCategoryIds()
   if (!ids.length) return
   $q.dialog({
-    title: '카테고리 일괄 삭제',
-    message: `선택한 ${ids.length}개 카테고리를 삭제할까요? 각 카테고리의 하위 카테고리와 글은 상위 카테고리로 옮겨집니다.`,
+    title: t('remaining.k020'),
+    message: t('extra.confirmDeleteCategories', { count: ids.length }),
     cancel: true,
     persistent: true
   }).onOk(async () => {
@@ -508,10 +503,10 @@ function bulkRemove() {
       if (ids.includes(Number(selectedId.value))) selectedId.value = null
       tickedIds.value = []
       await reload()
-      $q.notify({ type: 'positive', message: `${removed}개 카테고리를 삭제했습니다.` })
+      $q.notify({ type: 'positive', message: t('extra.deletedCategories', { count: removed }) })
     } catch (err) {
       await reload()
-      $q.notify({ type: 'negative', message: `${removed}개 삭제 후 실패했습니다. ${getErrorMessage(err)}` })
+      $q.notify({ type: 'negative', message: t('extra.deleteFailedAfter', { count: removed, error: getErrorMessage(err) }) })
     } finally {
       bulkWorking.value = false
     }
@@ -521,8 +516,8 @@ function bulkRemove() {
 function removeCategory() {
   if (!selected.value) return
   $q.dialog({
-    title: '카테고리 삭제',
-    message: `"${selected.value.name}"를 삭제할까요? 하위 카테고리와 글은 상위 카테고리로 옮겨집니다.`,
+    title: t('categories.deleteTitle'),
+    message: t('extra.confirmDeleteCategory', { name: selected.value.name }),
     cancel: true,
     persistent: true
   }).onOk(async () => {
@@ -530,7 +525,7 @@ function removeCategory() {
       await api.delete(`/categories/${selected.value.id}`)
       selectedId.value = null
       await reload()
-      $q.notify({ type: 'positive', message: '카테고리를 삭제했습니다.' })
+      $q.notify({ type: 'positive', message: t('categories.deleted') })
     } catch (err) {
       notifyError(err)
     }

@@ -2,8 +2,8 @@
   <q-page class="wiki-page">
     <div class="wiki-main">
       <div class="q-mb-md">
-        <div :class="isDesktop ? 'text-h4 text-weight-bold' : 'text-h6'">간단 포스트</div>
-        <div class="text-grey-7 q-mt-xs">나중에 일반 포스트로 옮겨 상세 저장할 수 있습니다.</div>
+        <div :class="isDesktop ? 'text-h4 text-weight-bold' : 'text-h6'">{{ t('settings.quickPosts') }}</div>
+        <div class="text-grey-7 q-mt-xs">{{ t('remaining.k091') }}</div>
       </div>
       <q-btn
         class="full-width q-mb-md"
@@ -11,24 +11,22 @@
         color="primary"
         no-caps
         icon="add"
-        label="새 입력"
+        :label="t('remaining.k086')"
         to="/quick-posts/new"
       />
 
       <q-banner v-if="error" class="bg-red-1 text-negative q-mb-md">{{ error }}</q-banner>
 
-      <q-card v-if="!items.length && !loading" flat bordered class="q-pa-lg text-center text-grey-7">
-        저장된 간단 포스트가 없습니다.
-      </q-card>
+      <q-card v-if="!items.length && !loading" flat bordered class="q-pa-lg text-center text-grey-7">{{ t('remaining.k092') }}</q-card>
 
       <div v-else class="q-gutter-md">
         <q-card v-for="item in items" :key="item.id" flat bordered class="q-pa-md">
           <QuickPostBody :content="item.content" :max-links="3" />
           <div class="text-caption text-grey-7 q-mt-sm">{{ formatDate(item.updatedAt) }}</div>
           <div class="row q-gutter-xs q-mt-sm">
-            <q-btn flat dense no-caps color="primary" label="수정" :to="`/quick-posts/${item.id}/edit`" />
-            <q-btn flat dense no-caps color="primary" label="포스트로 이동" :loading="promotingId === item.id" @click="openPromote(item)" />
-            <q-btn flat dense no-caps color="negative" label="삭제" :loading="deletingId === item.id" @click="remove(item)" />
+            <q-btn flat dense no-caps color="primary" :label="t('common.edit')" :to="`/quick-posts/${item.id}/edit`" />
+            <q-btn flat dense no-caps color="primary" :label="t('remaining.k054')" :loading="promotingId === item.id" @click="openPromote(item)" />
+            <q-btn flat dense no-caps color="negative" :label="t('dialogs.delete')" :loading="deletingId === item.id" @click="remove(item)" />
           </div>
         </q-card>
       </div>
@@ -43,6 +41,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -71,7 +72,7 @@ async function load() {
     const { data } = await api.get('/quick-posts')
     items.value = Array.isArray(data.quickPosts) ? data.quickPosts : []
   } catch (err) {
-    error.value = getErrorMessage(err, '간단 포스트를 불러오지 못했습니다.')
+    error.value = getErrorMessage(err, t('remaining.k083'))
   } finally {
     loading.value = false
   }
@@ -79,8 +80,8 @@ async function load() {
 
 async function remove(item) {
   $q.dialog({
-    title: '간단 포스트 삭제',
-    message: '이 간단 포스트를 삭제할까요?',
+    title: t('remaining.k087'),
+    message: t('remaining.k088'),
     cancel: true,
     persistent: true
   }).onOk(async () => {
@@ -88,9 +89,9 @@ async function remove(item) {
     try {
       await api.delete(`/quick-posts/${item.id}`)
       items.value = items.value.filter((row) => row.id !== item.id)
-      $q.notify({ type: 'positive', message: '삭제했습니다.' })
+      $q.notify({ type: 'positive', message: t('remaining.k089') })
     } catch (err) {
-      error.value = getErrorMessage(err, '삭제에 실패했습니다.')
+      error.value = getErrorMessage(err, t('remaining.k090'))
     } finally {
       deletingId.value = null
     }
@@ -114,10 +115,10 @@ async function promote({ editorType, keepSource }) {
     }
     promoteDialog.value = false
     promoteTarget.value = null
-    $q.notify({ type: 'positive', message: '일반 포스트 초안으로 옮겼습니다.' })
+    $q.notify({ type: 'positive', message: t('remaining.k084') })
     await router.push(`/posts/${data.post.id}/edit`)
   } catch (err) {
-    error.value = getErrorMessage(err, '포스트로 옮기지 못했습니다.')
+    error.value = getErrorMessage(err, t('remaining.k085'))
   } finally {
     promotingId.value = null
   }

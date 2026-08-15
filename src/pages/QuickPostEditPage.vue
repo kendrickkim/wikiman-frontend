@@ -6,7 +6,7 @@
       <q-card flat bordered :class="isDesktop ? 'q-pa-lg' : 'q-pa-md'">
         <div class="row items-center q-mb-md">
           <div class="text-subtitle1 text-weight-medium col">
-            {{ isEdit ? '간단 포스트 수정' : '간단 입력' }}
+            {{ isEdit ? t('remaining.k082') : t('remaining.k049') }}
           </div>
           <q-btn
             v-if="isEdit"
@@ -14,7 +14,7 @@
             dense
             no-caps
             color="primary"
-            label="목록"
+            :label="t('remaining.k050')"
             to="/quick-posts"
           />
         </div>
@@ -33,7 +33,7 @@
             outline
             no-caps
             color="primary"
-            label="포스트로 이동"
+            :label="t('remaining.k054')"
             :loading="promoting"
             :disable="saving || !canSave"
             @click="promoteDialog = true"
@@ -42,7 +42,7 @@
             unelevated
             no-caps
             color="primary"
-            :label="isEdit ? '저장' : '저장하고 계속'"
+            :label="isEdit ? t('common.save') : t('remaining.k051')"
             :loading="saving"
             :disable="promoting || !canSave"
             @click="save"
@@ -60,6 +60,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -105,13 +108,13 @@ async function load() {
     content.value = data.quickPost?.content || emptyQuickPostContent(editorType.value)
     editorKey.value += 1
   } catch (err) {
-    error.value = getErrorMessage(err, '간단 포스트를 불러오지 못했습니다.')
+    error.value = getErrorMessage(err, t('remaining.k083'))
   }
 }
 
 async function save() {
   if (!canSave.value) {
-    $q.notify({ type: 'negative', message: '내용을 입력하세요.' })
+    $q.notify({ type: 'negative', message: t('remaining.k048') })
     return
   }
   saving.value = true
@@ -119,14 +122,14 @@ async function save() {
   try {
     if (isEdit.value) {
       await api.patch(`/quick-posts/${route.params.id}`, { content: content.value })
-      $q.notify({ type: 'positive', message: '저장했습니다.' })
+      $q.notify({ type: 'positive', message: t('remaining.k052') })
     } else {
       await api.post('/quick-posts', { content: content.value })
       resetContent()
-      $q.notify({ type: 'positive', message: '저장했습니다.' })
+      $q.notify({ type: 'positive', message: t('remaining.k052') })
     }
   } catch (err) {
-    error.value = getErrorMessage(err, '저장에 실패했습니다.')
+    error.value = getErrorMessage(err, t('remaining.k053'))
   } finally {
     saving.value = false
   }
@@ -145,10 +148,10 @@ async function promote({ editorType: promoteEditorType, keepSource }) {
       keepSource
     })
     promoteDialog.value = false
-    $q.notify({ type: 'positive', message: '일반 포스트 초안으로 옮겼습니다.' })
+    $q.notify({ type: 'positive', message: t('remaining.k084') })
     await router.replace(`/posts/${data.post.id}/edit`)
   } catch (err) {
-    error.value = getErrorMessage(err, '포스트로 옮기지 못했습니다.')
+    error.value = getErrorMessage(err, t('remaining.k085'))
   } finally {
     promoting.value = false
   }

@@ -15,12 +15,13 @@
       <div v-if="preview.description" class="wiki-link-card__desc">{{ preview.description }}</div>
     </div>
   </a>
-  <div v-else-if="loading" class="wiki-link-card wiki-link-card--loading text-grey-7">
-    링크 정보를 불러오는 중…
-  </div>
+  <div v-else-if="loading" class="wiki-link-card wiki-link-card--loading text-grey-7">{{ t('remaining.k043') }}</div>
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { computed, onMounted, ref, watch } from 'vue'
 import { api } from '@/utils/api'
 

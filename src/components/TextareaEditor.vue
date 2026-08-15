@@ -12,10 +12,13 @@
 </template>
 
 <script setup>
+import { t as translate, useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { nextTick, ref } from 'vue'
 
 defineProps({
-  placeholder: { type: String, default: '글을 작성하세요.' },
+    placeholder: { type: String, default: translate('remaining.k062') },
   inputStyle: {
     type: String,
     default: 'min-height: 280px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 1.5;'

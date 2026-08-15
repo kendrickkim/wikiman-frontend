@@ -5,6 +5,9 @@
 </template>
 
 <script setup>
+import { getLocale, useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import $ from 'jquery'
@@ -23,10 +26,10 @@ async function uploadImage(file) {
   try {
     const { data } = await api.post('/uploads', form)
     const url = data.file?.url || data.url
-    if (!url) throw new Error('이미지 업로드에 실패했습니다.')
+    if (!url) throw new Error(t('remaining.k031'))
     $(element.value).summernote('insertImage', url, file.name || '')
   } catch (err) {
-    throw new Error(getErrorMessage(err, '이미지 업로드에 실패했습니다.'))
+    throw new Error(getErrorMessage(err, t('remaining.k031')))
   }
 }
 
@@ -54,12 +57,15 @@ onMounted(async () => {
   // summernote 0.9는 jQuery 3의 $.now에 의존합니다.
   if (typeof $.now !== 'function') $.now = () => Date.now()
   await import('summernote/dist/summernote-lite.js')
-  await import('summernote/dist/lang/summernote-ko-KR.js')
+  const editorLocale = getLocale().startsWith('en') ? 'en-US' : 'ko-KR'
+  if (editorLocale === 'ko-KR') {
+    await import('summernote/dist/lang/summernote-ko-KR.js')
+  }
   $(element.value).summernote({
-    lang: 'ko-KR',
+    lang: editorLocale,
     height: 420,
     minHeight: 240,
-    placeholder: '글을 작성하세요. 이미지는 붙여넣기할 수 있습니다.',
+    placeholder: t('remaining.k032'),
     dialogsInBody: true,
     toolbar: [
       ['style', ['style']],
@@ -79,7 +85,7 @@ onMounted(async () => {
             await uploadImage(file)
           }
         } catch (err) {
-          $q.notify({ type: 'negative', message: err.message || '이미지 업로드에 실패했습니다.' })
+          $q.notify({ type: 'negative', message: err.message || t('remaining.k031') })
         }
       }
     }

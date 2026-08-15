@@ -5,7 +5,7 @@
       dense
       expand-separator
       icon="edit_note"
-      label="간단 입력"
+      :label="t('remaining.k049')"
       header-class="text-weight-medium"
     >
       <div class="q-pa-md">
@@ -24,7 +24,7 @@
             dense
             no-caps
             color="primary"
-            label="목록"
+            :label="t('remaining.k050')"
             to="/quick-posts"
           />
           <q-space />
@@ -32,7 +32,7 @@
             unelevated
             no-caps
             color="primary"
-            label="저장하고 계속"
+            :label="t('remaining.k051')"
             :loading="saving"
             :disable="!canSave"
             @click="save"
@@ -44,6 +44,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { computed, onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
@@ -78,7 +81,7 @@ onMounted(async () => {
 
 async function save() {
   if (!canSave.value) {
-    $q.notify({ type: 'negative', message: '내용을 입력하세요.' })
+    $q.notify({ type: 'negative', message: t('remaining.k048') })
     return
   }
   saving.value = true
@@ -86,9 +89,9 @@ async function save() {
   try {
     await api.post('/quick-posts', { content: content.value })
     resetContent()
-    $q.notify({ type: 'positive', message: '저장했습니다.' })
+    $q.notify({ type: 'positive', message: t('remaining.k052') })
   } catch (err) {
-    error.value = getErrorMessage(err, '저장에 실패했습니다.')
+    error.value = getErrorMessage(err, t('remaining.k053'))
   } finally {
     saving.value = false
   }

@@ -9,6 +9,7 @@ Vue 3 · Quasar 2 · Pinia · Vue Router · JavaScript. Node 22.22+.
 - `src/pages/` — 목록·상세·작성·휴지통·로그인. 사이트 관리는 `src/pages/settings/`
 - `src/layouts/MainLayout.vue` — 사이드바 카테고리, 검색, 사이트 제목
 - `src/stores/` — `auth`, `wiki`, `settings`
+- `src/i18n/` — `koKr.js` / `usEn.js` 메시지, `index.js`의 `t()` / `useI18n()`. boot: `src/boot/i18n.js`
 - `src/composables/useLayout.js` — 데스크톱은 `$q.screen.gt.sm` (1024px)
 - `src/utils/api.js` — axios. `src/utils/title.js` — `displayTitle()`
 
@@ -16,7 +17,9 @@ Vue 3 · Quasar 2 · Pinia · Vue Router · JavaScript. Node 22.22+.
 
 ## UI
 
-- 문구는 한국어. 빈 제목은 `displayTitle()`로 `(제목 없음)`.
+- 사용자 노출 문구는 `t()` / `$t()`로 관리. 사이트 관리 → 일반의 `siteLanguage`(`ko-KR`|`en-US`). 빈 제목은 `displayTitle()` → `common.untitled`.
+- 새 UI 문자열은 `koKr.js`와 `usEn.js`에 같은 키로 추가합니다.
+- 백엔드의 SCREAMING_SNAKE_CASE 오류 코드는 두 카탈로그의 `errors.*` 키로 번역합니다.
 - 데스크톱 본문 최대 너비 `wiki-main--wide` (1380px).
 - 다크모드는 사이트 설정 `theme`. Editor.js 툴바(`+` 등), CKEditor, Summernote는 `body.body--dark` 스타일을 유지합니다.
 - `/`는 홈페이지로 지정된 글을 보여 줍니다. 블로그 모드가 켜져 있으면 지정 홈 대신 최근 발행 글 본문 피드를 표시하고, 한 페이지 글 수는 일반 설정의 `blogPostsPerPage`를 따릅니다. 전체 글 목록은 `/list`. 카테고리 트리의 **홈** / **전체 글**을 구분합니다. 카테고리 목록은 `/category/{id}`(미분류는 `/category/uncategorized`).

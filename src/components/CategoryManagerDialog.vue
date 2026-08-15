@@ -2,7 +2,7 @@
   <q-dialog :model-value="modelValue" :maximized="$q.screen.lt.md" @update:model-value="$emit('update:modelValue', $event)">
     <q-card class="category-manager-card">
       <q-card-section class="row items-center q-pb-none">
-        <div class="text-h6">카테고리 관리</div>
+        <div class="text-h6">{{ t('remaining.k001') }}</div>
         <q-space />
         <q-btn v-close-popup flat round dense icon="close" />
       </q-card-section>
@@ -14,6 +14,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { useQuasar } from 'quasar'
 import CategoryManagerPanel from './CategoryManagerPanel.vue'
 

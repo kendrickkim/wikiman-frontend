@@ -2,7 +2,7 @@
   <q-page class="wiki-page">
     <div class="wiki-main wiki-main--wide">
       <div :class="isDesktop ? 'text-h4 text-weight-bold q-mb-lg' : 'text-h6 q-mb-md'">
-        사이트 관리<span v-if="sectionLabel"> &gt; {{ sectionLabel }}</span>
+        {{ t('settings.title') }}<span v-if="sectionLabel"> &gt; {{ sectionLabel }}</span>
       </div>
       <router-view />
     </div>
@@ -13,23 +13,24 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useLayout } from '@/composables/useLayout'
-
-const SETTINGS_SECTIONS = [
-  { to: '/settings/general', label: '일반' },
-  { to: '/settings/top-menu', label: '상단 메뉴' },
-  { to: '/settings/categories', label: '카테고리' },
-  { to: '/settings/homepage', label: '홈페이지' },
-  { to: '/settings/blog', label: '블로그' },
-  { to: '/settings/quick-posts', label: '간단 포스트' },
-  { to: '/settings/attachments', label: '첨부파일' },
-  { to: '/settings/data', label: '데이터관리' }
-]
+import { useI18n } from '@/i18n'
 
 const route = useRoute()
 const { isDesktop } = useLayout()
+const { t } = useI18n()
+const settingsSections = computed(() => [
+  { to: '/settings/general', label: t('settings.general') },
+  { to: '/settings/top-menu', label: t('settings.topMenu') },
+  { to: '/settings/categories', label: t('settings.categories') },
+  { to: '/settings/homepage', label: t('settings.homepage') },
+  { to: '/settings/blog', label: t('settings.blog') },
+  { to: '/settings/quick-posts', label: t('settings.quickPosts') },
+  { to: '/settings/attachments', label: t('settings.attachments') },
+  { to: '/settings/data', label: t('settings.data') }
+])
 
 const sectionLabel = computed(() => {
-  const match = SETTINGS_SECTIONS.find((item) => route.path.startsWith(item.to))
+  const match = settingsSections.value.find((item) => route.path.startsWith(item.to))
   return match?.label || ''
 })
 </script>

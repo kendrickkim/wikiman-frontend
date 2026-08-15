@@ -2,7 +2,7 @@
   <q-card v-if="editable || files.length" flat bordered :class="cardClass">
     <q-card-section>
       <div class="row items-center no-wrap q-mb-xs">
-        <div class="text-subtitle2">첨부 파일</div>
+        <div class="text-subtitle2">{{ t('remaining.k039') }}</div>
         <q-space />
         <q-btn
           v-if="editable"
@@ -10,14 +10,14 @@
           no-caps
           color="primary"
           icon="attach_file"
-          label="파일 추가"
+          :label="t('remaining.k037')"
           :loading="uploading"
           :disable="uploading || files.length >= maxFiles"
           @click="pick"
         />
       </div>
       <div v-if="editable" class="text-caption text-grey-7 q-mb-sm">
-        여러 파일을 한 번에 올릴 수 있습니다. 파일당 최대 {{ maxMb }}MB.
+        {{ t('extra.attachmentHint', { max: maxMb }) }}
       </div>
       <input
         ref="inputEl"
@@ -26,7 +26,7 @@
         style="display: none"
         @change="onPick"
       >
-      <div v-if="!files.length" class="text-grey-7 text-caption">첨부된 파일이 없습니다.</div>
+      <div v-if="!files.length" class="text-grey-7 text-caption">{{ t('remaining.k040') }}</div>
       <q-list v-else separator>
         <q-item v-for="file in files" :key="file.storedName" dense>
           <q-item-section avatar>
@@ -49,7 +49,7 @@
                 target="_blank"
                 rel="noopener"
               >
-                <q-tooltip>내려받기</q-tooltip>
+                <q-tooltip>{{ t('remaining.k041') }}</q-tooltip>
               </q-btn>
               <q-btn
                 v-if="editable"
@@ -59,7 +59,7 @@
                 icon="close"
                 @click="removeFile(file)"
               >
-                <q-tooltip>제거</q-tooltip>
+                <q-tooltip>{{ t('common.remove') }}</q-tooltip>
               </q-btn>
             </div>
           </q-item-section>
@@ -70,6 +70,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
@@ -121,14 +124,14 @@ async function onPick(event) {
 
   const remaining = MAX_FILES - files.value.length
   if (remaining <= 0) {
-    $q.notify({ type: 'warning', message: `첨부 파일은 최대 ${MAX_FILES}개입니다.` })
+    $q.notify({ type: 'warning', message: t('extra.attachmentLimit', { max: MAX_FILES }) })
     return
   }
 
   const accepted = []
   for (const file of picked.slice(0, remaining)) {
     if (file.size > maxBytes.value) {
-      $q.notify({ type: 'negative', message: `${file.name}은(는) ${maxMb.value}MB를 넘습니다.` })
+      $q.notify({ type: 'negative', message: t('extra.fileTooLarge', { name: file.name, max: maxMb.value }) })
       continue
     }
     accepted.push(file)
@@ -147,7 +150,7 @@ async function onPick(event) {
       ...uploaded.filter((item) => item.storedName && !existing.has(item.storedName))
     ]
   } catch (err) {
-    $q.notify({ type: 'negative', message: getErrorMessage(err, '파일 업로드에 실패했습니다.') })
+    $q.notify({ type: 'negative', message: getErrorMessage(err, t('remaining.k038')) })
   } finally {
     uploading.value = false
   }

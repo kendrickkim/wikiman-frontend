@@ -2,7 +2,7 @@
   <q-dialog :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
     <q-card style="width: 560px; max-width: 92vw">
       <q-card-section>
-        <div class="text-h6">링크 추가</div>
+        <div class="text-h6">{{ t('posts.addLink') }}</div>
       </q-card-section>
 
       <q-card-section class="q-pt-none">
@@ -22,7 +22,7 @@
           map-options
           use-input
           input-debounce="150"
-          label="연결할 글"
+          :label="t('remaining.k063')"
           :loading="loading"
           :options="filteredOptions"
           option-value="id"
@@ -34,7 +34,7 @@
           v-model="url"
           outlined
           label="URL"
-          placeholder="https://example.com 또는 /posts/1"
+          :placeholder="t('remaining.k064')"
           maxlength="500"
         />
 
@@ -42,7 +42,7 @@
           v-model="label"
           outlined
           class="q-mt-md"
-          label="표시할 텍스트"
+          :label="t('remaining.k065')"
           maxlength="200"
           @keyup.enter="submit"
         />
@@ -50,12 +50,12 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn flat no-caps label="취소" v-close-popup />
+        <q-btn flat no-caps :label="t('dialogs.cancel')" v-close-popup />
         <q-btn
           unelevated
           no-caps
           color="primary"
-          label="추가"
+          :label="t('common.add')"
           :disable="!canSubmit"
           @click="submit"
         />
@@ -65,6 +65,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { computed, ref, watch } from 'vue'
 import { api, getErrorMessage } from '@/utils/api'
 import { displayTitle } from '@/utils/title'
@@ -76,7 +79,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'submit'])
 
 const linkTypeOptions = [
-  { label: '위키 글', value: 'post' },
+  { label: t('remaining.k066'), value: 'post' },
   { label: 'URL', value: 'url' }
 ]
 const linkType = ref('post')
@@ -109,8 +112,8 @@ const canSubmit = computed(() => Boolean(validHref.value && resolvedLabel.value)
 
 function postOption(post) {
   const suffix = [
-    post.status === 'draft' ? '작성중' : '',
-    post.visibility === 'private' ? '비공개' : ''
+    post.status === 'draft' ? t('status.draft') : '',
+    post.visibility === 'private' ? t('visibility.privateShort') : ''
   ].filter(Boolean).join(' · ')
   const title = displayTitle(post.title)
   return {
@@ -128,7 +131,7 @@ async function loadPosts() {
     options.value = (data.posts || []).map(postOption)
     filteredOptions.value = options.value
   } catch (err) {
-    error.value = getErrorMessage(err, '글 목록을 불러오지 못했습니다.')
+    error.value = getErrorMessage(err, t('remaining.k067'))
   } finally {
     loading.value = false
   }

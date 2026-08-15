@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { Dark } from 'quasar'
 import { api } from '@/utils/api'
 import { normalizeEditorType, EDITOR_OPTIONS } from '@/utils/editors'
+import { normalizeSiteLanguage, setLocale } from '@/i18n'
 
 const DEFAULT_FAVICON = '/icons/favicon.svg'
 const DEFAULT_APPLE_TOUCH = '/icons/apple-touch-icon.png'
@@ -41,6 +42,7 @@ function applyFontScale(scale) {
 export const useSettingsStore = defineStore('settings', {
   state: () => ({
     siteTitle: 'Wikiman',
+    siteLanguage: 'ko-KR',
     theme: 'light',
     plantumlServer: 'https://www.plantuml.com/plantuml',
     defaultEditor: 'ckeditor',
@@ -78,12 +80,17 @@ export const useSettingsStore = defineStore('settings', {
     },
     apply() {
       Dark.set(this.theme === 'dark')
+      const activeLanguage = setLocale(this.siteLanguage)
+      import('@/boot/i18n.js')
+        .then(({ applyQuasarLang }) => applyQuasarLang(activeLanguage))
+        .catch(() => {})
       document.title = this.siteTitle
       applyFavicon(this.favicon)
       applyFontScale(this.fontScale)
     },
     assign(data) {
       this.siteTitle = data.siteTitle || 'Wikiman'
+      this.siteLanguage = normalizeSiteLanguage(data.siteLanguage)
       this.theme = data.theme === 'dark' ? 'dark' : 'light'
       this.plantumlServer = data.plantumlServer || 'https://www.plantuml.com/plantuml'
       this.defaultEditor = normalizeEditorType(data.defaultEditor)

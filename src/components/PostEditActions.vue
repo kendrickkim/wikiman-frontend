@@ -4,7 +4,7 @@
       outline
       no-caps
       color="primary"
-      label="초안 저장"
+      :label="t('posts.draftSave')"
       :dense="mobile"
       :size="mobile ? 'sm' : undefined"
       :loading="saving && savingAs === 'draft'"
@@ -15,7 +15,7 @@
       unelevated
       no-caps
       color="primary"
-      label="발행"
+      :label="t('posts.publish')"
       :dense="mobile"
       :size="mobile ? 'sm' : undefined"
       :loading="saving && savingAs === 'published'"
@@ -25,7 +25,7 @@
     <q-btn
       outline
       no-caps
-      label="취소"
+      :label="t('common.cancel')"
       :dense="mobile"
       :size="mobile ? 'sm' : undefined"
       :disable="saving"
@@ -36,7 +36,7 @@
       outline
       no-caps
       color="negative"
-      label="삭제"
+      :label="t('posts.delete')"
       :dense="mobile"
       :size="mobile ? 'sm' : undefined"
       :disable="saving"
@@ -46,6 +46,10 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
+
 defineProps({
   mobile: { type: Boolean, default: false },
   saving: { type: Boolean, default: false },

@@ -42,6 +42,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { computed } from 'vue'
 import { useQuasar } from 'quasar'
 import { renderMarkdown } from '@/utils/markdown'
@@ -102,15 +105,15 @@ async function onContentClick(event) {
   try {
     await copyText(text)
     const prev = btn.textContent
-    btn.textContent = '복사됨'
+    btn.textContent = t('remaining.k044')
     btn.classList.add('wiki-code-copy--done')
     window.setTimeout(() => {
-      btn.textContent = prev || '복사'
+      btn.textContent = prev || t('remaining.k045')
       btn.classList.remove('wiki-code-copy--done')
     }, 1200)
-    $q.notify({ type: 'positive', message: '코드를 복사했습니다.' })
+    $q.notify({ type: 'positive', message: t('remaining.k046') })
   } catch {
-    $q.notify({ type: 'negative', message: '코드를 복사하지 못했습니다.' })
+    $q.notify({ type: 'negative', message: t('remaining.k047') })
   }
 }
 

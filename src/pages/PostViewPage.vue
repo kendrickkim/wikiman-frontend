@@ -10,13 +10,13 @@
           <div class="wiki-article-head__body">
             <div :class="['wiki-article-head__title', isDesktop ? 'text-h4 text-weight-bold' : 'text-h5']">{{ displayTitle(post.title) }}</div>
             <div class="text-grey-7 q-mt-sm" :class="isDesktop ? 'text-body2' : 'text-caption'">
-              {{ post.categoryName || '미분류' }} · {{ post.authorName }} · 작성 {{ formatDate(post.createdAt) }}<template v-if="isModified"> · 수정 {{ formatDate(post.updatedAt) }}</template>
-              <q-badge v-if="post.isHomepage" class="q-ml-sm" color="info">홈페이지</q-badge>
+              {{ post.categoryName || t('common.uncategorized') }} · {{ post.authorName }} · {{ t('common.created', { date: formatDate(post.createdAt) }) }}<template v-if="isModified"> · {{ t('common.updated', { date: formatDate(post.updatedAt) }) }}</template>
+              <q-badge v-if="post.isHomepage" class="q-ml-sm" color="info">{{ t('posts.homepageBadge') }}</q-badge>
               <q-badge class="q-ml-sm" :color="post.status === 'draft' ? 'warning' : 'primary'">
-                {{ post.status === 'draft' ? '작성중' : '발행' }}
+                {{ post.status === 'draft' ? t('status.draft') : t('posts.publish') }}
               </q-badge>
               <q-badge v-if="post.status === 'published'" class="q-ml-sm" :color="post.visibility === 'private' ? 'grey' : 'positive'">
-                {{ post.visibility === 'private' ? '비공개' : '공개' }}
+                {{ post.visibility === 'private' ? t('visibility.privateShort') : t('visibility.publicShort') }}
               </q-badge>
             </div>
             <KeywordChips class="q-mt-sm" :keywords="post.keywords" />
@@ -29,8 +29,8 @@
               no-caps
               :dense="!isDesktop"
               :size="isDesktop ? 'md' : 'sm'"
-              :label="isDesktop ? '링크 복사' : undefined"
-              :aria-label="isDesktop ? undefined : '링크 복사'"
+              :label="isDesktop ? t('common.copyLink') : undefined"
+              :aria-label="isDesktop ? undefined : t('common.copyLink')"
               @click="copyLink"
             />
             <template v-if="canEdit">
@@ -42,8 +42,8 @@
                 no-caps
                 :dense="!isDesktop"
                 :size="isDesktop ? 'md' : 'sm'"
-                :label="isDesktop ? '발행' : undefined"
-                :aria-label="isDesktop ? undefined : '발행'"
+                :label="isDesktop ? t('posts.publish') : undefined"
+                :aria-label="isDesktop ? undefined : t('posts.publish')"
                 @click="onPublish"
               />
               <q-btn
@@ -53,8 +53,8 @@
                 no-caps
                 :dense="!isDesktop"
                 :size="isDesktop ? 'md' : 'sm'"
-                :label="isDesktop ? '수정' : undefined"
-                :aria-label="isDesktop ? undefined : '수정'"
+                :label="isDesktop ? t('common.edit') : undefined"
+                :aria-label="isDesktop ? undefined : t('common.edit')"
                 :to="`/posts/${post.id}/edit`"
               />
               <q-btn
@@ -64,8 +64,8 @@
                 no-caps
                 :dense="!isDesktop"
                 :size="isDesktop ? 'md' : 'sm'"
-                :label="isDesktop ? '삭제' : undefined"
-                :aria-label="isDesktop ? undefined : '삭제'"
+                :label="isDesktop ? t('common.delete') : undefined"
+                :aria-label="isDesktop ? undefined : t('common.delete')"
                 @click="removePost(post)"
               />
             </template>
@@ -82,6 +82,7 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
 import { computed, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRoute } from 'vue-router'
@@ -96,6 +97,7 @@ import PostLinkPreviews from '@/components/PostLinkPreviews.vue'
 import { displayTitle } from '@/utils/title'
 import { formatDate } from '@/utils/format'
 
+const { t } = useI18n()
 const $q = useQuasar()
 const route = useRoute()
 const { isDesktop } = useLayout()
@@ -137,9 +139,9 @@ async function copyLink() {
       document.execCommand('copy')
       document.body.removeChild(input)
     }
-    $q.notify({ type: 'positive', message: '링크를 복사했습니다.' })
+    $q.notify({ type: 'positive', message: t('posts.copiedLink') })
   } catch {
-    $q.notify({ type: 'negative', message: '링크를 복사하지 못했습니다.' })
+    $q.notify({ type: 'negative', message: t('posts.copyLinkFailed') })
   }
 }
 
@@ -150,7 +152,7 @@ async function load() {
     const { data } = await api.get(`/posts/${route.params.id}`)
     post.value = data.post
   } catch (err) {
-    error.value = getErrorMessage(err, '글을 찾을 수 없습니다.')
+    error.value = getErrorMessage(err, t('posts.notFound'))
   } finally {
     loading.value = false
   }

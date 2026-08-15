@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { t } from '../i18n/index.js'
 
 export const api = axios.create({
   baseURL: '/api'
@@ -12,6 +13,16 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-export function getErrorMessage(err, fallback = '요청에 실패했습니다.') {
-  return err?.response?.data?.error || err?.message || fallback
+export function getErrorMessage(err, fallback) {
+  const data = err?.response?.data
+  const serverError = data?.error
+
+  if (typeof serverError === 'string' && /^[A-Z][A-Z0-9_]*$/.test(serverError)) {
+    const key = `errors.${serverError}`
+    const translated = t(key, data.params || {})
+    return translated === key ? (fallback || t('common.errorRequestFailed')) : translated
+  }
+
+  if (typeof serverError === 'string' && serverError) return serverError
+  return err?.message || fallback || t('common.errorRequestFailed')
 }

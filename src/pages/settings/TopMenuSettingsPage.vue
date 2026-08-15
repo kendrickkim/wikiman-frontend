@@ -4,22 +4,20 @@
 
     <q-card flat bordered>
       <q-card-section>
-        <div class="text-subtitle1 text-weight-medium">상단 메뉴바</div>
-        <div class="text-grey-7 text-caption q-mt-xs">
-          사이트 제목 바로 아래에 표시할 메뉴를 만듭니다. 글을 연결하거나 URL을 직접 입력할 수 있습니다.
-        </div>
+        <div class="text-subtitle1 text-weight-medium">{{ t('remaining.k151') }}</div>
+        <div class="text-grey-7 text-caption q-mt-xs">{{ t('remaining.k152') }}</div>
       </q-card-section>
 
       <q-card-section>
         <div class="row items-center justify-between q-gutter-sm">
           <div>
-            <div class="text-body2">상단 메뉴 표시</div>
-            <div class="text-caption text-grey-7">끄면 메뉴 항목은 유지되고 화면에서만 숨깁니다.</div>
+            <div class="text-body2">{{ t('remaining.k153') }}</div>
+            <div class="text-caption text-grey-7">{{ t('remaining.k154') }}</div>
           </div>
           <q-toggle
             v-model="topMenuVisible"
             color="primary"
-            :label="topMenuVisible ? '보이기' : '숨기기'"
+            :label="topMenuVisible ? t('extra.show') : t('extra.hide')"
             :disable="loading || togglingVisible"
             @update:model-value="saveVisibility"
           />
@@ -40,7 +38,7 @@
                 v-model="newItem.label"
                 outlined
                 dense
-                label="메뉴명"
+                :label="t('remaining.k137')"
                 maxlength="30"
                 counter
               />
@@ -66,7 +64,7 @@
                 fill-input
                 hide-selected
                 input-debounce="150"
-                label="연결할 글"
+                :label="t('remaining.k063')"
                 :options="filteredPostOptions"
                 option-value="id"
                 option-label="label"
@@ -78,7 +76,7 @@
                 outlined
                 dense
                 label="URL"
-                hint="예: /posts/1 또는 https://example.com"
+                :hint="t('remaining.k138')"
                 maxlength="500"
               />
             </div>
@@ -89,7 +87,7 @@
                 no-caps
                 color="primary"
                 icon="add"
-                label="메뉴 추가"
+                :label="t('remaining.k139')"
                 :disable="!canAdd || saving"
                 @click="addItem"
               />
@@ -101,9 +99,7 @@
             flat
             bordered
             class="q-pa-md q-mt-lg text-grey-7 text-center"
-          >
-            등록된 상단 메뉴가 없습니다.
-          </q-card>
+          >{{ t('remaining.k155') }}</q-card>
 
           <q-list v-else bordered separator class="rounded-borders q-mt-lg">
             <q-item v-for="(item, index) in items" :key="item.key">
@@ -114,7 +110,7 @@
                       v-model="item.label"
                       outlined
                       dense
-                      label="메뉴명"
+                      :label="t('remaining.k137')"
                       maxlength="30"
                     />
                   </div>
@@ -139,7 +135,7 @@
                       fill-input
                       hide-selected
                       input-debounce="150"
-                      label="연결할 글"
+                      :label="t('remaining.k063')"
                       :options="filteredPostOptions"
                       option-value="id"
                       option-label="label"
@@ -151,7 +147,7 @@
                       outlined
                       dense
                       label="URL"
-                      hint="예: /posts/1 또는 https://example.com"
+                      :hint="t('remaining.k138')"
                       maxlength="500"
                     />
                   </div>
@@ -164,7 +160,7 @@
                     round
                     dense
                     icon="arrow_upward"
-                    aria-label="위로 이동"
+                    :aria-label="t('remaining.k140')"
                     :disable="saving || index === 0"
                     @click="move(index, -1)"
                   />
@@ -173,7 +169,7 @@
                     round
                     dense
                     icon="arrow_downward"
-                    aria-label="아래로 이동"
+                    :aria-label="t('remaining.k141')"
                     :disable="saving || index === items.length - 1"
                     @click="move(index, 1)"
                   />
@@ -183,7 +179,7 @@
                     dense
                     color="negative"
                     icon="delete"
-                    aria-label="메뉴 삭제"
+                    :aria-label="t('remaining.k142')"
                     :disable="saving"
                     @click="removeAt(index)"
                   />
@@ -199,7 +195,7 @@
           unelevated
           no-caps
           color="primary"
-          label="메뉴 저장"
+          :label="t('remaining.k143')"
           :loading="saving"
           :disable="loading"
           @click="save"
@@ -210,6 +206,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
@@ -229,7 +228,7 @@ const error = ref('')
 let nextKey = 1
 
 const linkTypeOptions = [
-  { label: '글', value: 'post' },
+  { label: t('remaining.k144'), value: 'post' },
   { label: 'URL', value: 'url' }
 ]
 
@@ -262,8 +261,8 @@ const canAdd = computed(() => {
 
 function postOption(post) {
   const suffix = [
-    post.status === 'draft' ? '작성중' : '',
-    post.visibility === 'private' ? '비공개' : ''
+    post.status === 'draft' ? t('status.draft') : '',
+    post.visibility === 'private' ? t('visibility.privateShort') : ''
   ].filter(Boolean).join(' · ')
   return {
     id: Number(post.id),
@@ -295,7 +294,7 @@ async function load() {
     filteredPostOptions.value = postOptions.value
     items.value = (data.items || []).map(mapLoadedItem)
   } catch (err) {
-    error.value = getErrorMessage(err, '상단 메뉴 정보를 불러오지 못했습니다.')
+    error.value = getErrorMessage(err, t('remaining.k145'))
   } finally {
     loading.value = false
   }
@@ -309,11 +308,11 @@ async function saveVisibility(value) {
     topMenuVisible.value = settings.topMenuVisible !== false
     $q.notify({
       type: 'positive',
-      message: settings.topMenuVisible ? '상단 메뉴를 표시합니다.' : '상단 메뉴를 숨겼습니다.'
+      message: settings.topMenuVisible ? t('remaining.k146') : t('remaining.k147')
     })
   } catch (err) {
     topMenuVisible.value = settings.topMenuVisible !== false
-    error.value = getErrorMessage(err, '상단 메뉴 표시 설정을 저장하지 못했습니다.')
+    error.value = getErrorMessage(err, t('remaining.k148'))
   } finally {
     togglingVisible.value = false
   }
@@ -379,9 +378,9 @@ async function save() {
     const { data } = await api.put('/settings/top-menu', { items: payload })
     items.value = (data.items || []).map(mapLoadedItem)
     await settings.ensureLoaded({ force: true })
-    $q.notify({ type: 'positive', message: '상단 메뉴를 저장했습니다.' })
+    $q.notify({ type: 'positive', message: t('remaining.k149') })
   } catch (err) {
-    error.value = getErrorMessage(err, '상단 메뉴를 저장하지 못했습니다.')
+    error.value = getErrorMessage(err, t('remaining.k150'))
   } finally {
     saving.value = false
   }

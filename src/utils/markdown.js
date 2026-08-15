@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js'
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js/lib/core'
 import plantumlEncoder from 'plantuml-encoder'
@@ -147,7 +148,7 @@ function renderCodeFence(code, language, { codeLineNumbers = false } = {}) {
   const preClass = codeLineNumbers ? 'hljs wiki-code--lined' : 'hljs'
   return (
     `<div class="wiki-code-block">`
-    + `<button type="button" class="wiki-code-copy" title="복사">복사</button>`
+    + `<button type="button" class="wiki-code-copy" title="${escapeHtml(t('remaining.k045'))}">${escapeHtml(t('remaining.k045'))}</button>`
     + `<pre class="${preClass}"><code class="${className}">${body}</code></pre>`
     + `</div>`
   )

@@ -5,6 +5,9 @@
 </template>
 
 <script setup>
+import { getLocale, useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import '@toast-ui/editor/dist/toastui-editor.css'
@@ -24,7 +27,7 @@ async function uploadImage(blob) {
   form.append('image', blob, blob.name || 'image.png')
   const { data } = await api.post('/uploads', form)
   const url = data.file?.url || data.url
-  if (!url) throw new Error('이미지 업로드에 실패했습니다.')
+  if (!url) throw new Error(t('remaining.k031'))
   return url
 }
 
@@ -41,9 +44,13 @@ function insertLink({ href, label }) {
 defineExpose({ selectedText, insertLink })
 
 onMounted(async () => {
+  const editorLocale = getLocale().startsWith('en') ? 'en-US' : 'ko-KR'
+  const languagePack = editorLocale === 'ko-KR'
+    ? import('@toast-ui/editor/dist/i18n/ko-kr')
+    : Promise.resolve()
   const [{ default: Editor }] = await Promise.all([
     import('@toast-ui/editor'),
-    import('@toast-ui/editor/dist/i18n/ko-kr')
+    languagePack
   ])
   if (!holder.value) return
   editor = new Editor({
@@ -52,17 +59,17 @@ onMounted(async () => {
     initialEditType: 'wysiwyg',
     previewStyle: 'vertical',
     initialValue: model.value || '',
-    language: 'ko-KR',
+    language: editorLocale,
     usageStatistics: false,
     theme: settings.isDark ? 'dark' : 'light',
-    placeholder: '글을 작성하세요. 이미지는 붙여넣기할 수 있습니다.',
+    placeholder: t('remaining.k032'),
     hooks: {
       async addImageBlobHook(blob, callback) {
         try {
           const url = await uploadImage(blob)
           callback(url, blob.name || '')
         } catch (err) {
-          $q.notify({ type: 'negative', message: getErrorMessage(err, '이미지 업로드에 실패했습니다.') })
+          $q.notify({ type: 'negative', message: getErrorMessage(err, t('remaining.k031')) })
         }
       }
     },

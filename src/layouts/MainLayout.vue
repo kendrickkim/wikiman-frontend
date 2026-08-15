@@ -10,7 +10,7 @@
     >
       <template v-if="isDesktop">
       <q-toolbar class="wiki-toolbar-desktop">
-        <q-btn dense flat round icon="menu" aria-label="메뉴" @click="leftDrawer = !leftDrawer" />
+        <q-btn dense flat round icon="menu" :aria-label="t('common.menu')" @click="leftDrawer = !leftDrawer" />
         <q-toolbar-title class="cursor-pointer wiki-brand ellipsis" @click="goHome">
           {{ settings.siteTitle }}
         </q-toolbar-title>
@@ -18,7 +18,7 @@
           v-model="search"
           dense
           outlined
-          placeholder="글 검색"
+          :placeholder="t('posts.searchPlaceholder')"
           :dark="settings.isDark"
           :bg-color="settings.isDark ? undefined : 'grey-2'"
           class="wiki-search"
@@ -37,7 +37,7 @@
           flat
           round
           icon="account_tree"
-          aria-label="카테고리"
+          :aria-label="t('common.category')"
           @click="rightDrawer = !rightDrawer"
         />
         <q-btn
@@ -45,7 +45,7 @@
           unelevated
           color="primary"
           icon="add"
-          label="새 글"
+          :label="t('nav.write')"
           no-caps
           to="/posts/new"
         />
@@ -54,7 +54,7 @@
           outline
           no-caps
           color="primary"
-          label="로그인"
+          :label="t('nav.login')"
           to="/login"
         />
         <q-btn-dropdown v-else flat no-caps dropdown-icon="expand_more">
@@ -71,13 +71,13 @@
               <q-item-section avatar>
                 <q-icon name="settings" />
               </q-item-section>
-              <q-item-section>사이트 관리</q-item-section>
+              <q-item-section>{{ t('nav.settings') }}</q-item-section>
             </q-item>
             <q-item clickable v-close-popup @click="logout">
               <q-item-section avatar>
                 <q-icon name="logout" />
               </q-item-section>
-              <q-item-section>로그아웃</q-item-section>
+              <q-item-section>{{ t('nav.logout') }}</q-item-section>
             </q-item>
           </q-list>
         </q-btn-dropdown>
@@ -98,7 +98,7 @@
 
       <template v-else>
         <q-toolbar>
-          <q-btn dense flat round icon="menu" aria-label="메뉴" @click="leftDrawer = !leftDrawer" />
+          <q-btn dense flat round icon="menu" :aria-label="t('common.menu')" @click="leftDrawer = !leftDrawer" />
           <q-toolbar-title class="cursor-pointer wiki-brand ellipsis" @click="goHome">
             {{ settings.siteTitle }}
           </q-toolbar-title>
@@ -109,7 +109,7 @@
             round
             dense
             icon="search"
-            aria-label="검색"
+            :aria-label="t('common.search')"
             @click="mobileSearch = !mobileSearch"
           />
             <q-input
@@ -118,7 +118,7 @@
             :dark="settings.isDark"
             dense
             outlined
-            placeholder="검색"
+            :placeholder="t('common.search')"
             class="q-mr-sm wiki-search"
             debounce="300"
             @keyup.enter="applySearch"
@@ -133,7 +133,7 @@
             unelevated
             color="primary"
             icon="add"
-            :label="$q.screen.gt.xs ? '새 글' : undefined"
+            :label="$q.screen.gt.xs ? t('nav.write') : undefined"
             :round="$q.screen.lt.sm"
             dense
             no-caps
@@ -144,7 +144,7 @@
             flat
             no-caps
             :dense="$q.screen.lt.sm"
-            :label="$q.screen.gt.xs ? '로그인' : undefined"
+            :label="$q.screen.gt.xs ? t('nav.login') : undefined"
             :icon="$q.screen.lt.sm ? 'login' : undefined"
             to="/login"
           />
@@ -161,10 +161,10 @@
                 <q-item-section class="text-grey-8">{{ auth.user.username }}</q-item-section>
               </q-item>
               <q-item v-if="auth.canWrite" clickable v-close-popup to="/settings">
-                <q-item-section>사이트 관리</q-item-section>
+                <q-item-section>{{ t('nav.settings') }}</q-item-section>
               </q-item>
               <q-item clickable v-close-popup @click="logout">
-                <q-item-section>로그아웃</q-item-section>
+                <q-item-section>{{ t('nav.logout') }}</q-item-section>
               </q-item>
             </q-list>
           </q-btn-dropdown>
@@ -187,7 +187,7 @@
             :dark="settings.isDark"
             dense
             outlined
-            placeholder="검색"
+            :placeholder="t('common.search')"
             class="full-width"
             debounce="300"
             autofocus
@@ -214,7 +214,7 @@
       :class="drawerClass"
     >
       <div class="wiki-drawer-inner">
-        <div v-if="treeOnRight" class="wiki-drawer-title">메뉴</div>
+        <div v-if="treeOnRight" class="wiki-drawer-title">{{ t('common.menu') }}</div>
         <CategoryTreePanel :show-nav="true" :show-tree="!treeOnRight" />
       </div>
     </q-drawer>
@@ -236,7 +236,7 @@
     <q-page-container>
       <router-view />
       <div class="wiki-powered-by" aria-hidden="false">
-        Powered by Wikiman
+        {{ t('common.poweredBy') }}
       </div>
     </q-page-container>
   </q-layout>
@@ -250,6 +250,7 @@ import { useWikiStore } from '@/stores/wiki'
 import { useSettingsStore } from '@/stores/settings'
 import { useLayout } from '@/composables/useLayout'
 import CategoryTreePanel from '@/components/CategoryTreePanel.vue'
+import { useI18n } from '@/i18n'
 
 const route = useRoute()
 const router = useRouter()
@@ -257,6 +258,7 @@ const { $q, isDesktop } = useLayout()
 const auth = useAuthStore()
 const wiki = useWikiStore()
 const settings = useSettingsStore()
+const { t } = useI18n()
 const leftDrawer = ref(false)
 const rightDrawer = ref(false)
 const mobileSearch = ref(false)

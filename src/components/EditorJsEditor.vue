@@ -3,6 +3,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import EditorJS from '@editorjs/editorjs'
 import Header from '@editorjs/header'
@@ -104,7 +107,7 @@ onMounted(async () => {
   editor = new EditorCtor({
     holder: holder.value,
     readOnly: props.readOnly,
-    placeholder: '글을 작성하세요. 이미지는 붙여넣기할 수 있습니다.',
+    placeholder: t('remaining.k032'),
     data: parseContent(props.modelValue),
     tools: {
       header: { class: Header.default || Header, inlineToolbar: true },

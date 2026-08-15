@@ -3,8 +3,8 @@
     <CategoryTreeSelect
       class="col"
       :model-value="modelValue"
-      label="카테고리"
-      root-label="미분류"
+      :label="t('categories.title')"
+      root-:label="t('common.uncategorized')"
       empty-icon="folder_off"
       :empty-value="null"
       :dense="!isDesktop"
@@ -18,8 +18,8 @@
       no-caps
       unelevated
       icon="account_tree"
-      :label="isDesktop ? '관리' : undefined"
-      aria-label="카테고리 관리"
+      :label="isDesktop ? t('common.manage') : undefined"
+      :aria-label="t('remaining.k001')"
       @click="managerOpen = true"
     />
     <CategoryManagerDialog v-model="managerOpen" @saved="onSaved" />
@@ -27,6 +27,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { computed, ref } from 'vue'
 import { useWikiStore } from '@/stores/wiki'
 import { useAuthStore } from '@/stores/auth'

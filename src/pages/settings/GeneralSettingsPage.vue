@@ -5,45 +5,55 @@
     <q-form @submit.prevent="save">
       <q-card flat bordered>
         <q-card-section>
-          <div class="text-subtitle1 text-weight-medium">일반</div>
-          <div class="text-grey-7 text-caption q-mt-xs">사이트 기본 모습과 작성 환경을 설정합니다.</div>
+          <div class="text-subtitle1 text-weight-medium">{{ t('settings.general') }}</div>
+          <div class="text-grey-7 text-caption q-mt-xs">{{ t('settings.generalDescription') }}</div>
         </q-card-section>
         <q-card-section class="q-gutter-md">
           <q-input
             v-model="form.siteTitle"
             outlined
-            label="사이트 제목"
-            hint="상단 로고와 브라우저 탭에 표시됩니다."
+            :label="t('settings.siteTitle')"
+            :hint="t('settings.siteTitleHint')"
             maxlength="80"
           />
 
+          <q-select
+            v-model="form.siteLanguage"
+            outlined
+            emit-value
+            map-options
+            :label="t('settings.language.label')"
+            :hint="t('settings.language.hint')"
+            :options="languageOptions"
+          />
+
           <div>
-            <div class="text-body2 q-mb-sm">파비콘</div>
+            <div class="text-body2 q-mb-sm">{{ t('settings.favicon') }}</div>
             <div class="row items-center no-wrap q-gutter-sm">
               <img
                 class="wiki-favicon-preview"
                 :src="form.favicon || '/icons/favicon.svg'"
-                alt="파비콘 미리보기"
+                :alt="t('settings.faviconPreview')"
               >
               <q-btn
                 outline
                 no-caps
                 color="primary"
                 icon="upload"
-                label="이미지 선택"
+                :label="t('settings.chooseImage')"
                 :loading="uploadingFavicon"
                 @click="pickFavicon"
               />
               <q-btn
                 flat
                 no-caps
-                label="기본값으로 되돌리기"
+                :label="t('common.reset')"
                 :disable="uploadingFavicon || resettingFavicon || !form.favicon"
                 :loading="resettingFavicon"
                 @click="resetFavicon"
               />
             </div>
-            <div class="text-caption text-grey-7 q-mt-xs">PNG, ICO, SVG, WebP, JPEG. 최대 2MB.</div>
+            <div class="text-caption text-grey-7 q-mt-xs">{{ t('settings.faviconHint') }}</div>
             <input
               ref="faviconInput"
               type="file"
@@ -54,7 +64,7 @@
           </div>
 
           <div>
-            <div class="text-body2 q-mb-sm">테마</div>
+            <div class="text-body2 q-mb-sm">{{ t('settings.theme') }}</div>
             <q-btn-toggle
               v-model="form.theme"
               unelevated
@@ -65,7 +75,7 @@
           </div>
 
           <div>
-            <div class="text-body2 q-mb-sm">글자 스케일</div>
+            <div class="text-body2 q-mb-sm">{{ t('settings.fontScale') }}</div>
             <q-select
               v-model="form.fontScale"
               outlined
@@ -75,23 +85,23 @@
               :options="fontScaleOptions"
               style="max-width: 220px"
             />
-            <div class="text-caption text-grey-7 q-mt-xs">기본값은 100%입니다. 모바일에서 글자가 크면 낮춰 보세요.</div>
+            <div class="text-caption text-grey-7 q-mt-xs">{{ t('settings.fontScaleHint') }}</div>
           </div>
 
           <div>
             <q-toggle
               v-model="form.codeLineNumbers"
-              label="Markdown 코드 라인 번호"
+              :label="t('settings.codeLineNumbers')"
               color="primary"
             />
             <div class="text-caption text-grey-7 q-mt-xs">
-              켜면 Markdown 코드 블록 왼쪽에 줄 번호를 표시합니다.
+              {{ t('settings.codeLineNumbersHint') }}
             </div>
           </div>
 
           <div class="wiki-split">
             <div>
-              <div class="text-body2 q-mb-sm">카테고리 트리</div>
+              <div class="text-body2 q-mb-sm">{{ t('settings.categoryTree') }}</div>
               <q-btn-toggle
                 v-model="form.categoryTreeExpand"
                 unelevated
@@ -100,10 +110,10 @@
                 :spread="!isDesktop"
                 :options="treeExpandOptions"
               />
-              <div class="text-caption text-grey-7 q-mt-xs">사이드 메뉴 카테고리의 기본 펼침 상태입니다.</div>
+              <div class="text-caption text-grey-7 q-mt-xs">{{ t('settings.categoryTreeHint') }}</div>
             </div>
             <div>
-              <div class="text-body2 q-mb-sm">카테고리 트리 위치</div>
+              <div class="text-body2 q-mb-sm">{{ t('settings.categoryTreeSide') }}</div>
               <q-btn-toggle
                 v-model="form.categoryTreeSide"
                 unelevated
@@ -112,16 +122,16 @@
                 :spread="!isDesktop"
                 :options="treeSideOptions"
               />
-              <div class="text-caption text-grey-7 q-mt-xs">데스크톱에서 카테고리 트리만 오른쪽/왼쪽으로 옮깁니다. 홈·전체 글 등 메뉴는 항상 왼쪽에 둡니다.</div>
+              <div class="text-caption text-grey-7 q-mt-xs">{{ t('settings.categoryTreeSideHint') }}</div>
               <q-toggle
                 v-model="form.rightMenuDefaultOpen"
                 class="q-mt-sm"
-                label="오른쪽 메뉴 기본으로 열기"
+                :label="t('settings.rightMenuDefaultOpen')"
                 color="primary"
                 :disable="form.categoryTreeSide !== 'right'"
               />
               <div class="text-caption text-grey-7 q-mt-xs">
-                카테고리 트리를 오른쪽에 둔 경우, 페이지를 열 때 오른쪽 패널을 기본으로 펼칠지 정합니다.
+                {{ t('settings.rightMenuDefaultOpenHint') }}
               </div>
             </div>
           </div>
@@ -129,7 +139,7 @@
           <div>
             <div class="wiki-split">
               <div>
-                <div class="text-body2 q-mb-sm">기본 작성 방식 (데스크톱)</div>
+                <div class="text-body2 q-mb-sm">{{ t('settings.defaultEditorDesktop') }}</div>
                 <q-select
                   v-model="form.defaultEditor"
                   outlined
@@ -140,7 +150,7 @@
                 />
               </div>
               <div>
-                <div class="text-body2 q-mb-sm">기본 작성 방식 (모바일)</div>
+                <div class="text-body2 q-mb-sm">{{ t('settings.defaultEditorMobile') }}</div>
                 <q-select
                   v-model="form.defaultEditorMobile"
                   outlined
@@ -151,18 +161,18 @@
                 />
               </div>
             </div>
-            <div class="text-caption text-grey-7 q-mt-xs">새 글 작성 시 화면 크기에 맞는 에디터가 기본으로 선택됩니다.</div>
+            <div class="text-caption text-grey-7 q-mt-xs">{{ t('settings.defaultEditorHint') }}</div>
           </div>
 
           <q-input
             v-model="form.plantumlServer"
             outlined
-            label="PlantUML 서버"
-            hint="Markdown의 plantuml 코드 블록을 그릴 서버 주소입니다."
+            :label="t('settings.plantumlServer')"
+            :hint="t('settings.plantumlServerHint')"
           />
         </q-card-section>
         <q-card-actions align="right" class="q-pa-md">
-          <q-btn type="submit" unelevated color="primary" label="설정 저장" :loading="saving" />
+          <q-btn type="submit" unelevated color="primary" :label="t('settings.saveSettings')" :loading="saving" />
         </q-card-actions>
       </q-card>
     </q-form>
@@ -170,16 +180,18 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
 import { useLayout } from '@/composables/useLayout'
 import { useSettingsStore } from '@/stores/settings'
-import { EDITOR_OPTIONS } from '@/utils/editors'
+import { editorOptions as makeEditorOptions } from '@/utils/editors'
+import { useI18n } from '@/i18n'
 
 const $q = useQuasar()
 const { isDesktop } = useLayout()
 const settings = useSettingsStore()
+const { t } = useI18n()
 const saving = ref(false)
 const uploadingFavicon = ref(false)
 const resettingFavicon = ref(false)
@@ -187,6 +199,7 @@ const faviconInput = ref(null)
 const error = ref('')
 const form = reactive({
   siteTitle: settings.siteTitle,
+  siteLanguage: settings.siteLanguage,
   theme: settings.theme,
   plantumlServer: settings.plantumlServer,
   defaultEditor: settings.defaultEditor,
@@ -199,28 +212,33 @@ const form = reactive({
   codeLineNumbers: settings.codeLineNumbers
 })
 
-const themeOptions = [
-  { label: '밝은', value: 'light', icon: 'light_mode' },
-  { label: '어두운', value: 'dark', icon: 'dark_mode' }
-]
-const treeExpandOptions = [
-  { label: '모두 펼침', value: 'expanded' },
-  { label: '모두 접힘', value: 'collapsed' },
-  { label: '1단계만 펼침', value: 'root' }
-]
-const treeSideOptions = [
-  { label: '왼쪽', value: 'left' },
-  { label: '오른쪽', value: 'right' }
-]
-const fontScaleOptions = [60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120].map((value) => ({
-  label: value === 100 ? '100% (기본)' : `${value}%`,
+const languageOptions = computed(() => [
+  { label: t('settings.language.korean'), value: 'ko-KR' },
+  { label: t('settings.language.englishUs'), value: 'en-US' }
+])
+const themeOptions = computed(() => [
+  { label: t('settings.themeLight'), value: 'light', icon: 'light_mode' },
+  { label: t('settings.themeDark'), value: 'dark', icon: 'dark_mode' }
+])
+const treeExpandOptions = computed(() => [
+  { label: t('settings.treeExpanded'), value: 'expanded' },
+  { label: t('settings.treeCollapsed'), value: 'collapsed' },
+  { label: t('settings.treeRoot'), value: 'root' }
+])
+const treeSideOptions = computed(() => [
+  { label: t('settings.left'), value: 'left' },
+  { label: t('settings.right'), value: 'right' }
+])
+const fontScaleOptions = computed(() => [60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120].map((value) => ({
+  label: value === 100 ? t('settings.fontScaleDefault', { value }) : `${value}%`,
   value
-}))
-const editorOptions = EDITOR_OPTIONS
+})))
+const editorOptions = computed(() => makeEditorOptions())
 
 onMounted(async () => {
   await settings.ensureLoaded()
   form.siteTitle = settings.siteTitle
+  form.siteLanguage = settings.siteLanguage
   form.theme = settings.theme
   form.plantumlServer = settings.plantumlServer
   form.defaultEditor = settings.defaultEditor
@@ -242,7 +260,7 @@ async function onFaviconPick(event) {
   event.target.value = ''
   if (!file) return
   if (file.size > 2 * 1024 * 1024) {
-    $q.notify({ type: 'negative', message: '파비콘은 2MB를 넘을 수 없습니다.' })
+    $q.notify({ type: 'negative', message: t('settings.faviconTooLarge') })
     return
   }
   uploadingFavicon.value = true
@@ -253,7 +271,7 @@ async function onFaviconPick(event) {
     const { data: uploaded } = await api.post('/uploads/favicon', data)
     form.favicon = uploaded.url
   } catch (err) {
-    error.value = getErrorMessage(err, '파비콘을 올리지 못했습니다.')
+    error.value = getErrorMessage(err, t('settings.faviconUploadFailed'))
   } finally {
     uploadingFavicon.value = false
   }
@@ -266,9 +284,9 @@ async function resetFavicon() {
   try {
     await settings.save({ favicon: '' })
     form.favicon = ''
-    $q.notify({ type: 'positive', message: '파비콘을 기본값으로 되돌렸습니다.' })
+    $q.notify({ type: 'positive', message: t('settings.faviconReset') })
   } catch (err) {
-    error.value = getErrorMessage(err, '파비콘을 되돌리지 못했습니다.')
+    error.value = getErrorMessage(err, t('settings.faviconResetFailed'))
   } finally {
     resettingFavicon.value = false
   }
@@ -280,6 +298,7 @@ async function save() {
   try {
     await settings.save({
       siteTitle: form.siteTitle,
+      siteLanguage: form.siteLanguage,
       theme: form.theme,
       plantumlServer: form.plantumlServer,
       defaultEditor: form.defaultEditor,
@@ -293,7 +312,8 @@ async function save() {
     })
     form.rightMenuDefaultOpen = settings.rightMenuDefaultOpen
     form.codeLineNumbers = settings.codeLineNumbers
-    $q.notify({ type: 'positive', message: '설정을 저장했습니다.' })
+    form.siteLanguage = settings.siteLanguage
+    $q.notify({ type: 'positive', message: t('settings.saved') })
   } catch (err) {
     error.value = getErrorMessage(err)
   } finally {

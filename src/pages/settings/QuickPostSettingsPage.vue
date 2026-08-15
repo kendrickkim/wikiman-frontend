@@ -5,25 +5,21 @@
     <q-form @submit.prevent="save">
       <q-card flat bordered>
         <q-card-section>
-          <div class="text-subtitle1 text-weight-medium">간단 포스트</div>
-          <div class="text-grey-7 text-caption q-mt-xs">
-            모바일에서 빠르게 메모를 저장하는 간단 포스트 기능을 설정합니다.
-          </div>
+          <div class="text-subtitle1 text-weight-medium">{{ t('settings.quickPosts') }}</div>
+          <div class="text-grey-7 text-caption q-mt-xs">{{ t('remaining.k128') }}</div>
         </q-card-section>
         <q-card-section class="q-gutter-lg">
           <div>
             <q-toggle
               v-model="mobileQuickPostEnabled"
-              label="모바일에서 간단 입력 화면 사용"
+              :label="t('remaining.k125')"
               color="primary"
             />
-            <div class="text-caption text-grey-7 q-mt-xs">
-              켜면 모바일 홈 상단에 접을 수 있는 간단 입력창이 표시됩니다.
-            </div>
+            <div class="text-caption text-grey-7 q-mt-xs">{{ t('remaining.k129') }}</div>
           </div>
 
           <div>
-            <div class="text-body2 q-mb-sm">간단 포스트 에디터</div>
+            <div class="text-body2 q-mb-sm">{{ t('remaining.k130') }}</div>
             <q-select
               v-model="quickPostEditor"
               outlined
@@ -33,13 +29,11 @@
               :options="EDITOR_OPTIONS"
               style="max-width: 360px"
             />
-            <div class="text-caption text-grey-7 q-mt-xs">
-              간단 입력·수정 화면에서 사용할 작성 방식입니다.
-            </div>
+            <div class="text-caption text-grey-7 q-mt-xs">{{ t('remaining.k131') }}</div>
           </div>
 
           <div>
-            <div class="text-body2 q-mb-sm">포스트 이동 시 에디터</div>
+            <div class="text-body2 q-mb-sm">{{ t('remaining.k132') }}</div>
             <q-select
               v-model="promoteEditor"
               outlined
@@ -49,13 +43,11 @@
               :options="promoteEditorOptions"
               style="max-width: 360px"
             />
-            <div class="text-caption text-grey-7 q-mt-xs">
-              일반 포스트로 옮길 때 사용할 작성 방식입니다.
-            </div>
+            <div class="text-caption text-grey-7 q-mt-xs">{{ t('remaining.k133') }}</div>
           </div>
 
           <div>
-            <div class="text-body2 q-mb-sm">포스트 이동 후 원본 처리</div>
+            <div class="text-body2 q-mb-sm">{{ t('remaining.k134') }}</div>
             <q-select
               v-model="promoteSourceMode"
               outlined
@@ -65,13 +57,11 @@
               :options="promoteSourceOptions"
               style="max-width: 360px"
             />
-            <div class="text-caption text-grey-7 q-mt-xs">
-              간단 포스트를 일반 포스트로 옮긴 뒤 원본을 어떻게 처리할지 정합니다.
-            </div>
+            <div class="text-caption text-grey-7 q-mt-xs">{{ t('remaining.k135') }}</div>
           </div>
         </q-card-section>
         <q-card-actions align="right" class="q-pa-md">
-          <q-btn type="submit" unelevated color="primary" label="설정 저장" :loading="saving" />
+          <q-btn type="submit" unelevated color="primary" :label="t('settings.saveSettings')" :loading="saving" />
         </q-card-actions>
       </q-card>
     </q-form>
@@ -79,6 +69,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { getErrorMessage } from '@/utils/api'
@@ -94,13 +87,13 @@ const promoteSourceMode = ref(settings.quickPostPromoteSourceMode)
 const saving = ref(false)
 const error = ref('')
 const promoteEditorOptions = [
-  { label: '이동할 때마다 선택', value: 'ask' },
+  { label: t('remaining.k126'), value: 'ask' },
   ...EDITOR_OPTIONS
 ]
 const promoteSourceOptions = [
-  { label: '이동할 때마다 선택', value: 'ask' },
-  { label: '이동 후 삭제', value: 'delete' },
-  { label: '원본 유지', value: 'keep' }
+  { label: t('remaining.k126'), value: 'ask' },
+  { label: t('remaining.k057'), value: 'delete' },
+  { label: t('remaining.k058'), value: 'keep' }
 ]
 
 onMounted(async () => {
@@ -125,7 +118,7 @@ async function save() {
     quickPostEditor.value = settings.quickPostEditor
     promoteEditor.value = settings.quickPostPromoteEditor
     promoteSourceMode.value = settings.quickPostPromoteSourceMode
-    $q.notify({ type: 'positive', message: '간단 포스트 설정을 저장했습니다.' })
+    $q.notify({ type: 'positive', message: t('remaining.k127') })
   } catch (err) {
     error.value = getErrorMessage(err)
   } finally {

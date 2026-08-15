@@ -18,13 +18,13 @@
               <div class="wiki-article-head__body">
                 <div :class="['wiki-article-head__title', isDesktop ? 'text-h4 text-weight-bold' : 'text-h5']">{{ displayTitle(homePost.title) }}</div>
                 <div class="text-grey-7 q-mt-sm" :class="isDesktop ? 'text-body2' : 'text-caption'">
-                  {{ homePost.categoryName || '미분류' }} · {{ homePost.authorName }} · 작성 {{ formatDate(homePost.createdAt) }}<template v-if="isModifiedPost(homePost)"> · 수정 {{ formatDate(homePost.updatedAt) }}</template>
-                  <q-badge class="q-ml-sm" color="info">홈페이지</q-badge>
+                  {{ homePost.categoryName || t('common.uncategorized') }} · {{ homePost.authorName }} · {{ t('common.created', { date: formatDate(homePost.createdAt) }) }}<template v-if="isModifiedPost(homePost)"> · {{ t('common.updated', { date: formatDate(homePost.updatedAt) }) }}</template>
+                  <q-badge class="q-ml-sm" color="info">{{ t('posts.homepageBadge') }}</q-badge>
                   <q-badge class="q-ml-sm" :color="homePost.status === 'draft' ? 'warning' : 'primary'">
-                    {{ homePost.status === 'draft' ? '작성중' : '발행' }}
+                    {{ homePost.status === 'draft' ? t('common.draft') : t('common.published') }}
                   </q-badge>
                   <q-badge v-if="homePost.status === 'published'" class="q-ml-sm" :color="homePost.visibility === 'private' ? 'grey' : 'positive'">
-                    {{ homePost.visibility === 'private' ? '비공개' : '공개' }}
+                    {{ homePost.visibility === 'private' ? t('common.private') : t('common.public') }}
                   </q-badge>
                 </div>
                 <KeywordChips class="q-mt-sm" :keywords="homePost.keywords" />
@@ -37,8 +37,8 @@
                   no-caps
                   :dense="!isDesktop"
                   :size="isDesktop ? 'md' : 'sm'"
-                  :label="isDesktop ? '수정' : undefined"
-                  :aria-label="isDesktop ? undefined : '수정'"
+                  :label="isDesktop ? t('common.edit') : undefined"
+                  :aria-label="isDesktop ? undefined : t('common.edit')"
                   :to="`/posts/${homePost.id}/edit`"
                 />
                 <q-btn
@@ -48,8 +48,8 @@
                   no-caps
                   :dense="!isDesktop"
                   :size="isDesktop ? 'md' : 'sm'"
-                  :label="isDesktop ? '삭제' : undefined"
-                  :aria-label="isDesktop ? undefined : '삭제'"
+                  :label="isDesktop ? t('common.delete') : undefined"
+                  :aria-label="isDesktop ? undefined : t('common.delete')"
                   @click="onRemoveHome(homePost)"
                 />
               </div>
@@ -69,7 +69,7 @@
         </div>
         <q-banner v-else-if="error" class="bg-red-1 text-negative q-mb-md">{{ error }}</q-banner>
         <q-card v-else-if="!homePosts.length && !posts.length" flat bordered class="q-pa-lg text-center text-grey-7">
-          표시할 글이 없습니다.
+          {{ t('posts.empty') }}
         </q-card>
         <template v-else>
           <div
@@ -83,13 +83,13 @@
                   {{ displayTitle(homePost.title) }}
                 </router-link>
                 <div class="text-grey-7 q-mt-sm" :class="isDesktop ? 'text-body2' : 'text-caption'">
-                  {{ homePost.categoryName || '미분류' }} · {{ homePost.authorName }} · 작성 {{ formatDate(homePost.createdAt) }}<template v-if="isModifiedPost(homePost)"> · 수정 {{ formatDate(homePost.updatedAt) }}</template>
-                  <q-badge class="q-ml-sm" color="info">홈페이지</q-badge>
+                  {{ homePost.categoryName || t('common.uncategorized') }} · {{ homePost.authorName }} · {{ t('common.created', { date: formatDate(homePost.createdAt) }) }}<template v-if="isModifiedPost(homePost)"> · {{ t('common.updated', { date: formatDate(homePost.updatedAt) }) }}</template>
+                  <q-badge class="q-ml-sm" color="info">{{ t('posts.homepageBadge') }}</q-badge>
                   <q-badge class="q-ml-sm" :color="homePost.status === 'draft' ? 'warning' : 'primary'">
-                    {{ homePost.status === 'draft' ? '작성중' : '발행' }}
+                    {{ homePost.status === 'draft' ? t('common.draft') : t('common.published') }}
                   </q-badge>
                   <q-badge v-if="homePost.status === 'published'" class="q-ml-sm" :color="homePost.visibility === 'private' ? 'grey' : 'positive'">
-                    {{ homePost.visibility === 'private' ? '비공개' : '공개' }}
+                    {{ homePost.visibility === 'private' ? t('common.private') : t('common.public') }}
                   </q-badge>
                 </div>
                 <KeywordChips class="q-mt-sm" :keywords="homePost.keywords" />
@@ -102,8 +102,8 @@
                   no-caps
                   :dense="!isDesktop"
                   :size="isDesktop ? 'md' : 'sm'"
-                  :label="isDesktop ? '링크 복사' : undefined"
-                  :aria-label="isDesktop ? undefined : '링크 복사'"
+                  :label="isDesktop ? t('common.copyLink') : undefined"
+                  :aria-label="isDesktop ? undefined : t('common.copyLink')"
                   @click="copyLink(homePost)"
                 />
                 <template v-if="auth.canWrite">
@@ -114,8 +114,8 @@
                     no-caps
                     :dense="!isDesktop"
                     :size="isDesktop ? 'md' : 'sm'"
-                    :label="isDesktop ? '수정' : undefined"
-                    :aria-label="isDesktop ? undefined : '수정'"
+                    :label="isDesktop ? t('common.edit') : undefined"
+                    :aria-label="isDesktop ? undefined : t('common.edit')"
                     :to="`/posts/${homePost.id}/edit`"
                   />
                   <q-btn
@@ -125,8 +125,8 @@
                     no-caps
                     :dense="!isDesktop"
                     :size="isDesktop ? 'md' : 'sm'"
-                    :label="isDesktop ? '삭제' : undefined"
-                    :aria-label="isDesktop ? undefined : '삭제'"
+                    :label="isDesktop ? t('common.delete') : undefined"
+                    :aria-label="isDesktop ? undefined : t('common.delete')"
                     @click="onRemoveHome(homePost)"
                   />
                 </template>
@@ -150,12 +150,12 @@
                   {{ displayTitle(post.title) }}
                 </router-link>
                 <div class="text-grey-7 q-mt-sm" :class="isDesktop ? 'text-body2' : 'text-caption'">
-                  {{ post.categoryName || '미분류' }} · {{ post.authorName }} · 작성 {{ formatDate(post.createdAt) }}<template v-if="isModifiedPost(post)"> · 수정 {{ formatDate(post.updatedAt) }}</template>
+                  {{ post.categoryName || t('common.uncategorized') }} · {{ post.authorName }} · {{ t('common.created', { date: formatDate(post.createdAt) }) }}<template v-if="isModifiedPost(post)"> · {{ t('common.updated', { date: formatDate(post.updatedAt) }) }}</template>
                   <q-badge class="q-ml-sm" :color="post.status === 'draft' ? 'warning' : 'primary'">
-                    {{ post.status === 'draft' ? '작성중' : '발행' }}
+                    {{ post.status === 'draft' ? t('common.draft') : t('common.published') }}
                   </q-badge>
                   <q-badge v-if="post.status === 'published'" class="q-ml-sm" :color="post.visibility === 'private' ? 'grey' : 'positive'">
-                    {{ post.visibility === 'private' ? '비공개' : '공개' }}
+                    {{ post.visibility === 'private' ? t('common.private') : t('common.public') }}
                   </q-badge>
                 </div>
                 <KeywordChips class="q-mt-sm" :keywords="post.keywords" />
@@ -168,8 +168,8 @@
                   no-caps
                   :dense="!isDesktop"
                   :size="isDesktop ? 'md' : 'sm'"
-                  :label="isDesktop ? '링크 복사' : undefined"
-                  :aria-label="isDesktop ? undefined : '링크 복사'"
+                  :label="isDesktop ? t('common.copyLink') : undefined"
+                  :aria-label="isDesktop ? undefined : t('common.copyLink')"
                   @click="copyLink(post)"
                 />
                 <template v-if="auth.canWrite">
@@ -180,8 +180,8 @@
                     no-caps
                     :dense="!isDesktop"
                     :size="isDesktop ? 'md' : 'sm'"
-                    :label="isDesktop ? '수정' : undefined"
-                    :aria-label="isDesktop ? undefined : '수정'"
+                    :label="isDesktop ? t('common.edit') : undefined"
+                    :aria-label="isDesktop ? undefined : t('common.edit')"
                     :to="`/posts/${post.id}/edit`"
                   />
                   <q-btn
@@ -191,8 +191,8 @@
                     no-caps
                     :dense="!isDesktop"
                     :size="isDesktop ? 'md' : 'sm'"
-                    :label="isDesktop ? '삭제' : undefined"
-                    :aria-label="isDesktop ? undefined : '삭제'"
+                    :label="isDesktop ? t('common.delete') : undefined"
+                    :aria-label="isDesktop ? undefined : t('common.delete')"
                     @click="onRemove(post)"
                   />
                 </template>
@@ -286,7 +286,7 @@
         <q-banner v-else-if="error" class="bg-red-1 text-negative q-mb-md">{{ error }}</q-banner>
 
         <q-card v-else-if="!posts.length" flat bordered class="q-pa-lg text-center text-grey-7">
-          표시할 글이 없습니다.
+          {{ t('posts.empty') }}
         </q-card>
 
         <div v-else-if="isDesktop" class="wiki-article-card">
@@ -295,18 +295,18 @@
               <div class="wiki-post-row__title">{{ displayTitle(post.title) }}</div>
               <div class="wiki-post-row__meta">
                 <span class="wiki-post-row__url">{{ postPath(post) }}</span>
-                <span>{{ post.categoryName || '미분류' }} · {{ post.authorName }}</span>
+                <span>{{ post.categoryName || t('common.uncategorized') }} · {{ post.authorName }}</span>
                 <KeywordChips :keywords="post.keywords" :wrap="false" />
               </div>
             </router-link>
             <div class="wiki-post-row__aside">
               <div class="row q-gutter-xs justify-end">
-                <q-badge v-if="post.isHomepage" color="info">홈페이지</q-badge>
+                <q-badge v-if="post.isHomepage" color="info">{{ t('posts.homepageBadge') }}</q-badge>
                 <q-badge :color="post.status === 'draft' ? 'warning' : 'primary'">
-                  {{ post.status === 'draft' ? '작성중' : '발행' }}
+                  {{ post.status === 'draft' ? t('common.draft') : t('common.published') }}
                 </q-badge>
                 <q-badge v-if="post.status === 'published'" :color="post.visibility === 'private' ? 'grey' : 'positive'">
-                  {{ post.visibility === 'private' ? '비공개' : '공개' }}
+                  {{ post.visibility === 'private' ? t('common.private') : t('common.public') }}
                 </q-badge>
               </div>
               <div class="row items-center no-wrap q-gutter-xs">
@@ -318,7 +318,7 @@
                   dense
                   color="negative"
                   icon="delete"
-                  aria-label="삭제"
+                  :aria-label="t('common.delete')"
                   @click="onRemove(post)"
                 />
               </div>
@@ -332,18 +332,18 @@
               <q-item-label class="text-subtitle1 text-weight-medium wiki-post-row__title">{{ displayTitle(post.title) }}</q-item-label>
               <q-item-label caption class="wiki-post-row__meta">
                 <span class="wiki-post-row__url">{{ postPath(post) }}</span>
-                <span>{{ post.categoryName || '미분류' }} · {{ post.authorName }} · {{ formatDate(post.createdAt) }}</span>
+                <span>{{ post.categoryName || t('common.uncategorized') }} · {{ post.authorName }} · {{ formatDate(post.createdAt) }}</span>
                 <KeywordChips :keywords="post.keywords" :wrap="false" />
               </q-item-label>
             </q-item-section>
             <q-item-section side>
               <div class="column items-end q-gutter-xs">
-                <q-badge v-if="post.isHomepage" color="info">홈페이지</q-badge>
+                <q-badge v-if="post.isHomepage" color="info">{{ t('posts.homepageBadge') }}</q-badge>
                 <q-badge :color="post.status === 'draft' ? 'warning' : 'primary'">
-                  {{ post.status === 'draft' ? '작성중' : '발행' }}
+                  {{ post.status === 'draft' ? t('common.draft') : t('common.published') }}
                 </q-badge>
                 <q-badge v-if="post.status === 'published'" :color="post.visibility === 'private' ? 'grey' : 'positive'">
-                  {{ post.visibility === 'private' ? '비공개' : '공개' }}
+                  {{ post.visibility === 'private' ? t('common.private') : t('common.public') }}
                 </q-badge>
                 <q-btn
                   v-if="auth.canWrite"
@@ -352,7 +352,7 @@
                   dense
                   color="negative"
                   icon="delete"
-                  aria-label="삭제"
+                  :aria-label="t('common.delete')"
                   @click.stop.prevent="onRemove(post)"
                 />
               </div>
@@ -402,6 +402,7 @@ import QuickPostComposer from '@/components/QuickPostComposer.vue'
 import PostLinkPreviews from '@/components/PostLinkPreviews.vue'
 import { displayTitle } from '@/utils/title'
 import { formatDate } from '@/utils/format'
+import { useI18n } from '@/i18n'
 
 const route = useRoute()
 const router = useRouter()
@@ -410,25 +411,24 @@ const { removePost } = usePostActions()
 const auth = useAuthStore()
 const wiki = useWikiStore()
 const settings = useSettingsStore()
+const { t } = useI18n()
 const posts = ref([])
 const homePosts = ref([])
 const loading = ref(false)
 const error = ref('')
 const total = ref(0)
 const statusFilter = ref('all')
-const statusFilterOptions = [
-  { label: '전체', value: 'all' },
-  { label: '발행', value: 'published' },
-  { label: '작성중', value: 'draft' }
-]
+const statusFilterOptions = computed(() => [
+  { label: t('status.all'), value: 'all' },
+  { label: t('status.published'), value: 'published' },
+  { label: t('status.draft'), value: 'draft' }
+])
 const PAGE_SIZE_KEY = 'wikiman_page_size'
 const PAGE_SIZES = [10, 20, 50, 100]
-const pageSizeOptions = [
-  { label: '10개씩', value: 10 },
-  { label: '20개씩', value: 20 },
-  { label: '50개씩', value: 50 },
-  { label: '100개씩', value: 100 }
-]
+const pageSizeOptions = computed(() => PAGE_SIZES.map((value) => ({
+  label: t('posts.pageSize', { count: value }),
+  value
+})))
 
 function readStoredPageSize() {
   const n = Number(localStorage.getItem(PAGE_SIZE_KEY))
@@ -502,7 +502,7 @@ const pageRangeLabel = computed(() => {
   if (!total.value) return ''
   const start = (page.value - 1) * effectivePageSize.value + 1
   const end = Math.min(total.value, page.value * effectivePageSize.value)
-  return `${start}–${end} / ${total.value}개`
+  return t('posts.pagination', { start, end, total: total.value })
 })
 
 const showQuickComposer = computed(() => (
@@ -513,12 +513,12 @@ const showQuickComposer = computed(() => (
 ))
 
 const heading = computed(() => {
-  if (activeKeyword.value) return `"${activeKeyword.value}" 키워드 글`
-  if (route.query.q) return `"${route.query.q}" 검색 결과`
-  if (activeCategoryId.value === 'uncategorized') return '미분류'
+  if (activeKeyword.value) return t('posts.keywordResults', { keyword: activeKeyword.value })
+  if (route.query.q) return t('posts.searchResults', { query: route.query.q })
+  if (activeCategoryId.value === 'uncategorized') return t('common.uncategorized')
   const id = Number(activeCategoryId.value)
   const category = wiki.categories.find((c) => c.id === id)
-  return category ? category.name : '전체 글'
+  return category ? category.name : t('nav.allPosts')
 })
 
 const listKey = computed(() => [
@@ -669,9 +669,9 @@ async function copyLink(post) {
       document.execCommand('copy')
       document.body.removeChild(input)
     }
-    $q.notify({ type: 'positive', message: '링크를 복사했습니다.' })
+    $q.notify({ type: 'positive', message: t('posts.copiedLink') })
   } catch {
-    $q.notify({ type: 'negative', message: '링크를 복사하지 못했습니다.' })
+    $q.notify({ type: 'negative', message: t('posts.copyLinkFailed') })
   }
 }
 

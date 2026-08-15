@@ -3,8 +3,8 @@
     <div class="wiki-main">
       <div class="row items-start justify-between q-gutter-sm q-mb-md">
         <div>
-          <div :class="isDesktop ? 'text-h4 text-weight-bold' : 'text-h6'">휴지통</div>
-          <div class="text-grey-7 q-mt-xs">삭제된 글은 여기에 보관됩니다. 복원하거나 완전히 삭제할 수 있습니다.</div>
+          <div :class="isDesktop ? 'text-h4 text-weight-bold' : 'text-h6'">{{ t('nav.trash') }}</div>
+          <div class="text-grey-7 q-mt-xs">{{ t('remaining.k157') }}</div>
         </div>
         <q-btn
           v-if="auth.canWrite && posts.length"
@@ -12,7 +12,7 @@
           color="negative"
           no-caps
           icon="delete_forever"
-          label="휴지통 비우기"
+          :label="t('posts.emptyTrashTitle')"
           :loading="emptying"
           :disable="loading"
           @click="onEmpty"
@@ -21,23 +21,21 @@
 
       <q-banner v-if="error" class="bg-red-1 text-negative q-mb-md">{{ error }}</q-banner>
 
-      <q-card v-if="!posts.length && !loading" flat bordered class="q-pa-lg text-center text-grey-7">
-        휴지통이 비어 있습니다.
-      </q-card>
+      <q-card v-if="!posts.length && !loading" flat bordered class="q-pa-lg text-center text-grey-7">{{ t('posts.trashEmpty') }}</q-card>
 
       <div v-else-if="isDesktop" class="wiki-article-card">
         <div v-for="post in posts" :key="post.id" class="wiki-post-row">
           <div class="wiki-post-row__main">
             <div class="wiki-post-row__title">{{ displayTitle(post.title) }}</div>
             <div class="wiki-post-row__meta">
-              {{ post.categoryName || '미분류' }} · {{ formatDate(post.deletedAt) }}에 삭제
+              {{ t('extra.deletedAt', { category: post.categoryName || t('common.uncategorized'), date: formatDate(post.deletedAt) }) }}
             </div>
             <KeywordChips :keywords="post.keywords" />
           </div>
           <div v-if="auth.canWrite" class="wiki-post-row__aside">
             <div class="row q-gutter-xs no-wrap">
-              <q-btn outline color="primary" no-caps label="복원" @click="onRestore(post)" />
-              <q-btn unelevated color="negative" no-caps label="완전 삭제" @click="onPurge(post)" />
+              <q-btn outline color="primary" no-caps :label="t('common.restore')" @click="onRestore(post)" />
+              <q-btn unelevated color="negative" no-caps :label="t('remaining.k156')" @click="onPurge(post)" />
             </div>
           </div>
         </div>
@@ -48,14 +46,14 @@
           <q-item-section>
             <q-item-label class="text-subtitle1 text-weight-medium wiki-post-row__title">{{ displayTitle(post.title) }}</q-item-label>
             <q-item-label caption>
-              {{ post.categoryName || '미분류' }} · {{ formatDate(post.deletedAt) }}에 삭제
+              {{ t('extra.deletedAt', { category: post.categoryName || t('common.uncategorized'), date: formatDate(post.deletedAt) }) }}
             </q-item-label>
             <KeywordChips :keywords="post.keywords" />
           </q-item-section>
           <q-item-section v-if="auth.canWrite" side>
             <div class="column q-gutter-xs">
-              <q-btn outline color="primary" no-caps size="sm" label="복원" @click="onRestore(post)" />
-              <q-btn unelevated color="negative" no-caps size="sm" label="완전 삭제" @click="onPurge(post)" />
+              <q-btn outline color="primary" no-caps size="sm" :label="t('common.restore')" @click="onRestore(post)" />
+              <q-btn unelevated color="negative" no-caps size="sm" :label="t('remaining.k156')" @click="onPurge(post)" />
             </div>
           </q-item-section>
         </q-item>
@@ -65,6 +63,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { onMounted, ref } from 'vue'
 import { api, getErrorMessage } from '@/utils/api'
 import { useAuthStore } from '@/stores/auth'

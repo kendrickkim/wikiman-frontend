@@ -9,7 +9,7 @@
         @click="select('home')"
       >
         <q-item-section avatar><q-icon name="home" /></q-item-section>
-        <q-item-section>홈</q-item-section>
+        <q-item-section>{{ t('nav.home') }}</q-item-section>
       </q-item>
       <q-item
         clickable
@@ -18,7 +18,7 @@
         @click="select('all')"
       >
         <q-item-section avatar><q-icon name="article" /></q-item-section>
-        <q-item-section>전체 글</q-item-section>
+        <q-item-section>{{ t('nav.allPosts') }}</q-item-section>
       </q-item>
       <q-item
         clickable
@@ -27,7 +27,7 @@
         @click="select('uncategorized')"
       >
         <q-item-section avatar><q-icon name="folder_off" /></q-item-section>
-        <q-item-section>미분류</q-item-section>
+        <q-item-section>{{ t('common.uncategorized') }}</q-item-section>
       </q-item>
       <q-item
         clickable
@@ -36,7 +36,7 @@
         @click="select('keywords')"
       >
         <q-item-section avatar><q-icon name="sell" /></q-item-section>
-        <q-item-section>키워드</q-item-section>
+        <q-item-section>{{ t('nav.keywords') }}</q-item-section>
       </q-item>
       <q-item
         v-if="auth.canWrite"
@@ -46,7 +46,7 @@
         @click="select('quick-posts')"
       >
         <q-item-section avatar><q-icon name="edit_note" /></q-item-section>
-        <q-item-section>간단 포스트</q-item-section>
+        <q-item-section>{{ t('nav.quickPosts') }}</q-item-section>
       </q-item>
       <q-item
         v-if="auth.canWrite"
@@ -56,12 +56,12 @@
         @click="select('trash')"
       >
         <q-item-section avatar><q-icon name="delete" /></q-item-section>
-        <q-item-section>휴지통</q-item-section>
+        <q-item-section>{{ t('nav.trash') }}</q-item-section>
       </q-item>
     </q-list>
 
     <div v-if="showNav && auth.canWrite" class="wiki-nav-settings">
-      <div class="wiki-drawer-title">사이트 관리</div>
+      <div class="wiki-drawer-title">{{ t('nav.settings') }}</div>
       <q-list dense>
         <q-item
           v-for="item in settingsMenu"
@@ -78,12 +78,12 @@
     </div>
 
     <template v-if="showTree">
-      <div class="wiki-drawer-title" :class="{ 'q-mt-md': showNav }">카테고리</div>
+      <div class="wiki-drawer-title" :class="{ 'q-mt-md': showNav }">{{ t('nav.categories') }}</div>
       <q-input
         v-model="filter"
         dense
         outlined
-        placeholder="카테고리 찾기"
+        :placeholder="t('categories.search')"
         class="q-mb-sm"
         clearable
       >
@@ -112,7 +112,7 @@
               color="grey-7"
               class="q-ml-sm"
             >
-              비공개
+              {{ t('common.private') }}
             </q-badge>
           </div>
         </template>
@@ -127,22 +127,12 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useWikiStore } from '@/stores/wiki'
 import { useSettingsStore } from '@/stores/settings'
+import { useI18n } from '@/i18n'
 
 const props = defineProps({
   showNav: { type: Boolean, default: true },
   showTree: { type: Boolean, default: true }
 })
-
-const settingsMenu = [
-  { key: 'settings-general', to: '/settings/general', label: '일반', icon: 'tune' },
-  { key: 'settings-top-menu', to: '/settings/top-menu', label: '상단 메뉴', icon: 'view_week' },
-  { key: 'settings-categories', to: '/settings/categories', label: '카테고리', icon: 'folder' },
-  { key: 'settings-homepage', to: '/settings/homepage', label: '홈페이지', icon: 'home' },
-  { key: 'settings-blog', to: '/settings/blog', label: '블로그', icon: 'rss_feed' },
-  { key: 'settings-quick-posts', to: '/settings/quick-posts', label: '간단 포스트', icon: 'edit_note' },
-  { key: 'settings-attachments', to: '/settings/attachments', label: '첨부파일', icon: 'attach_file' },
-  { key: 'settings-data', to: '/settings/data', label: '데이터관리', icon: 'storage' }
-]
 
 const NAV_KEYS = new Set([
   'all',
@@ -151,7 +141,14 @@ const NAV_KEYS = new Set([
   'keywords',
   'quick-posts',
   'trash',
-  ...settingsMenu.map((item) => item.key)
+  'settings-general',
+  'settings-top-menu',
+  'settings-categories',
+  'settings-homepage',
+  'settings-blog',
+  'settings-quick-posts',
+  'settings-attachments',
+  'settings-data'
 ])
 
 const route = useRoute()
@@ -159,6 +156,17 @@ const router = useRouter()
 const auth = useAuthStore()
 const wiki = useWikiStore()
 const settings = useSettingsStore()
+const { t } = useI18n()
+const settingsMenu = computed(() => [
+  { key: 'settings-general', to: '/settings/general', label: t('settings.general'), icon: 'tune' },
+  { key: 'settings-top-menu', to: '/settings/top-menu', label: t('settings.topMenu'), icon: 'view_week' },
+  { key: 'settings-categories', to: '/settings/categories', label: t('settings.categories'), icon: 'folder' },
+  { key: 'settings-homepage', to: '/settings/homepage', label: t('settings.homepage'), icon: 'home' },
+  { key: 'settings-blog', to: '/settings/blog', label: t('settings.blog'), icon: 'rss_feed' },
+  { key: 'settings-quick-posts', to: '/settings/quick-posts', label: t('settings.quickPosts'), icon: 'edit_note' },
+  { key: 'settings-attachments', to: '/settings/attachments', label: t('settings.attachments'), icon: 'attach_file' },
+  { key: 'settings-data', to: '/settings/data', label: t('settings.data'), icon: 'storage' }
+])
 const filter = ref('')
 const treeSelected = ref(null)
 const expanded = ref([])
@@ -167,7 +175,7 @@ const selectedKey = computed(() => {
   if (route.path === '/trash') return 'trash'
   if (route.path.startsWith('/quick-posts')) return 'quick-posts'
   if (route.path.startsWith('/settings')) {
-    const match = settingsMenu.find((item) => route.path.startsWith(item.to))
+    const match = settingsMenu.value.find((item) => route.path.startsWith(item.to))
     return match?.key || 'settings-general'
   }
   if (route.path === '/keywords' || route.path.startsWith('/keyword/')) return 'keywords'

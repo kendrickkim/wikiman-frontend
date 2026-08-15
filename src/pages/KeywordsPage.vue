@@ -1,9 +1,7 @@
 <template>
   <q-page class="wiki-page wiki-page--article">
     <div class="wiki-main wiki-main--wide">
-      <div :class="isDesktop ? 'text-h4 text-weight-bold q-mb-lg' : 'text-h6 q-mb-md'">
-        키워드
-      </div>
+      <div :class="isDesktop ? 'text-h4 text-weight-bold q-mb-lg' : 'text-h6 q-mb-md'">{{ t('nav.keywords') }}</div>
 
       <q-input
         v-model="filter"
@@ -11,7 +9,7 @@
         dense
         clearable
         debounce="200"
-        placeholder="키워드 찾기"
+        :placeholder="t('remaining.k070')"
         class="q-mb-md"
       >
         <template #prepend>
@@ -23,9 +21,7 @@
         <q-spinner size="40px" color="primary" />
       </div>
       <q-banner v-else-if="error" class="bg-red-1 text-negative">{{ error }}</q-banner>
-      <q-card v-else-if="!filteredItems.length" flat bordered class="q-pa-lg text-center text-grey-7">
-        표시할 키워드가 없습니다.
-      </q-card>
+      <q-card v-else-if="!filteredItems.length" flat bordered class="q-pa-lg text-center text-grey-7">{{ t('remaining.k072') }}</q-card>
       <div v-else class="keyword-list">
         <q-btn
           v-for="item in filteredItems"
@@ -45,6 +41,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getErrorMessage } from '@/utils/api'
@@ -71,7 +70,7 @@ onMounted(async () => {
     await wiki.ensureKeywords({ force: true })
     items.value = wiki.keywords
   } catch (err) {
-    error.value = getErrorMessage(err, '키워드를 불러오지 못했습니다.')
+    error.value = getErrorMessage(err, t('remaining.k071'))
   } finally {
     loading.value = false
   }

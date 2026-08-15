@@ -2,18 +2,17 @@
   <q-page class="wiki-page flex flex-center">
     <q-card flat bordered class="wiki-auth-card">
       <q-card-section>
-        <div class="text-h5 text-weight-medium">로그인</div>
-        <div class="text-grey-7 q-mt-xs">{{ settings.siteTitle }} 계정으로 들어옵니다.</div>
+        <div class="text-h5 text-weight-medium">{{ t('auth.login') }}</div>
+        <div class="text-grey-7 q-mt-xs">{{ t('extra.loginDescription', { siteTitle: settings.siteTitle }) }}</div>
       </q-card-section>
       <q-card-section>
         <q-form class="q-gutter-md" @submit.prevent="submit">
-          <q-input v-model="username" outlined dense label="아이디" autocomplete="username" />
-          <q-input v-model="password" outlined dense type="password" label="비밀번호" autocomplete="current-password" />
+          <q-input v-model="username" outlined dense :label="t('auth.username')" autocomplete="username" />
+          <q-input v-model="password" outlined dense type="password" :label="t('auth.password')" autocomplete="current-password" />
           <div class="text-negative" v-if="error">{{ error }}</div>
-          <q-btn type="submit" color="primary" unelevated class="full-width" label="로그인" :loading="loading" />
+          <q-btn type="submit" color="primary" unelevated class="full-width" :label="t('auth.login')" :loading="loading" />
         </q-form>
-        <div v-if="auth.canRegister" class="q-mt-md text-center">
-          계정이 없으면 <router-link to="/register">회원가입</router-link>
+        <div v-if="auth.canRegister" class="q-mt-md text-center">{{ t('auth.noAccount') }}<router-link to="/register">{{ t('auth.registerTitle') }}</router-link>
         </div>
       </q-card-section>
     </q-card>
@@ -21,6 +20,9 @@
 </template>
 
 <script setup>
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'

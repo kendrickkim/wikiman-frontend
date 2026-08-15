@@ -43,6 +43,9 @@
 </template>
 
 <script setup>
+import { t as translate, useI18n } from '@/i18n'
+
+const { t } = useI18n()
 import { computed, defineAsyncComponent } from 'vue'
 import { normalizeEditorType } from '@/utils/editors'
 import { useSettingsStore } from '@/stores/settings'
@@ -56,7 +59,7 @@ const SourceEditor = defineAsyncComponent(() => import('@/components/SourceEdito
 
 const props = defineProps({
   compact: { type: Boolean, default: false },
-  placeholder: { type: String, default: '내용을 입력하세요.' },
+  placeholder: { type: String, default: translate('remaining.k048') },
   editorKey: { type: [String, Number], default: 'quick-post' }
 })
 
