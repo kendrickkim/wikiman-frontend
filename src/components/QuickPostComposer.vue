@@ -20,6 +20,24 @@
 
         <div class="row q-gutter-sm q-mt-md items-center">
           <q-btn
+            v-if="speechSupported"
+            round
+            dense
+            :outline="!speechListening"
+            :unelevated="speechListening"
+            :color="speechListening ? 'negative' : 'primary'"
+            :icon="speechListening ? 'stop' : 'mic'"
+            :aria-label="speechListening ? t('speech.stop') : t('speech.start')"
+            @click="toggleSpeech"
+          >
+            <q-tooltip>
+              {{ speechListening ? t('speech.stop') : t('speech.start') }}
+            </q-tooltip>
+          </q-btn>
+          <div v-if="speechListening" class="text-caption text-negative">
+            {{ t('speech.listening') }}
+          </div>
+          <q-btn
             flat
             dense
             no-caps
@@ -51,7 +69,12 @@ import { computed, onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
 import { useSettingsStore } from '@/stores/settings'
-import { emptyQuickPostContent, hasQuickPostContent } from '@/utils/quickPostContent'
+import { useSpeechRecognition } from '@/composables/useSpeechRecognition'
+import {
+  appendQuickPostSpeech,
+  emptyQuickPostContent,
+  hasQuickPostContent
+} from '@/utils/quickPostContent'
 import PostLinkPreviews from '@/components/PostLinkPreviews.vue'
 import QuickPostBodyEditor from '@/components/QuickPostBodyEditor.vue'
 
@@ -68,6 +91,25 @@ const saving = ref(false)
 const error = ref('')
 const editorType = computed(() => settings.quickPostEditor || 'textarea')
 const canSave = computed(() => hasQuickPostContent(content.value, editorType.value))
+const {
+  supported: speechSupported,
+  listening: speechListening,
+  stop: stopSpeech,
+  toggle: toggleSpeech
+} = useSpeechRecognition({
+  onTranscript(transcript) {
+    content.value = appendQuickPostSpeech(content.value, editorType.value, transcript)
+  },
+  onError(code) {
+    if (code === 'aborted' || code === 'no-speech') return
+    const key = code === 'not-allowed' || code === 'service-not-allowed'
+      ? 'speech.permissionDenied'
+      : code === 'audio-capture'
+        ? 'speech.microphoneUnavailable'
+        : 'speech.failed'
+    $q.notify({ type: 'negative', message: t(key) })
+  }
+})
 
 function resetContent() {
   content.value = emptyQuickPostContent(editorType.value)
@@ -84,6 +126,7 @@ async function save() {
     $q.notify({ type: 'negative', message: t('remaining.k048') })
     return
   }
+  stopSpeech()
   saving.value = true
   error.value = ''
   try {

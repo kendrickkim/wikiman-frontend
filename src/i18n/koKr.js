@@ -402,8 +402,15 @@ export default {
     attachmentCleanupDescription: '업로드 폴더에서 글(첨부·본문 이미지)이나 파비콘에 연결되지 않은 파일을 찾아 삭제합니다. 작성 중 올렸지만 저장하지 않은 파일도 포함됩니다.',
     confirmCleanup: '연결되지 않은 파일 {count}개({size})를 삭제할까요? 삭제하면 되돌릴 수 없습니다.',
     cleanupResult: '파일 {count}개({size})를 삭제했습니다.'
-  }
-,
+  },
+  speech: {
+    start: '음성 입력 시작',
+    stop: '음성 입력 중지',
+    listening: '듣고 있습니다…',
+    permissionDenied: '마이크 권한이 필요합니다.',
+    microphoneUnavailable: '사용할 수 있는 마이크가 없습니다.',
+    failed: '음성을 인식하지 못했습니다.'
+  },
   remaining: {
     k001: "카테고리 관리",
     k002: "선택 해제",

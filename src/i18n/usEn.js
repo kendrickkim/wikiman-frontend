@@ -402,8 +402,15 @@ export default {
     attachmentCleanupDescription: 'Find and delete uploaded files not linked to posts, body images, or the favicon. This includes files uploaded while editing an unsaved post.',
     confirmCleanup: 'Delete {count} unlinked files ({size})? This action cannot be undone.',
     cleanupResult: 'Deleted {count} files ({size}).'
-  }
-,
+  },
+  speech: {
+    start: 'Start voice input',
+    stop: 'Stop voice input',
+    listening: 'Listening…',
+    permissionDenied: 'Microphone permission is required.',
+    microphoneUnavailable: 'No microphone is available.',
+    failed: 'Speech could not be recognized.'
+  },
   remaining: {
     k001: "Manage categories",
     k002: "Clear selection",
