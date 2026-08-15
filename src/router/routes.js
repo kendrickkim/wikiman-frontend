@@ -25,8 +25,10 @@ const routes = [
           { path: 'top-menu', component: () => import('@/pages/settings/TopMenuSettingsPage.vue') },
           { path: 'categories', component: () => import('@/pages/settings/CategoriesSettingsPage.vue') },
           { path: 'homepage', component: () => import('@/pages/settings/HomepageSettingsPage.vue') },
+          { path: 'quick-posts', component: () => import('@/pages/settings/QuickPostSettingsPage.vue') },
           { path: 'attachments', component: () => import('@/pages/settings/AttachmentsSettingsPage.vue') },
-          { path: 'backup', component: () => import('@/pages/settings/BackupSettingsPage.vue') }
+          { path: 'data', component: () => import('@/pages/settings/BackupSettingsPage.vue') },
+          { path: 'backup', redirect: '/settings/data' }
         ]
       },
       { path: 'login', component: () => import('@/pages/LoginPage.vue') },

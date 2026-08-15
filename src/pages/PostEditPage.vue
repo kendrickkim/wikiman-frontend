@@ -177,6 +177,8 @@
         </div>
       </div>
 
+      <PostLinkPreviews :content="liveContent" extra-class="q-mt-md" />
+
       <WikiLinkDialog
         v-model="linkDialog"
         :initial-label="linkInitialLabel"
@@ -212,6 +214,7 @@ import CategorySelect from '@/components/CategorySelect.vue'
 import KeywordSelect from '@/components/KeywordSelect.vue'
 import FileAttachments from '@/components/FileAttachments.vue'
 import PostViewer from '@/components/PostViewer.vue'
+import PostLinkPreviews from '@/components/PostLinkPreviews.vue'
 import WikiLinkDialog from '@/components/WikiLinkDialog.vue'
 import PostEditActions from '@/components/PostEditActions.vue'
 
@@ -305,6 +308,8 @@ function editorContent() {
   }
   return drafts.value[editorType.value] || ''
 }
+
+const liveContent = computed(() => drafts.value[editorType.value] || '')
 
 function snapshot() {
   return JSON.stringify({

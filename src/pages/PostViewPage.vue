@@ -49,6 +49,7 @@
         <q-card flat bordered class="wiki-article-card wiki-article-body">
           <PostViewer :editor-type="post.editorType" :content="post.content" />
         </q-card>
+        <PostLinkPreviews :content="post.content" extra-class="q-mt-md" />
         <FileAttachments :model-value="post.attachments || []" card-class="q-mt-md" />
       </div>
     </div>
@@ -65,6 +66,7 @@ import { usePostActions } from '@/composables/usePostActions'
 import PostViewer from '@/components/PostViewer.vue'
 import KeywordChips from '@/components/KeywordChips.vue'
 import FileAttachments from '@/components/FileAttachments.vue'
+import PostLinkPreviews from '@/components/PostLinkPreviews.vue'
 import { displayTitle } from '@/utils/title'
 import { formatDate } from '@/utils/format'
 

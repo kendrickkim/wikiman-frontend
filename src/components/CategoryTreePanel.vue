@@ -138,8 +138,9 @@ const settingsMenu = [
   { key: 'settings-top-menu', to: '/settings/top-menu', label: '상단 메뉴', icon: 'view_week' },
   { key: 'settings-categories', to: '/settings/categories', label: '카테고리', icon: 'folder' },
   { key: 'settings-homepage', to: '/settings/homepage', label: '홈페이지', icon: 'home' },
+  { key: 'settings-quick-posts', to: '/settings/quick-posts', label: '간단 포스트', icon: 'edit_note' },
   { key: 'settings-attachments', to: '/settings/attachments', label: '첨부파일', icon: 'attach_file' },
-  { key: 'settings-backup', to: '/settings/backup', label: '백업/복구', icon: 'backup' }
+  { key: 'settings-data', to: '/settings/data', label: '데이터관리', icon: 'storage' }
 ]
 
 const NAV_KEYS = new Set([

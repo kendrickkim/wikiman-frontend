@@ -77,19 +77,86 @@
         >
       </q-card-section>
     </q-card>
+
+    <q-card flat bordered>
+      <q-card-section>
+        <div class="text-subtitle1 text-weight-medium">링크 미리보기 캐시</div>
+        <div class="text-grey-7 text-caption q-mt-xs">
+          외부 링크의 제목·설명·이미지 메타 정보를 약 {{ linkCache.ttlDays }}일간 저장합니다.
+          만료 후 다시 가져오지 못하면 기존 정보를 유지하고 {{ linkCache.failureTtlDays }}일 연장합니다.
+        </div>
+      </q-card-section>
+      <q-card-section>
+        <div class="row">
+          <div class="col-12 col-md-6" :class="isDesktop ? 'q-pr-sm' : 'q-mb-md'">
+            <q-input
+              v-model.number="cacheTtlDays"
+              type="number"
+              outlined
+              class="full-width"
+              label="기본 TTL (일)"
+              hint="1~365일"
+              :min="1"
+              :max="365"
+              step="1"
+            />
+          </div>
+          <div class="col-12 col-md-6" :class="isDesktop ? 'q-pl-sm' : ''">
+            <q-input
+              v-model.number="failureTtlDays"
+              type="number"
+              outlined
+              class="full-width"
+              label="조회 실패 시 연장 TTL (일)"
+              hint="1~365일"
+              :min="1"
+              :max="365"
+              step="1"
+            />
+          </div>
+        </div>
+        <div class="row justify-end q-mt-md">
+          <q-btn
+            unelevated
+            no-caps
+            color="primary"
+            label="TTL 설정 저장"
+            :loading="savingLinkCacheSettings"
+            @click="saveLinkCacheSettings"
+          />
+        </div>
+        <q-separator class="q-my-md" />
+        <div class="text-body2 q-mb-md">
+          캐시된 주소
+          <span class="text-weight-medium">{{ linkCache.count }}</span>개
+        </div>
+        <q-btn
+          unelevated
+          no-caps
+          color="primary"
+          icon="delete_sweep"
+          label="캐시 삭제"
+          :loading="clearingLinkCache"
+          :disable="clearingLinkCache || !linkCache.count"
+          @click="clearLinkCache"
+        />
+      </q-card-section>
+    </q-card>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
+import { useLayout } from '@/composables/useLayout'
 import { useSettingsStore } from '@/stores/settings'
 import { useWikiStore } from '@/stores/wiki'
 import { useAuthStore } from '@/stores/auth'
 import { formatBytes, formatDate } from '@/utils/format'
 
 const $q = useQuasar()
+const { isDesktop } = useLayout()
 const settings = useSettingsStore()
 const wiki = useWikiStore()
 const auth = useAuthStore()
@@ -98,10 +165,88 @@ const error = ref('')
 const downloading = ref(false)
 const inspecting = ref(false)
 const restoring = ref(false)
+const clearingLinkCache = ref(false)
+const savingLinkCacheSettings = ref(false)
 const inputEl = ref(null)
 const pendingFile = ref(null)
 const pendingName = ref('')
 const inspectInfo = ref(null)
+const linkCache = reactive({
+  count: 0,
+  ttlDays: 10,
+  failureTtlDays: 1
+})
+const cacheTtlDays = ref(settings.linkPreviewCacheTtlDays)
+const failureTtlDays = ref(settings.linkPreviewFailureTtlDays)
+
+async function loadLinkCache() {
+  try {
+    const { data } = await api.get('/link-preview/cache')
+    linkCache.count = Number(data.count) || 0
+    linkCache.ttlDays = Number(data.ttlDays) || 10
+    linkCache.failureTtlDays = Number(data.failureTtlDays) || 1
+  } catch {
+    linkCache.count = 0
+  }
+}
+
+onMounted(async () => {
+  await settings.ensureLoaded()
+  cacheTtlDays.value = settings.linkPreviewCacheTtlDays
+  failureTtlDays.value = settings.linkPreviewFailureTtlDays
+  await loadLinkCache()
+})
+
+async function saveLinkCacheSettings() {
+  savingLinkCacheSettings.value = true
+  error.value = ''
+  try {
+    await settings.save({
+      linkPreviewCacheTtlDays: cacheTtlDays.value,
+      linkPreviewFailureTtlDays: failureTtlDays.value
+    })
+    cacheTtlDays.value = settings.linkPreviewCacheTtlDays
+    failureTtlDays.value = settings.linkPreviewFailureTtlDays
+    linkCache.ttlDays = settings.linkPreviewCacheTtlDays
+    linkCache.failureTtlDays = settings.linkPreviewFailureTtlDays
+    $q.notify({ type: 'positive', message: '링크 캐시 TTL 설정을 저장했습니다.' })
+  } catch (err) {
+    error.value = getErrorMessage(err, 'TTL 설정을 저장하지 못했습니다.')
+  } finally {
+    savingLinkCacheSettings.value = false
+  }
+}
+
+async function clearLinkCache() {
+  const ok = await new Promise((resolve) => {
+    $q.dialog({
+      title: '링크 미리보기 캐시 삭제',
+      message: `캐시된 주소 ${linkCache.count}개를 삭제할까요? 다음 미리보기 때 다시 가져옵니다.`,
+      persistent: true,
+      cancel: { label: '취소', flat: true },
+      ok: { label: '삭제', color: 'negative', unelevated: true }
+    }).onOk(() => resolve(true))
+      .onCancel(() => resolve(false))
+  })
+  if (!ok) return
+
+  clearingLinkCache.value = true
+  error.value = ''
+  try {
+    const { data } = await api.delete('/link-preview/cache')
+    linkCache.count = 0
+    linkCache.ttlDays = Number(data.ttlDays) || linkCache.ttlDays
+    linkCache.failureTtlDays = Number(data.failureTtlDays) || linkCache.failureTtlDays
+    $q.notify({
+      type: 'positive',
+      message: data.deleted ? `캐시 ${data.deleted}개를 삭제했습니다.` : '삭제할 캐시가 없습니다.'
+    })
+  } catch (err) {
+    error.value = getErrorMessage(err, '캐시를 삭제하지 못했습니다.')
+  } finally {
+    clearingLinkCache.value = false
+  }
+}
 
 function filenameFromDisposition(header, fallback) {
   const raw = String(header || '')

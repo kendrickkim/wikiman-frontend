@@ -28,6 +28,8 @@ const props = defineProps({
   url: { type: String, required: true }
 })
 
+const emit = defineEmits(['resolved'])
+
 const preview = ref(null)
 const loading = ref(false)
 const failed = ref(false)
@@ -49,6 +51,7 @@ async function load() {
     const { data } = await api.get('/link-preview', { params: { url: props.url } })
     preview.value = data.preview || null
     if (!preview.value) failed.value = true
+    else emit('resolved', props.url, preview.value.url || props.url)
   } catch {
     failed.value = true
     preview.value = null

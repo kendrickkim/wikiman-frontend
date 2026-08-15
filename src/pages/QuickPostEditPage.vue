@@ -29,9 +29,7 @@
           input-style="min-height: 280px; line-height: 1.5;"
         />
 
-        <div v-if="linkUrls.length" class="wiki-link-cards q-mt-md">
-          <LinkPreviewCard v-for="url in linkUrls" :key="url" :url="url" />
-        </div>
+        <PostLinkPreviews :content="content" :max-links="5" extra-class="q-mt-md" />
 
         <div class="row q-gutter-sm q-mt-md" :class="isDesktop ? 'justify-end' : ''">
           <q-btn
@@ -42,7 +40,7 @@
             label="포스트로 이동"
             :loading="promoting"
             :disable="saving || !content.trim()"
-            @click="promote"
+            @click="promoteDialog = true"
           />
           <q-btn
             unelevated
@@ -55,6 +53,12 @@
           />
         </div>
       </q-card>
+
+      <QuickPostPromoteDialog
+        v-model="promoteDialog"
+        :loading="promoting"
+        @confirm="promote"
+      />
     </div>
   </q-page>
 </template>
@@ -65,8 +69,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
 import { useLayout } from '@/composables/useLayout'
-import { extractUrls } from '@/utils/urls'
-import LinkPreviewCard from '@/components/LinkPreviewCard.vue'
+import PostLinkPreviews from '@/components/PostLinkPreviews.vue'
+import QuickPostPromoteDialog from '@/components/QuickPostPromoteDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -76,9 +80,9 @@ const { isDesktop } = useLayout()
 const content = ref('')
 const saving = ref(false)
 const promoting = ref(false)
+const promoteDialog = ref(false)
 const error = ref('')
 const isEdit = computed(() => Boolean(route.params.id))
-const linkUrls = computed(() => extractUrls(content.value, { limit: 5 }))
 
 async function load() {
   if (!isEdit.value) {
@@ -119,7 +123,7 @@ async function save() {
   }
 }
 
-async function promote() {
+async function promote({ editorType, keepSource }) {
   if (!isEdit.value) return
   promoting.value = true
   error.value = ''
@@ -127,7 +131,8 @@ async function promote() {
     if (content.value.trim()) {
       await api.patch(`/quick-posts/${route.params.id}`, { content: content.value.trim() })
     }
-    const { data } = await api.post(`/quick-posts/${route.params.id}/promote`)
+    const { data } = await api.post(`/quick-posts/${route.params.id}/promote`, { editorType, keepSource })
+    promoteDialog.value = false
     $q.notify({ type: 'positive', message: '일반 포스트 초안으로 옮겼습니다.' })
     await router.replace(`/posts/${data.post.id}/edit`)
   } catch (err) {

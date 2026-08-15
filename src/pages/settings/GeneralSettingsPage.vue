@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <q-banner v-if="error" class="bg-red-1 text-negative q-mb-md">{{ error }}</q-banner>
+  <div class="q-gutter-md">
+    <q-banner v-if="error" class="bg-red-1 text-negative">{{ error }}</q-banner>
 
     <q-form @submit.prevent="save">
       <q-card flat bordered>
@@ -131,16 +131,6 @@
             <div class="text-caption text-grey-7 q-mt-xs">새 글 작성 시 화면 크기에 맞는 에디터가 기본으로 선택됩니다.</div>
           </div>
 
-          <div>
-            <div class="text-body2 q-mb-sm">모바일 간단 화면</div>
-            <q-toggle
-              v-model="form.mobileQuickPostEnabled"
-              label="모바일에서 간단 입력 화면 사용"
-              color="primary"
-            />
-            <div class="text-caption text-grey-7 q-mt-xs">켜면 모바일로 사이트를 처음 열 때 내용만 빠르게 저장하는 화면이 열립니다.</div>
-          </div>
-
           <q-input
             v-model="form.plantumlServer"
             outlined
@@ -181,8 +171,7 @@ const form = reactive({
   favicon: settings.favicon,
   categoryTreeExpand: settings.categoryTreeExpand,
   categoryTreeSide: settings.categoryTreeSide,
-  fontScale: settings.fontScale,
-  mobileQuickPostEnabled: settings.mobileQuickPostEnabled
+  fontScale: settings.fontScale
 })
 
 const themeOptions = [
@@ -215,7 +204,6 @@ onMounted(async () => {
   form.categoryTreeExpand = settings.categoryTreeExpand
   form.categoryTreeSide = settings.categoryTreeSide
   form.fontScale = settings.fontScale
-  form.mobileQuickPostEnabled = settings.mobileQuickPostEnabled
 })
 
 function pickFavicon() {
@@ -272,8 +260,7 @@ async function save() {
       favicon: form.favicon,
       categoryTreeExpand: form.categoryTreeExpand,
       categoryTreeSide: form.categoryTreeSide,
-      fontScale: form.fontScale,
-      mobileQuickPostEnabled: form.mobileQuickPostEnabled
+      fontScale: form.fontScale
     })
     $q.notify({ type: 'positive', message: '설정을 저장했습니다.' })
   } catch (err) {

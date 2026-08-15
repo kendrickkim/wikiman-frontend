@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { Dark } from 'quasar'
 import { api } from '@/utils/api'
-import { normalizeEditorType } from '@/utils/editors'
+import { normalizeEditorType, EDITOR_OPTIONS } from '@/utils/editors'
 
 const DEFAULT_FAVICON = '/icons/favicon.svg'
 const DEFAULT_APPLE_TOUCH = '/icons/apple-touch-icon.png'
@@ -52,6 +52,10 @@ export const useSettingsStore = defineStore('settings', {
     fontScale: 100,
     topMenuVisible: true,
     mobileQuickPostEnabled: false,
+    quickPostPromoteSourceMode: 'ask',
+    quickPostPromoteEditor: 'ask',
+    linkPreviewCacheTtlDays: 10,
+    linkPreviewFailureTtlDays: 1,
     homePostIds: [],
     hasHomepage: false,
     topMenuItems: [],
@@ -88,6 +92,21 @@ export const useSettingsStore = defineStore('settings', {
       this.fontScale = Number.isFinite(scale) && scale >= 60 && scale <= 120 ? scale : 100
       this.topMenuVisible = data.topMenuVisible !== false
       this.mobileQuickPostEnabled = data.mobileQuickPostEnabled === true
+      this.quickPostPromoteSourceMode = ['ask', 'delete', 'keep'].includes(data.quickPostPromoteSourceMode)
+        ? data.quickPostPromoteSourceMode
+        : 'ask'
+      this.quickPostPromoteEditor = data.quickPostPromoteEditor === 'ask'
+        || EDITOR_OPTIONS.some((option) => option.value === data.quickPostPromoteEditor)
+        ? data.quickPostPromoteEditor
+        : 'ask'
+      const linkCacheTtl = Math.round(Number(data.linkPreviewCacheTtlDays))
+      this.linkPreviewCacheTtlDays = Number.isFinite(linkCacheTtl) && linkCacheTtl >= 1 && linkCacheTtl <= 365
+        ? linkCacheTtl
+        : 10
+      const linkFailureTtl = Math.round(Number(data.linkPreviewFailureTtlDays))
+      this.linkPreviewFailureTtlDays = Number.isFinite(linkFailureTtl) && linkFailureTtl >= 1 && linkFailureTtl <= 365
+        ? linkFailureTtl
+        : 1
       const ids = Array.isArray(data.homePostIds)
         ? data.homePostIds.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0)
         : []

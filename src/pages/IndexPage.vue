@@ -1,6 +1,8 @@
 <template>
   <q-page class="wiki-page wiki-page--article">
     <div class="wiki-main wiki-main--wide">
+      <QuickPostComposer v-if="showQuickComposer" />
+
       <template v-if="showingHome">
         <div v-if="loading" class="flex flex-center q-pa-xl">
           <q-spinner size="40px" color="primary" />
@@ -55,6 +57,7 @@
             <q-card flat bordered class="wiki-article-card wiki-article-body">
               <PostViewer :editor-type="homePost.editorType" :content="homePost.content" />
             </q-card>
+            <PostLinkPreviews :content="homePost.content" extra-class="q-mt-md" />
             <FileAttachments :model-value="homePost.attachments || []" card-class="q-mt-md" />
           </div>
         </template>
@@ -229,6 +232,8 @@ import { usePostActions } from '@/composables/usePostActions'
 import KeywordChips from '@/components/KeywordChips.vue'
 import PostViewer from '@/components/PostViewer.vue'
 import FileAttachments from '@/components/FileAttachments.vue'
+import QuickPostComposer from '@/components/QuickPostComposer.vue'
+import PostLinkPreviews from '@/components/PostLinkPreviews.vue'
 import { displayTitle } from '@/utils/title'
 import { formatDate } from '@/utils/format'
 
@@ -316,6 +321,17 @@ const wantsHomepage = computed(() => (
 ))
 
 const showingHome = computed(() => wantsHomepage.value && homePosts.value.length > 0)
+
+const showQuickComposer = computed(() => (
+  !isDesktop.value
+  && settings.mobileQuickPostEnabled
+  && auth.canWrite
+  && route.path === '/'
+  && !activeCategoryId.value
+  && !route.query.q
+  && !activeKeyword.value
+  && route.query.view !== 'list'
+))
 
 const heading = computed(() => {
   if (activeKeyword.value) return `"${activeKeyword.value}" 키워드 글`
