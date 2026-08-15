@@ -21,29 +21,42 @@
             </div>
             <KeywordChips class="q-mt-sm" :keywords="post.keywords" />
           </div>
-          <div v-if="canEdit" class="wiki-article-actions">
+          <div class="wiki-article-actions">
             <q-btn
               outline
               color="primary"
-              icon="edit"
+              icon="content_copy"
               no-caps
               :dense="!isDesktop"
               :size="isDesktop ? 'md' : 'sm'"
-              :label="isDesktop ? '수정' : undefined"
-              :aria-label="isDesktop ? undefined : '수정'"
-              :to="`/posts/${post.id}/edit`"
+              :label="isDesktop ? '링크 복사' : undefined"
+              :aria-label="isDesktop ? undefined : '링크 복사'"
+              @click="copyLink"
             />
-            <q-btn
-              unelevated
-              color="negative"
-              icon="delete"
-              no-caps
-              :dense="!isDesktop"
-              :size="isDesktop ? 'md' : 'sm'"
-              :label="isDesktop ? '삭제' : undefined"
-              :aria-label="isDesktop ? undefined : '삭제'"
-              @click="removePost(post)"
-            />
+            <template v-if="canEdit">
+              <q-btn
+                outline
+                color="primary"
+                icon="edit"
+                no-caps
+                :dense="!isDesktop"
+                :size="isDesktop ? 'md' : 'sm'"
+                :label="isDesktop ? '수정' : undefined"
+                :aria-label="isDesktop ? undefined : '수정'"
+                :to="`/posts/${post.id}/edit`"
+              />
+              <q-btn
+                unelevated
+                color="negative"
+                icon="delete"
+                no-caps
+                :dense="!isDesktop"
+                :size="isDesktop ? 'md' : 'sm'"
+                :label="isDesktop ? '삭제' : undefined"
+                :aria-label="isDesktop ? undefined : '삭제'"
+                @click="removePost(post)"
+              />
+            </template>
           </div>
         </div>
         <q-card flat bordered class="wiki-article-card wiki-article-body">
@@ -58,6 +71,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useQuasar } from 'quasar'
 import { useRoute } from 'vue-router'
 import { api, getErrorMessage } from '@/utils/api'
 import { useAuthStore } from '@/stores/auth'
@@ -70,6 +84,7 @@ import PostLinkPreviews from '@/components/PostLinkPreviews.vue'
 import { displayTitle } from '@/utils/title'
 import { formatDate } from '@/utils/format'
 
+const $q = useQuasar()
 const route = useRoute()
 const { isDesktop } = useLayout()
 const { removePost } = usePostActions()
@@ -82,6 +97,29 @@ const isModified = computed(() => (
   Boolean(post.value?.updatedAt)
   && formatDate(post.value.updatedAt) !== formatDate(post.value.createdAt)
 ))
+
+async function copyLink() {
+  if (!post.value?.id) return
+  const url = `${window.location.origin}/posts/${post.value.id}`
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url)
+    } else {
+      const input = document.createElement('input')
+      input.value = url
+      input.setAttribute('readonly', '')
+      input.style.position = 'fixed'
+      input.style.opacity = '0'
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+    }
+    $q.notify({ type: 'positive', message: '링크를 복사했습니다.' })
+  } catch {
+    $q.notify({ type: 'negative', message: '링크를 복사하지 못했습니다.' })
+  }
+}
 
 async function load() {
   loading.value = true
