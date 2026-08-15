@@ -28,6 +28,7 @@ Vue 3 · Quasar 2 · Pinia · Vue Router · JavaScript. Node 22.22+.
 - Markdown 코드 펜스(````js` 등)는 highlight.js로 언어별 하이라이트합니다. `plantuml`/`puml`은 기존처럼 다이어그램으로 렌더합니다.
 - 액션 버튼(저장·발행·취소·삭제) 높이를 `wiki-edit-actions`로 맞춥니다.
 - 사이트 관리(`/settings`)는 일반·카테고리·홈페이지·간단 포스트·첨부파일·데이터관리 메뉴로 나뉩니다.
+- 간단 포스트 작성 에디터는 사이트 관리 → 간단 포스트의 `quickPostEditor`(기본 `textarea`). 일반 포스트 이동 시 에디터는 `quickPostPromoteEditor`.
 - 글자 스케일은 사이트 관리 → 일반에서 선택(60~120%, 기본 100). `--wiki-font-scale`은 `html` 변수로 두고, 실제 크기는 `.wiki-content`와 편집 영역에만 적용합니다.
 - 사이트 관리에서 파비콘을 바꿀 수 있습니다. **기본값으로 되돌리기**는 바로 저장됩니다.
 - 첨부 파일 최대 용량(MB)과 미연결 파일 정리는 사이트 관리 → 첨부파일에서 합니다.

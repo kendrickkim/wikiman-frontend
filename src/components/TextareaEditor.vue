@@ -6,13 +6,21 @@
     outlined
     autogrow
     class="wiki-textarea-editor"
-    placeholder="글을 작성하세요."
-    input-style="min-height: 280px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 1.5;"
+    :placeholder="placeholder"
+    :input-style="inputStyle"
   />
 </template>
 
 <script setup>
 import { nextTick, ref } from 'vue'
+
+defineProps({
+  placeholder: { type: String, default: '글을 작성하세요.' },
+  inputStyle: {
+    type: String,
+    default: 'min-height: 280px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 1.5;'
+  }
+})
 
 const model = defineModel({ type: String, default: '' })
 const inputRef = ref(null)

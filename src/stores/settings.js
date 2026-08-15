@@ -52,6 +52,7 @@ export const useSettingsStore = defineStore('settings', {
     fontScale: 100,
     topMenuVisible: true,
     mobileQuickPostEnabled: false,
+    quickPostEditor: 'textarea',
     quickPostPromoteSourceMode: 'ask',
     quickPostPromoteEditor: 'ask',
     linkPreviewCacheTtlDays: 10,
@@ -92,6 +93,7 @@ export const useSettingsStore = defineStore('settings', {
       this.fontScale = Number.isFinite(scale) && scale >= 60 && scale <= 120 ? scale : 100
       this.topMenuVisible = data.topMenuVisible !== false
       this.mobileQuickPostEnabled = data.mobileQuickPostEnabled === true
+      this.quickPostEditor = normalizeEditorType(data.quickPostEditor, 'textarea')
       this.quickPostPromoteSourceMode = ['ask', 'delete', 'keep'].includes(data.quickPostPromoteSourceMode)
         ? data.quickPostPromoteSourceMode
         : 'ask'

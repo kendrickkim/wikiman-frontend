@@ -23,6 +23,21 @@
           </div>
 
           <div>
+            <div class="text-body2 q-mb-sm">간단 포스트 에디터</div>
+            <q-select
+              v-model="quickPostEditor"
+              outlined
+              emit-value
+              map-options
+              :options="EDITOR_OPTIONS"
+              style="max-width: 360px"
+            />
+            <div class="text-caption text-grey-7 q-mt-xs">
+              간단 입력·수정 화면에서 사용할 작성 방식입니다.
+            </div>
+          </div>
+
+          <div>
             <div class="text-body2 q-mb-sm">포스트 이동 시 에디터</div>
             <q-select
               v-model="promoteEditor"
@@ -70,6 +85,7 @@ import { EDITOR_OPTIONS } from '@/utils/editors'
 const $q = useQuasar()
 const settings = useSettingsStore()
 const mobileQuickPostEnabled = ref(settings.mobileQuickPostEnabled)
+const quickPostEditor = ref(settings.quickPostEditor)
 const promoteEditor = ref(settings.quickPostPromoteEditor)
 const promoteSourceMode = ref(settings.quickPostPromoteSourceMode)
 const saving = ref(false)
@@ -87,6 +103,7 @@ const promoteSourceOptions = [
 onMounted(async () => {
   await settings.ensureLoaded()
   mobileQuickPostEnabled.value = settings.mobileQuickPostEnabled
+  quickPostEditor.value = settings.quickPostEditor
   promoteEditor.value = settings.quickPostPromoteEditor
   promoteSourceMode.value = settings.quickPostPromoteSourceMode
 })
@@ -97,10 +114,12 @@ async function save() {
   try {
     await settings.save({
       mobileQuickPostEnabled: mobileQuickPostEnabled.value,
+      quickPostEditor: quickPostEditor.value,
       quickPostPromoteEditor: promoteEditor.value,
       quickPostPromoteSourceMode: promoteSourceMode.value
     })
     mobileQuickPostEnabled.value = settings.mobileQuickPostEnabled
+    quickPostEditor.value = settings.quickPostEditor
     promoteEditor.value = settings.quickPostPromoteEditor
     promoteSourceMode.value = settings.quickPostPromoteSourceMode
     $q.notify({ type: 'positive', message: '간단 포스트 설정을 저장했습니다.' })
