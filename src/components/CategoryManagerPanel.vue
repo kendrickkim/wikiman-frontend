@@ -7,6 +7,8 @@
           node-key="id"
           selected-color="primary"
           v-model:selected="selectedId"
+          tick-strategy="strict"
+          v-model:ticked="tickedIds"
           default-expand-all
           class="wiki-category-tree"
         >
@@ -30,6 +32,47 @@
 
     <div class="col-12 col-md-7">
       <div class="category-manager-form" :style="paneStyle">
+      <template v-if="tickedIds.length">
+        <div class="category-manager-bulk">
+          <div class="row items-center">
+            <div class="text-subtitle2 col">체크한 카테고리 {{ tickedIds.length }}개</div>
+            <q-btn flat dense no-caps label="선택 해제" :disable="bulkWorking" @click="tickedIds = []" />
+          </div>
+          <q-select
+            v-model="bulkParentId"
+            :options="bulkMoveOptions"
+            emit-value
+            map-options
+            dense
+            outlined
+            label="이동할 상위 카테고리"
+            class="q-mt-sm"
+          />
+          <div class="row q-gutter-sm q-mt-sm">
+            <q-btn
+              color="primary"
+              unelevated
+              no-caps
+              label="한번에 이동"
+              :loading="bulkWorking"
+              @click="bulkMove"
+            />
+            <q-btn
+              color="negative"
+              outline
+              no-caps
+              label="한번에 삭제"
+              :disable="bulkWorking"
+              @click="bulkRemove"
+            />
+          </div>
+          <div class="text-caption text-grey-7 q-mt-xs">
+            삭제하면 각 카테고리의 하위 카테고리와 글은 상위 카테고리로 옮겨집니다.
+          </div>
+        </div>
+        <q-separator class="q-my-lg" />
+      </template>
+
       <q-form class="q-gutter-sm" @submit.prevent="createCategory">
         <div class="text-subtitle2">새 카테고리</div>
         <q-input v-model="createName" dense outlined label="이름" />
@@ -48,8 +91,8 @@
             v-model="createVisibility"
             unelevated
             no-caps
-            dense
             toggle-color="primary"
+            class="wiki-visibility-toggle"
             :options="visibilityOptions"
           />
         </div>
@@ -67,8 +110,8 @@
             v-model="editVisibility"
             unelevated
             no-caps
-            dense
             toggle-color="primary"
+            class="wiki-visibility-toggle"
             :options="visibilityOptions"
           />
           <div class="text-caption text-grey-7 q-mt-xs">
@@ -125,6 +168,9 @@ const emit = defineEmits(['saved'])
 const $q = useQuasar()
 const wiki = useWikiStore()
 const selectedId = ref(null)
+const tickedIds = ref([])
+const bulkParentId = ref(0)
+const bulkWorking = ref(false)
 const createName = ref('')
 const createParentId = ref(0)
 const createVisibility = ref('public')
@@ -179,6 +225,22 @@ const moveOptions = computed(() => {
       .map((category) => ({ label: category.label, value: category.id }))
   ]
 })
+
+const bulkBlockedIds = computed(() => {
+  // 선택한 카테고리 자신과 그 하위로는 이동할 수 없습니다(순환 방지)
+  const blocked = new Set()
+  for (const id of tickedIds.value) {
+    for (const item of descendantIdSet(id)) blocked.add(item)
+  }
+  return blocked
+})
+
+const bulkMoveOptions = computed(() => [
+  { label: '최상위', value: 0 },
+  ...wiki.flatOptions
+    .filter((category) => !bulkBlockedIds.value.has(category.id))
+    .map((category) => ({ label: category.label, value: category.id }))
+])
 
 const currentLocationLabel = computed(() => {
   if (!selected.value) return ''
@@ -238,6 +300,13 @@ onBeforeUnmount(() => {
 watch(() => $q.screen.gt.sm, fitPaneHeight)
 watch(() => wiki.categories.length, fitPaneHeight)
 watch(selectedId, fitPaneHeight)
+watch(() => tickedIds.value.length, fitPaneHeight)
+
+watch(bulkMoveOptions, (options) => {
+  if (!options.some((option) => option.value === bulkParentId.value)) {
+    bulkParentId.value = 0
+  }
+})
 
 async function notifyError(err) {
   $q.notify({ type: 'negative', message: getErrorMessage(err) })
@@ -298,6 +367,75 @@ async function moveCategory() {
   }
 }
 
+function tickedCategoryIds() {
+  const known = new Set(wiki.categories.map((category) => category.id))
+  return tickedIds.value.map(Number).filter((id) => known.has(id))
+}
+
+async function bulkMove() {
+  const ids = tickedCategoryIds()
+  if (!ids.length) return
+  const parentId = toParentId(bulkParentId.value)
+  if (parentId && bulkBlockedIds.value.has(parentId)) {
+    $q.notify({ type: 'negative', message: '선택한 카테고리의 하위로는 이동할 수 없습니다.' })
+    return
+  }
+  const targetLabel = parentId
+    ? wiki.categories.find((category) => category.id === parentId)?.name || '선택한 카테고리'
+    : '최상위'
+  bulkWorking.value = true
+  let moved = 0
+  try {
+    for (const id of ids) {
+      await api.patch(`/categories/${id}`, { parentId })
+      moved += 1
+    }
+    tickedIds.value = []
+    bulkParentId.value = 0
+    await reload()
+    $q.notify({
+      type: 'positive',
+      message: parentId
+        ? `${moved}개 카테고리를 "${targetLabel}" 아래로 이동했습니다.`
+        : `${moved}개 카테고리를 최상위로 이동했습니다.`
+    })
+  } catch (err) {
+    await reload()
+    $q.notify({ type: 'negative', message: `${moved}개 이동 후 실패했습니다. ${getErrorMessage(err)}` })
+  } finally {
+    bulkWorking.value = false
+  }
+}
+
+function bulkRemove() {
+  const ids = tickedCategoryIds()
+  if (!ids.length) return
+  $q.dialog({
+    title: '카테고리 일괄 삭제',
+    message: `선택한 ${ids.length}개 카테고리를 삭제할까요? 각 카테고리의 하위 카테고리와 글은 상위 카테고리로 옮겨집니다.`,
+    cancel: true,
+    persistent: true
+  }).onOk(async () => {
+    bulkWorking.value = true
+    let removed = 0
+    try {
+      for (const id of ids) {
+        await api.delete(`/categories/${id}`)
+        removed += 1
+      }
+      if (ids.includes(Number(selectedId.value))) selectedId.value = null
+      tickedIds.value = []
+      await reload()
+      $q.notify({ type: 'positive', message: `${removed}개 카테고리를 삭제했습니다.` })
+    } catch (err) {
+      await reload()
+      $q.notify({ type: 'negative', message: `${removed}개 삭제 후 실패했습니다. ${getErrorMessage(err)}` })
+    } finally {
+      bulkWorking.value = false
+    }
+  })
+}
+
 function removeCategory() {
   if (!selected.value) return
   $q.dialog({
@@ -334,7 +472,29 @@ function removeCategory() {
   padding-right: 4px;
 }
 
+.category-manager-bulk {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #bfd4f0;
+  background: #eef4fb;
+}
+
 .body--dark .category-manager-tree {
   border-color: #3a4149;
+}
+
+.body--dark .category-manager-bulk {
+  border-color: #3d5570;
+  background: #243142;
+}
+
+.wiki-visibility-toggle :deep(.q-btn) {
+  min-height: 36px;
+  padding: 6px 14px;
+  margin-right: 6px;
+}
+
+.wiki-visibility-toggle :deep(.q-btn:last-child) {
+  margin-right: 0;
 }
 </style>
