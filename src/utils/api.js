@@ -13,6 +13,20 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const data = error?.response?.data
+    if (data?.error === 'INSTALL_REQUIRED' && window.location.pathname !== '/install.php') {
+      const target = typeof data?.params?.installUrl === 'string'
+        ? data.params.installUrl
+        : '/install.php'
+      window.location.replace(target)
+    }
+    return Promise.reject(error)
+  }
+)
+
 export function getErrorMessage(err, fallback) {
   const data = err?.response?.data
   const serverError = data?.error

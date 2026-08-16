@@ -29,7 +29,9 @@ if (import.meta.env.QUASAR_PROD) {
       {
         denylist: [
           new RegExp(import.meta.env.QUASAR_PWA_SERVICE_WORKER_REGEX),
-          /workbox-(.)*\.js$/
+          /workbox-(.)*\.js$/,
+          /^\/api(?:\/|$)/,
+          /^\/install\.php(?:$|\?)/
         ]
       }
     )

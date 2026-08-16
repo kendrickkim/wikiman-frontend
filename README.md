@@ -40,6 +40,7 @@ npm run dev:pwa
 | `npm run build` | `dist/spa/` | SPA build |
 | `npm run build:pwa` | `dist/pwa/` | **PWA** build (service worker + manifest) |
 | `npm run build:backend` | `../backend/public/` | PWA build copied into the backend `public/` folder |
+| `npm run build:php` | `../wikiman-backend-php/public/` | Copy PWA while preserving the PHP installer gate |
 
 Recommended deploy flow:
 
@@ -54,6 +55,15 @@ Override the copy destination:
 $env:BACKEND_PUBLIC="D:\path\to\backend\public"
 npm run build:backend
 ```
+
+For the PHP backend:
+
+```bash
+npm run build:php
+```
+
+The PHP copy preserves `public/index.php`, `public/install.php`, `public/.htaccess`, and
+`public/.wikiman-installed`.
 
 Build PWA only, then copy manually:
 
@@ -71,7 +81,10 @@ npm run build:pwa
 
 ## Nginx proxy (Open Graph)
 
-Per-post Open Graph tags are injected by the backend host (`HOST_PORT`, default `:80`). See the [backend README](../backend/README.md) Nginx section for the recommended proxy setup.
+Per-post Open Graph tags are injected by the Node host (`HOST_PORT`, default `:80`) or
+the PHP backend's `public/index.php`. See the [backend README](../backend/README.md)
+for the recommended proxy setup. Do not fall back to a static `index.html` in front
+of either backend.
 
 ### Icons
 
@@ -100,6 +113,7 @@ npm run check   # lint + test + PWA build
 | `build` | SPA production build |
 | `build:pwa` | PWA production build |
 | `build:backend` | PWA build → backend `public/` |
+| `build:php` | PWA build → PHP backend `public/` |
 | `icons:pwa` | Generate icon PNGs from favicon.svg |
 | `lint` / `test` / `check` | Checks |
 

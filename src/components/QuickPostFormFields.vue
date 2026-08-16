@@ -10,6 +10,8 @@
       @update:model-value="emit('update:modelValue', $event)"
     />
 
+    <QuickPostImages :content="modelValue" :max-images="maxImages" extra-class="q-mt-sm" />
+
     <PostLinkPreviews :content="modelValue" :max-links="maxLinks" extra-class="q-mt-sm" />
 
     <div class="row q-gutter-sm q-mt-sm items-center" :class="actionsClass">
@@ -47,6 +49,7 @@ import { useSettingsStore } from '@/stores/settings'
 import { appendQuickPostSpeech } from '@/utils/quickPostContent'
 import PostLinkPreviews from '@/components/PostLinkPreviews.vue'
 import QuickPostBodyEditor from '@/components/QuickPostBodyEditor.vue'
+import QuickPostImages from '@/components/QuickPostImages.vue'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -54,6 +57,7 @@ const props = defineProps({
   editorKey: { type: [String, Number], default: 0 },
   compact: { type: Boolean, default: false },
   maxLinks: { type: Number, default: 5 },
+  maxImages: { type: Number, default: 6 },
   actionsClass: { type: [String, Array, Object], default: '' },
   actionsSpace: { type: Boolean, default: false }
 })

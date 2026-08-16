@@ -11,6 +11,7 @@
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
     "build:backend": "npm run build:pwa && node scripts/copy-to-backend.mjs",
+    "build:php": "npm run build:pwa && node scripts/copy-to-php.mjs",
     "icons:pwa": "node scripts/generate-pwa-icons.mjs",
     "postinstall": "quasar prepare",
     "lint": "node scripts/syntax-check.mjs",

@@ -36,6 +36,7 @@ export default {
     manage: '관리'
   },
   errors: {
+    INSTALL_REQUIRED: 'Wikiman 설치 또는 데이터베이스 설정이 필요합니다.',
     FAVICON_UPLOAD_ONLY: '파비콘은 업로드한 이미지만 사용할 수 있습니다.',
     SITE_TITLE_LENGTH: '사이트 제목은 1~80자로 입력하세요.',
     THEME_INVALID: '테마는 밝은 또는 어두운만 선택할 수 있습니다.',
@@ -93,6 +94,7 @@ export default {
     BACKUP_DATABASE_CORRUPT: '데이터베이스 파일이 손상되어 있습니다. 백업을 다시 만든 뒤 복구해 주세요.',
     BACKUP_RESTORE_FAILED: '복구에 실패했습니다.',
     BACKUP_REOPEN_FAILED: '복구 후 데이터베이스를 열 수 없습니다: {message}',
+    BACKUP_DRIVER_UNSUPPORTED: '{driver} 데이터베이스는 앱 내 백업을 지원하지 않습니다.',
     RATE_LIMITED: '요청이 너무 많습니다. 잠시 후 다시 시도하세요.',
     LINK_PREVIEW_FAILED: '링크 미리보기에 실패했습니다.',
     LINK_PREVIEW_PRIVATE: '내부 주소는 미리볼 수 없습니다.',
@@ -269,6 +271,7 @@ export default {
     htmlCapabilities: 'HTML · 이미지 붙여넣기',
     markdownCapabilities: 'Markdown · plantuml · 이미지 붙여넣기',
     attachmentCount: '첨부 {count}',
+    attachedImage: '본문 이미지',
     homepageBadge: '홈페이지',
     pageSize: '{count}개씩',
     pagination: '{start}–{end} / {total}개',
@@ -339,6 +342,7 @@ export default {
     restoreMessage: '형식 버전 {version} 백업으로 현재 사이트 데이터를 모두 덮어쓸까요? 이 작업은 되돌릴 수 없습니다.',
     restored: '백업으로 복구했습니다.',
     restoreFailed: '복구에 실패했습니다.',
+    unsupportedDriver: '{driver} 데이터베이스는 앱 내 백업을 지원하지 않습니다. 호스팅 DB 백업 기능을 사용하세요.',
     linkCache: '링크 미리보기 캐시',
     cacheTtl: '기본 TTL (일)',
     failureTtl: '조회 실패 시 연장 TTL (일)',

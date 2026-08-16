@@ -19,7 +19,16 @@ if (!fs.existsSync(path.dirname(dest))) {
   process.exit(0)
 }
 
+const preserved = new Map()
+for (const name of ['index.php', 'install.php', '.htaccess', '.wikiman-installed']) {
+  const file = path.join(dest, name)
+  if (fs.existsSync(file)) preserved.set(name, fs.readFileSync(file))
+}
+
 fs.rmSync(dest, { recursive: true, force: true })
 fs.mkdirSync(dest, { recursive: true })
 fs.cpSync(src, dest, { recursive: true })
+for (const [name, content] of preserved) {
+  fs.writeFileSync(path.join(dest, name), content)
+}
 console.log(`Copied frontend PWA build -> ${dest}`)

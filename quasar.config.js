@@ -60,10 +60,14 @@ export default defineConfig(() => {
       },
       extendPWAGenerateSWOptions (cfg) {
         cfg.navigateFallback = 'index.html'
-        cfg.navigateFallbackDenylist = [/^\/api\//]
+        cfg.navigateFallbackDenylist = [
+          /^\/api(?:\/|$)/,
+          /^\/install\.php(?:$|\?)/
+        ]
         cfg.runtimeCaching = [
           {
-            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/')
+              || url.pathname === '/install.php',
             handler: 'NetworkOnly'
           }
         ]

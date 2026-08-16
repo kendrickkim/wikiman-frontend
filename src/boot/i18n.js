@@ -15,7 +15,9 @@ export default async ({ app }) => {
 }
 
 export async function applyQuasarLang(siteLanguage) {
-  const pack = siteLanguage === 'en-US' ? 'en-US' : 'ko-KR'
-  const lang = await import(`quasar/lang/${pack}`)
+  const lang =
+    siteLanguage === 'en-US'
+      ? await import('quasar/lang/en-US')
+      : await import('quasar/lang/ko-KR')
   Quasar.lang.set(lang.default)
 }

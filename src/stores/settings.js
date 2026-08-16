@@ -42,6 +42,8 @@ function applyFontScale(scale) {
 export const useSettingsStore = defineStore('settings', {
   state: () => ({
     siteTitle: 'Wikiman',
+    databaseDriver: 'sqlite',
+    backupSupported: true,
     siteLanguage: 'ko-KR',
     theme: 'light',
     plantumlServer: 'https://www.plantuml.com/plantuml',
@@ -90,6 +92,8 @@ export const useSettingsStore = defineStore('settings', {
     },
     assign(data) {
       this.siteTitle = data.siteTitle || 'Wikiman'
+      this.databaseDriver = data.databaseDriver === 'mysql' ? 'mysql' : 'sqlite'
+      this.backupSupported = data.backupSupported !== false
       this.siteLanguage = normalizeSiteLanguage(data.siteLanguage)
       this.theme = data.theme === 'dark' ? 'dark' : 'light'
       this.plantumlServer = data.plantumlServer || 'https://www.plantuml.com/plantuml'

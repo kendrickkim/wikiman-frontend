@@ -1,6 +1,9 @@
 <template>
   <div class="q-gutter-md">
     <q-banner v-if="error" class="bg-red-1 text-negative">{{ error }}</q-banner>
+    <q-banner v-if="!settings.backupSupported" class="bg-orange-1 text-warning">
+      {{ t('backup.unsupportedDriver', { driver: settings.databaseDriver }) }}
+    </q-banner>
 
     <div class="wiki-split">
       <div>
@@ -17,7 +20,7 @@
               icon="download"
               :label="t('backup.download')"
               :loading="downloading"
-              :disable="downloading || restoring"
+              :disable="!settings.backupSupported || downloading || restoring"
               @click="downloadBackup"
             />
           </q-card-section>
@@ -45,7 +48,7 @@
                 icon="upload_file"
                 :label="t('backup.chooseFile')"
                 :loading="inspecting"
-                :disable="downloading || restoring || inspecting"
+                :disable="!settings.backupSupported || downloading || restoring || inspecting"
                 @click="pickBackup"
               />
               <q-btn

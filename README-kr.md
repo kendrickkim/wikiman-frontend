@@ -40,6 +40,7 @@ npm run dev:pwa
 | `npm run build` | `dist/spa/` | 일반 SPA 빌드 |
 | `npm run build:pwa` | `dist/pwa/` | **PWA** 빌드 (서비스 워커·매니페스트 포함) |
 | `npm run build:backend` | `../backend/public/` | PWA 빌드 후 백엔드 `public/`에 복사 |
+| `npm run build:php` | `../wikiman-backend-php/public/` | PHP 설치 게이트를 보존하며 PWA 복사 |
 
 권장 배포 흐름:
 
@@ -54,6 +55,15 @@ npm run build:backend
 $env:BACKEND_PUBLIC="D:\path\to\backend\public"
 npm run build:backend
 ```
+
+PHP 백엔드에 배포하려면:
+
+```bash
+npm run build:php
+```
+
+PHP 대상 복사에서는 기존 `public/index.php`, `public/install.php`, `public/.htaccess`,
+`public/.wikiman-installed`를 보존합니다.
 
 PWA만 빌드한 뒤 수동 복사:
 
@@ -71,7 +81,9 @@ npm run build:pwa
 
 ## Nginx 프록시 (공유 메타 / Open Graph)
 
-자세한 프록시 설정은 [backend README-kr](../backend/README-kr.md)의 Nginx 절을 보세요. 글별 Open Graph는 백엔드 호스트(`HOST_PORT`, 기본 `:80`)가 HTML에 넣습니다.
+Node 배포에서는 [backend README-kr](../backend/README-kr.md)의 Nginx 절을 참고하세요.
+글별 Open Graph는 Node의 `HOST_PORT` 호스트 또는 PHP 백엔드의 `public/index.php`가
+HTML에 넣습니다. 리버스 프록시가 정적 `index.html`을 직접 fallback하면 안 됩니다.
 
 ### 아이콘
 
@@ -100,6 +112,7 @@ npm run check   # lint + test + PWA 빌드
 | `build` | SPA 프로덕션 빌드 |
 | `build:pwa` | PWA 프로덕션 빌드 |
 | `build:backend` | PWA 빌드 → 백엔드 `public/` 복사 |
+| `build:php` | PWA 빌드 → PHP 백엔드 `public/` 복사 |
 | `icons:pwa` | favicon.svg에서 아이콘 PNG 생성 |
 | `lint` / `test` / `check` | 검사 |
 

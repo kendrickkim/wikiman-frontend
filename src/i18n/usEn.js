@@ -36,6 +36,7 @@ export default {
     manage: 'Manage'
   },
   errors: {
+    INSTALL_REQUIRED: 'Wikiman installation or database configuration is required.',
     FAVICON_UPLOAD_ONLY: 'Only uploaded images can be used as the favicon.',
     SITE_TITLE_LENGTH: 'Site title must be 1–80 characters.',
     THEME_INVALID: 'Theme must be light or dark.',
@@ -93,6 +94,7 @@ export default {
     BACKUP_DATABASE_CORRUPT: 'The database file is corrupted. Create a new backup and try again.',
     BACKUP_RESTORE_FAILED: 'Restore failed.',
     BACKUP_REOPEN_FAILED: 'Could not open the database after restore: {message}',
+    BACKUP_DRIVER_UNSUPPORTED: 'In-app backup is not supported for the {driver} database.',
     RATE_LIMITED: 'Too many requests. Try again later.',
     LINK_PREVIEW_FAILED: 'Link preview failed.',
     LINK_PREVIEW_PRIVATE: 'Private addresses cannot be previewed.',
@@ -269,6 +271,7 @@ export default {
     htmlCapabilities: 'HTML · paste images',
     markdownCapabilities: 'Markdown · plantuml · paste images',
     attachmentCount: '{count} attachments',
+    attachedImage: 'Content image',
     homepageBadge: 'Homepage',
     pageSize: '{count} per page',
     pagination: '{start}–{end} of {total}',
@@ -339,6 +342,7 @@ export default {
     restoreMessage: 'Overwrite all current site data with this format version {version} backup? This action cannot be undone.',
     restored: 'Restored from backup.',
     restoreFailed: 'Restore failed.',
+    unsupportedDriver: 'In-app backup is unavailable for the {driver} database. Use your hosting database backup.',
     linkCache: 'Link preview cache',
     cacheTtl: 'Default TTL (days)',
     failureTtl: 'Failure extension TTL (days)',
