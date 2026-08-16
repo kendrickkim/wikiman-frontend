@@ -73,6 +73,12 @@
               </q-item-section>
               <q-item-section>{{ t('nav.settings') }}</q-item-section>
             </q-item>
+            <q-item v-if="isNativeApp" clickable v-close-popup @click="changeConnection">
+              <q-item-section avatar>
+                <q-icon name="manage_accounts" />
+              </q-item-section>
+              <q-item-section>{{ t('nav.changeConnection') }}</q-item-section>
+            </q-item>
             <q-item clickable v-close-popup @click="logout">
               <q-item-section avatar>
                 <q-icon name="logout" />
@@ -163,6 +169,9 @@
               <q-item v-if="auth.canWrite" clickable v-close-popup to="/settings">
                 <q-item-section>{{ t('nav.settings') }}</q-item-section>
               </q-item>
+              <q-item v-if="isNativeApp" clickable v-close-popup @click="changeConnection">
+                <q-item-section>{{ t('nav.changeConnection') }}</q-item-section>
+              </q-item>
               <q-item clickable v-close-popup @click="logout">
                 <q-item-section>{{ t('nav.logout') }}</q-item-section>
               </q-item>
@@ -251,6 +260,7 @@ import { useSettingsStore } from '@/stores/settings'
 import { useLayout } from '@/composables/useLayout'
 import CategoryTreePanel from '@/components/CategoryTreePanel.vue'
 import { useI18n } from '@/i18n'
+import { isWikimanNativeApp, notifyWikimanNativeApp } from '@/utils/nativeApp'
 
 const route = useRoute()
 const router = useRouter()
@@ -259,6 +269,7 @@ const auth = useAuthStore()
 const wiki = useWikiStore()
 const settings = useSettingsStore()
 const { t } = useI18n()
+const isNativeApp = isWikimanNativeApp()
 const leftDrawer = ref(false)
 const rightDrawer = ref(false)
 const mobileSearch = ref(false)
@@ -343,5 +354,9 @@ function logout() {
   auth.logout()
   wiki.ensureLoaded({ force: true })
   router.push('/')
+}
+
+function changeConnection() {
+  notifyWikimanNativeApp('changeConnection')
 }
 </script>

@@ -157,7 +157,8 @@ export default {
     homepage: 'Homepage',
     blog: 'Blog',
     attachments: 'Attachments',
-    data: 'Data management'
+    data: 'Data management',
+    changeConnection: 'Change connection'
   },
   status: {
     label: 'Status',
@@ -517,7 +518,7 @@ export default {
     k103: "There are no files to clean up.",
     k104: "Attachment cleanup failed.",
     k105: "Size limit",
-    k106: "Applies to post attachments and body image uploads.",
+    k106: "Applies to post attachments, body images, and files shared from the mobile app.",
     k107: "Clean up unlinked files",
     k108: "Unlinked files",
     k109: " · ",

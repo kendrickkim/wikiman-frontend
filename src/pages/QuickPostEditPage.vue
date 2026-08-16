@@ -66,6 +66,8 @@ import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
 import { useLayout } from '@/composables/useLayout'
 import { useSettingsStore } from '@/stores/settings'
+import { convertEditorContent } from '@/utils/editorConvert'
+import { takeWikimanSharedDraft } from '@/utils/nativeApp'
 import {
   emptyQuickPostContent,
   hasQuickPostContent
@@ -100,6 +102,11 @@ async function load() {
   await settings.ensureLoaded()
   if (!isEdit.value) {
     resetContent()
+    const sharedDraft = takeWikimanSharedDraft()
+    if (sharedDraft) {
+      content.value = convertEditorContent(sharedDraft, 'markdown', editorType.value)
+      editorKey.value += 1
+    }
     error.value = ''
     return
   }

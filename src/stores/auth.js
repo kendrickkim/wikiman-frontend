@@ -1,8 +1,32 @@
 import { defineStore } from 'pinia'
 import { api } from '@/utils/api'
+import { isWikimanNativeApp, notifyWikimanNativeApp } from '@/utils/nativeApp'
 
 const TOKEN_KEY = 'wikiman_token'
 const TOKEN_MAX_AGE = 60 * 60 * 24 * 7
+
+function tokenFromCookie() {
+  if (typeof document === 'undefined') return ''
+  const prefix = `${TOKEN_KEY}=`
+  for (const part of document.cookie.split(';')) {
+    const value = part.trim()
+    if (!value.startsWith(prefix)) continue
+    try {
+      return decodeURIComponent(value.slice(prefix.length))
+    } catch {
+      return value.slice(prefix.length)
+    }
+  }
+  return ''
+}
+
+function storedToken() {
+  const localToken = localStorage.getItem(TOKEN_KEY) || ''
+  if (localToken || !isWikimanNativeApp()) return localToken
+  const appToken = tokenFromCookie()
+  if (appToken) localStorage.setItem(TOKEN_KEY, appToken)
+  return appToken
+}
 
 function syncAuthCookie(token) {
   if (typeof document === 'undefined') return
@@ -15,7 +39,7 @@ function syncAuthCookie(token) {
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: localStorage.getItem(TOKEN_KEY) || '',
+    token: storedToken(),
     user: null,
     loaded: false,
     canRegister: false,
@@ -37,6 +61,7 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       localStorage.removeItem(TOKEN_KEY)
       syncAuthCookie('')
+      notifyWikimanNativeApp('logout')
     },
     async loadStatus() {
       try {
