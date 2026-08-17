@@ -60,6 +60,7 @@ export default {
     LINK_PREVIEW_CACHE_TTL_INVALID: 'Link preview cache TTL must be 1–365 days.',
     LINK_PREVIEW_FAILURE_TTL_INVALID: 'Link preview failure TTL must be 1–365 days.',
     MAX_ATTACHMENT_MB_INVALID: 'Max attachment size must be 1–200 MB.',
+    THUMBNAIL_CACHE_DAYS_INVALID: 'Thumbnail cache retention must be 1–365 days.',
     URL_REQUIRED: 'Enter a URL.',
     URL_TOO_LONG: 'URL must be at most {max} characters.',
     URL_INVALID: 'URL must be an http(s):// address or a path starting with /.',
@@ -406,7 +407,12 @@ export default {
     linkCacheDescription: 'External link metadata is stored for about {ttl} days. If refreshing fails after expiration, existing data is kept for another {failureTtl} days.',
     attachmentCleanupDescription: 'Find and delete uploaded files not linked to posts, body images, or the favicon. This includes files uploaded while editing an unsaved post.',
     confirmCleanup: 'Delete {count} unlinked files ({size})? This action cannot be undone.',
-    cleanupResult: 'Deleted {count} files ({size}).'
+    cleanupResult: 'Deleted {count} files ({size}).',
+    thumbnailCacheTitle: 'Thumbnail cache',
+    thumbnailCacheDescription: 'How long the server keeps thumbnails used in quick post image grids.',
+    thumbnailCacheDays: 'Thumbnail cache retention (days)',
+    thumbnailCacheHint: '1–365 days · default 100 days',
+    thumbnailCacheSaved: 'Thumbnail cache settings saved.'
   },
   speech: {
     start: 'Start voice input',

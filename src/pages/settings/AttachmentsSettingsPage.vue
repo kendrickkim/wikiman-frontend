@@ -26,6 +26,37 @@
       </q-card>
     </q-form>
 
+    <q-form @submit.prevent="saveThumbnailCacheDays">
+      <q-card flat bordered>
+        <q-card-section>
+          <div class="text-subtitle1 text-weight-medium">{{ t('extra.thumbnailCacheTitle') }}</div>
+          <div class="text-grey-7 text-caption q-mt-xs">{{ t('extra.thumbnailCacheDescription') }}</div>
+        </q-card-section>
+        <q-card-section>
+          <q-input
+            v-model.number="thumbnailCacheDays"
+            type="number"
+            outlined
+            :label="t('extra.thumbnailCacheDays')"
+            :hint="t('extra.thumbnailCacheHint')"
+            :min="1"
+            :max="365"
+            :rules="[thumbnailDaysRule]"
+            step="1"
+          />
+        </q-card-section>
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn
+            type="submit"
+            unelevated
+            color="primary"
+            :label="t('common.save')"
+            :loading="savingThumbnailCache"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-form>
+
     <q-card flat bordered>
       <q-card-section>
         <div class="text-subtitle1 text-weight-medium">{{ t('remaining.k107') }}</div>
@@ -66,14 +97,23 @@ const $q = useQuasar()
 const settings = useSettingsStore()
 const error = ref('')
 const savingLimit = ref(false)
+const savingThumbnailCache = ref(false)
 const cleaningOrphans = ref(false)
 const orphanSummary = ref(null)
 const maxAttachmentMb = ref(settings.maxAttachmentMb)
+const thumbnailCacheDays = ref(settings.thumbnailCacheDays)
 
 onMounted(async () => {
   await settings.ensureLoaded()
   maxAttachmentMb.value = settings.maxAttachmentMb
+  thumbnailCacheDays.value = settings.thumbnailCacheDays
 })
+
+function thumbnailDaysRule(value) {
+  const days = Number(value)
+  return (Number.isInteger(days) && days >= 1 && days <= 365)
+    || t('errors.THUMBNAIL_CACHE_DAYS_INVALID')
+}
 
 function confirmOrphanDelete(summary) {
   return new Promise((resolve) => {
@@ -99,6 +139,20 @@ async function saveLimit() {
     error.value = getErrorMessage(err)
   } finally {
     savingLimit.value = false
+  }
+}
+
+async function saveThumbnailCacheDays() {
+  savingThumbnailCache.value = true
+  error.value = ''
+  try {
+    await settings.save({ thumbnailCacheDays: thumbnailCacheDays.value })
+    thumbnailCacheDays.value = settings.thumbnailCacheDays
+    $q.notify({ type: 'positive', message: t('extra.thumbnailCacheSaved') })
+  } catch (err) {
+    error.value = getErrorMessage(err)
+  } finally {
+    savingThumbnailCache.value = false
   }
 }
 

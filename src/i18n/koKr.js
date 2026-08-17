@@ -60,6 +60,7 @@ export default {
     LINK_PREVIEW_CACHE_TTL_INVALID: '링크 캐시 기본 TTL은 1~365일로 입력하세요.',
     LINK_PREVIEW_FAILURE_TTL_INVALID: '링크 조회 실패 TTL은 1~365일로 입력하세요.',
     MAX_ATTACHMENT_MB_INVALID: '첨부 파일 최대 용량은 1~200MB로 입력하세요.',
+    THUMBNAIL_CACHE_DAYS_INVALID: '썸네일 캐시 보관 기간은 1~365일로 입력하세요.',
     URL_REQUIRED: 'URL을 입력하세요.',
     URL_TOO_LONG: 'URL은 {max}자 이하여야 합니다.',
     URL_INVALID: 'URL은 http(s):// 주소이거나 /로 시작하는 경로여야 합니다.',
@@ -406,7 +407,12 @@ export default {
     linkCacheDescription: '외부 링크의 제목·설명·이미지 메타 정보를 약 {ttl}일간 저장합니다. 만료 후 다시 가져오지 못하면 기존 정보를 유지하고 {failureTtl}일 연장합니다.',
     attachmentCleanupDescription: '업로드 폴더에서 글(첨부·본문 이미지)이나 파비콘에 연결되지 않은 파일을 찾아 삭제합니다. 작성 중 올렸지만 저장하지 않은 파일도 포함됩니다.',
     confirmCleanup: '연결되지 않은 파일 {count}개({size})를 삭제할까요? 삭제하면 되돌릴 수 없습니다.',
-    cleanupResult: '파일 {count}개({size})를 삭제했습니다.'
+    cleanupResult: '파일 {count}개({size})를 삭제했습니다.',
+    thumbnailCacheTitle: '썸네일 캐시',
+    thumbnailCacheDescription: '간단 포스트 이미지 목록에 사용할 썸네일을 서버에 보관하는 기간입니다.',
+    thumbnailCacheDays: '썸네일 캐시 보관 기간 (일)',
+    thumbnailCacheHint: '1~365일 · 기본값 100일',
+    thumbnailCacheSaved: '썸네일 캐시 설정을 저장했습니다.'
   },
   speech: {
     start: '음성 입력 시작',

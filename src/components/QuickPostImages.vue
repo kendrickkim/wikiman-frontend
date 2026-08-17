@@ -7,7 +7,7 @@
       class="wiki-quick-image"
       @click="open(src)"
     >
-      <img :src="src" :alt="t('posts.attachedImage')" loading="lazy" @error="markFailed(src)" />
+      <img :src="toThumbnailUrl(src)" :alt="t('posts.attachedImage')" loading="lazy" @error="markFailed(src)" />
     </button>
 
     <q-dialog
@@ -47,6 +47,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from '@/i18n'
 import { extractQuickPostImages } from '@/utils/quickPostContent'
+import { toThumbnailUrl } from '@/utils/urls'
 
 const HISTORY_FLAG = 'wikiQuickImageViewer'
 

@@ -51,6 +51,7 @@ export const useSettingsStore = defineStore('settings', {
     defaultEditorMobile: 'ckeditor',
     favicon: '',
     maxAttachmentMb: 20,
+    thumbnailCacheDays: 100,
     categoryTreeExpand: 'expanded',
     categoryTreeSide: 'left',
     rightMenuDefaultOpen: true,
@@ -102,6 +103,10 @@ export const useSettingsStore = defineStore('settings', {
       this.favicon = typeof data.favicon === 'string' ? data.favicon : ''
       const mb = Math.round(Number(data.maxAttachmentMb))
       this.maxAttachmentMb = Number.isFinite(mb) && mb >= 1 && mb <= 200 ? mb : 20
+      const thumbnailDays = Math.round(Number(data.thumbnailCacheDays))
+      this.thumbnailCacheDays = Number.isFinite(thumbnailDays) && thumbnailDays >= 1 && thumbnailDays <= 365
+        ? thumbnailDays
+        : 100
       const treeExpand = String(data.categoryTreeExpand || '')
       this.categoryTreeExpand = ['expanded', 'collapsed', 'root'].includes(treeExpand) ? treeExpand : 'expanded'
       this.categoryTreeSide = data.categoryTreeSide === 'right' ? 'right' : 'left'

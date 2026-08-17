@@ -1,5 +1,38 @@
 const IMAGE_EXT_RE = /\.(?:png|jpe?g|gif|webp|svg|ico|bmp|avif)(?:\?.*)?$/i
 const TRACKING_PARAM_RE = /^(?:utm_.*|rc|ntype|sid|sl|fbclid|gclid|mc_eid|ref)$/i
+const THUMBNAIL_PATH_RE = /^\/api\/(?:files\/[^/]+|posts\/[^/]+\/files\/[^/]+)$/
+
+function addThumbnailParam(path, search = '', hash = '') {
+  if (/(?:^\?|&)thumb(?:=|&|$)/.test(search)) {
+    return `${path}${search.replace(/([?&])thumb(?:=[^&#]*)?/g, '$1thumb=1')}${hash}`
+  }
+  return `${path}${search ? `${search}&` : '?'}thumb=1${hash}`
+}
+
+export function toThumbnailUrl(src) {
+  if (typeof src !== 'string' || !src) return src
+
+  if (src.startsWith('/')) {
+    const match = src.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/)
+    if (!match || !THUMBNAIL_PATH_RE.test(match[1])) return src
+    return addThumbnailParam(match[1], match[2] || '', match[3] || '')
+  }
+
+  if (!/^https?:\/\//i.test(src)) return src
+  const currentOrigin = globalThis.location?.origin
+  if (!currentOrigin) return src
+
+  try {
+    const url = new URL(src)
+    if (url.origin !== currentOrigin || !THUMBNAIL_PATH_RE.test(url.pathname)) return src
+    const pathStart = src.indexOf(url.pathname)
+    if (pathStart < 0) return src
+    const prefix = src.slice(0, pathStart)
+    return `${prefix}${addThumbnailParam(url.pathname, url.search, url.hash)}`
+  } catch {
+    return src
+  }
+}
 
 function decodeBasicEntities(value) {
   return String(value || '')
