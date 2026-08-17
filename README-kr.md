@@ -2,129 +2,102 @@
 
 # Wikiman Frontend
 
-개인 위키 UI. Vue 3 + Quasar + Pinia.
+[Wikiman](https://github.com/kendrickkim/wikiman)의 Vue 3·Quasar 사용자 화면입니다.
 
-백엔드는 별도 저장소입니다. 개발 시 API 기본 주소는 `http://localhost:85` 입니다.
+위키와 블로그, 글 편집, 검색, 간단 포스트, 사이트 관리 화면을 제공합니다.
+[Node 백엔드](https://github.com/kendrickkim/wikiman-backend) 또는
+[PHP 백엔드](https://github.com/kendrickkim/wikiman-backend-php)가 필요합니다.
 
-## 요구 사항
+## 개발 시작
+
+필요한 환경:
 
 - Node.js 22.22 이상
-
-## 설치
+- `http://localhost:85`에서 실행 중인 Wikiman 백엔드
 
 ```bash
 npm install
-```
-
-## 개발
-
-백엔드를 먼저 띄운 뒤:
-
-```bash
 npm run dev
 ```
 
-- 주소: `http://localhost:9000`
-- `/api` 요청은 백엔드로 프록시됩니다.
+브라우저에서 `http://localhost:9000`을 여세요. 개발 서버는 `/api` 요청을
+백엔드로 전달합니다.
 
-PWA 모드로 개발하려면:
+PWA 개발 모드를 확인하려면:
 
 ```bash
 npm run dev:pwa
 ```
 
-## 빌드
+## 빌드와 배포
 
-| 명령 | 결과 | 설명 |
-| --- | --- | --- |
-| `npm run build` | `dist/spa/` | 일반 SPA 빌드 |
-| `npm run build:pwa` | `dist/pwa/` | **PWA** 빌드 (서비스 워커·매니페스트 포함) |
-| `npm run build:backend` | `../backend/public/` | PWA 빌드 후 백엔드 `public/`에 복사 |
-| `npm run build:php` | `../wikiman-backend-php/public/` | PHP 설치 게이트를 보존하며 PWA 복사 |
-
-권장 배포 흐름:
+사용하는 백엔드에 맞는 명령을 선택하세요.
 
 ```bash
+# PWA를 빌드해 Node 백엔드로 복사
 npm run build:backend
-```
 
-복사 위치를 바꾸려면:
-
-```bash
-# Windows PowerShell 예
-$env:BACKEND_PUBLIC="D:\path\to\backend\public"
-npm run build:backend
-```
-
-PHP 백엔드에 배포하려면:
-
-```bash
+# PWA를 빌드해 PHP 백엔드로 복사
 npm run build:php
 ```
 
-PHP 대상 복사에서는 기존 `public/index.php`, `public/install.php`, `public/.htaccess`,
-`public/.wikiman-installed`를 보존합니다.
+`build:php`는 `wikiman-backend-php/public/`에 있는 PHP 전면 컨트롤러,
+설치 화면, `.htaccess`를 보존합니다.
 
-PWA만 빌드한 뒤 수동 복사:
-
-```bash
-npm run build:pwa
-# dist/pwa 내용을 백엔드 public/ 에 복사
-```
-
-### PWA 참고
-
-- 결과물: `dist/pwa/` (`index.html`, `manifest.json`, `sw.js` 등)
-- `/api`는 서비스 워커에서 캐시하지 않습니다 (`NetworkOnly`)
-- 설치·오프라인 동작은 **HTTPS**(또는 localhost)에서 확인하세요
-- history 라우팅이므로 서버는 모든 경로를 `index.html`로 돌려줘야 합니다 (**백엔드 호스트**가 처리). Nginx에서 `try_files … /index.html`로 직접 폴백하지 마세요.
-
-## Nginx 프록시 (공유 메타 / Open Graph)
-
-Node 배포에서는 [backend README-kr](../backend/README-kr.md)의 Nginx 절을 참고하세요.
-글별 Open Graph는 Node의 `HOST_PORT` 호스트 또는 PHP 백엔드의 `public/index.php`가
-HTML에 넣습니다. 리버스 프록시가 정적 `index.html`을 직접 fallback하면 안 됩니다.
-
-### 아이콘
-
-`public/icons/favicon.svg`를 기준으로 PWA·Apple·MS 아이콘을 다시 만들 때:
+복사하지 않고 빌드만 하려면:
 
 ```bash
-npm run icons:pwa
+npm run build       # dist/spa/
+npm run build:pwa   # dist/pwa/
 ```
 
-생성 예: `icon-*.png`, `apple-icon-*.png`, `apple-touch-icon.png`, `ms-icon-144x144.png`
+PWA 설치와 오프라인 동작은 localhost를 제외하면 HTTPS가 필요합니다.
+서비스 워커는 `/api`를 캐시하지 않습니다.
+
+### 리버스 프록시
+
+글별 Open Graph 정보는 백엔드가 HTML에 추가합니다. 페이지 요청을 Node 호스트
+(`HOST_PORT`, 기본값 `80`) 또는 PHP의 `public/index.php`로 전달하세요.
+리버스 프록시가 정적 `index.html`을 직접 반환하면 글별 공유 정보가 생성되지 않습니다.
+
+자세한 배포 방법은 사용하는 백엔드 문서를 참고하세요.
+
+- [Node 백엔드](https://github.com/kendrickkim/wikiman-backend/blob/main/README-kr.md)
+- [PHP 백엔드](https://github.com/kendrickkim/wikiman-backend-php)
 
 ## 검사
 
 ```bash
-npm run lint    # 문법 검사
-npm test        # 단위 테스트
+npm run lint
+npm test
 npm run check   # lint + test + PWA 빌드
 ```
 
-## npm 스크립트 요약
+## 자주 쓰는 명령
 
-| 스크립트 | 설명 |
+| 명령 | 용도 |
 | --- | --- |
-| `dev` | SPA 개발 서버 (`:9000`) |
-| `dev:pwa` | PWA 개발 서버 |
-| `build` | SPA 프로덕션 빌드 |
-| `build:pwa` | PWA 프로덕션 빌드 |
-| `build:backend` | PWA 빌드 → 백엔드 `public/` 복사 |
-| `build:php` | PWA 빌드 → PHP 백엔드 `public/` 복사 |
-| `icons:pwa` | favicon.svg에서 아이콘 PNG 생성 |
-| `lint` / `test` / `check` | 검사 |
+| `npm run dev` | SPA 개발 서버 실행 |
+| `npm run dev:pwa` | PWA 개발 모드 실행 |
+| `npm run build:backend` | 빌드 후 Node 백엔드로 복사 |
+| `npm run build:php` | 빌드 후 PHP 백엔드로 복사 |
+| `npm run icons:pwa` | `public/icons/favicon.svg`에서 아이콘 재생성 |
 
-## 동작 개요
+## 제공하는 화면
 
-- 사이트 언어: 사이트 관리 → 일반에서 한국어 / English (US) 선택 (`src/i18n/koKr.js`, `usEn.js`), 백엔드 오류 코드도 선택 언어로 번역
-- 카테고리 트리, 글 목록·검색, 키워드
-- 홈: 홈페이지 지정 글, 또는 블로그 모드(최근 발행 본문 피드). 블로그에서 홈페이지 글 선표시 가능
-- 에디터: 텍스트 / CKEditor / Summernote / TUI Editor / Editor.js / Markdown / HTML (전환 시 본문 이어받기)
-- Markdown: 하이라이트·라인 번호·코드 복사, PlantUML
-- 모바일 간단 포스트: 설정에서 켜면 모바일 홈 상단에 접을 수 있는 간단 입력창이 보인다. 목록은 사이드 메뉴의 간단 포스트.
-- 초안·발행, 공개·비공개. 초안 보기에서 발행 가능
-- 글 작성·사이트 관리는 작성자만 가능
-- 사이트 관리: 일반·카테고리·홈페이지·블로그·간단 포스트·첨부파일·데이터관리
+- 카테고리 트리, 글 목록, 검색, 키워드
+- 위키 홈페이지 또는 시간순 블로그 모드
+- 텍스트, CKEditor, Summernote, TUI, Editor.js, Markdown, HTML 에디터
+- 초안·발행 및 공개·비공개 글
+- Markdown 코드 강조, 줄 번호, 복사 버튼, PlantUML
+- 모바일 간단 포스트와 정식 글 전환
+- 사이트 관리와 한국어·영어 UI
 
+글 작성과 사이트 관리는 작성자 계정만 사용할 수 있습니다.
+
+## 관련 저장소
+
+- [Wikiman 허브](https://github.com/kendrickkim/wikiman)
+- [Node 백엔드](https://github.com/kendrickkim/wikiman-backend)
+- [PHP 백엔드](https://github.com/kendrickkim/wikiman-backend-php)
+- [Android·iOS 앱](https://github.com/kendrickkim/wikiman-flutter)

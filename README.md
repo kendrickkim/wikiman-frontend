@@ -2,130 +2,103 @@
 
 # Wikiman Frontend
 
-Personal wiki UI built with Vue 3, Quasar, and Pinia.
+The Vue 3 and Quasar user interface for [Wikiman](https://github.com/kendrickkim/wikiman).
 
-The backend lives in a separate repository. During development the API defaults to `http://localhost:85`.
+It provides the wiki, blog, editor, search, Quick Posts, and site-admin screens.
+It needs either the [Node backend](https://github.com/kendrickkim/wikiman-backend)
+or the [PHP backend](https://github.com/kendrickkim/wikiman-backend-php).
 
-## Requirements
+## Start developing
+
+Requirements:
 
 - Node.js 22.22 or newer
-
-## Install
+- A Wikiman backend running at `http://localhost:85`
 
 ```bash
 npm install
-```
-
-## Development
-
-Start the backend first, then:
-
-```bash
 npm run dev
 ```
 
-- App: `http://localhost:9000`
-- `/api` is proxied to the backend
+Open `http://localhost:9000`. The development server proxies `/api` to the
+backend.
 
-PWA development mode:
+To test the PWA development mode:
 
 ```bash
 npm run dev:pwa
 ```
 
-## Build
+## Build and deploy
 
-| Command | Output | Description |
-| --- | --- | --- |
-| `npm run build` | `dist/spa/` | SPA build |
-| `npm run build:pwa` | `dist/pwa/` | **PWA** build (service worker + manifest) |
-| `npm run build:backend` | `../backend/public/` | PWA build copied into the backend `public/` folder |
-| `npm run build:php` | `../wikiman-backend-php/public/` | Copy PWA while preserving the PHP installer gate |
-
-Recommended deploy flow:
+Choose the command for the backend you use:
 
 ```bash
+# Build the PWA and copy it to the Node backend
 npm run build:backend
-```
 
-Override the copy destination:
-
-```bash
-# Windows PowerShell example
-$env:BACKEND_PUBLIC="D:\path\to\backend\public"
-npm run build:backend
-```
-
-For the PHP backend:
-
-```bash
+# Build the PWA and copy it to the PHP backend
 npm run build:php
 ```
 
-The PHP copy preserves `public/index.php`, `public/install.php`, `public/.htaccess`, and
-`public/.wikiman-installed`.
+`build:php` preserves the PHP frontend controller, installer, and `.htaccess`
+files already present in `wikiman-backend-php/public/`.
 
-Build PWA only, then copy manually:
-
-```bash
-npm run build:pwa
-# copy dist/pwa into backend/public
-```
-
-### PWA notes
-
-- Output: `dist/pwa/` (`index.html`, `manifest.json`, `sw.js`, …)
-- `/api` is not cached by the service worker (`NetworkOnly`)
-- Install/offline behavior needs **HTTPS** (or localhost)
-- History routing must fall back to `index.html` on the **backend host**. Do not use Nginx `try_files … /index.html` as a static SPA fallback in front of Node.
-
-## Nginx proxy (Open Graph)
-
-Per-post Open Graph tags are injected by the Node host (`HOST_PORT`, default `:80`) or
-the PHP backend's `public/index.php`. See the [backend README](../backend/README.md)
-for the recommended proxy setup. Do not fall back to a static `index.html` in front
-of either backend.
-
-### Icons
-
-Regenerate PWA / Apple / MS icons from `public/icons/favicon.svg`:
+Build without copying:
 
 ```bash
-npm run icons:pwa
+npm run build       # dist/spa/
+npm run build:pwa   # dist/pwa/
 ```
 
-Examples: `icon-*.png`, `apple-icon-*.png`, `apple-touch-icon.png`, `ms-icon-144x144.png`
+PWA installation and offline behavior require HTTPS, except on localhost.
+The service worker deliberately does not cache `/api`.
+
+### Reverse proxy
+
+Post-specific Open Graph tags are added by the backend. Forward page requests
+to the Node host (`HOST_PORT`, default `80`) or the PHP `public/index.php`.
+Serving a static `index.html` as the proxy fallback prevents those tags from
+being generated.
+
+See the deployment section of the backend you use:
+
+- [Node backend](https://github.com/kendrickkim/wikiman-backend#frontend-hosting-pwa)
+- [PHP backend](https://github.com/kendrickkim/wikiman-backend-php)
 
 ## Checks
 
 ```bash
-npm run lint    # syntax check
-npm test        # unit tests
+npm run lint
+npm test
 npm run check   # lint + test + PWA build
 ```
 
-## npm scripts
+## Useful scripts
 
-| Script | Description |
+| Command | Purpose |
 | --- | --- |
-| `dev` | SPA dev server (`:9000`) |
-| `dev:pwa` | PWA dev server |
-| `build` | SPA production build |
-| `build:pwa` | PWA production build |
-| `build:backend` | PWA build → backend `public/` |
-| `build:php` | PWA build → PHP backend `public/` |
-| `icons:pwa` | Generate icon PNGs from favicon.svg |
-| `lint` / `test` / `check` | Checks |
+| `npm run dev` | Start the SPA development server |
+| `npm run dev:pwa` | Start in PWA development mode |
+| `npm run build:backend` | Build and copy to the Node backend |
+| `npm run build:php` | Build and copy to the PHP backend |
+| `npm run icons:pwa` | Regenerate icons from `public/icons/favicon.svg` |
 
-## Feature overview
+## Product areas
 
-- Site language: Site admin → General → Korean / English (US) (`src/i18n/koKr.js`, `usEn.js`), including translated backend error codes
-- Category tree, post list/search, keywords
-- Home: curated homepage posts, or blog mode (recent published full-text feed). Optional pinned homepage posts above the feed
-- Editors: Textarea / CKEditor / Summernote / TUI / Editor.js / Markdown / HTML (content carried over when switching)
-- Markdown: highlighting, line numbers, code copy, PlantUML
-- Mobile quick posts when enabled in settings
-- Draft / published, public / private; publish from the draft view
-- Writing and site admin are writer-only
-- Site admin: General, Categories, Homepage, Blog, Quick posts, Attachments, Data
+- Category tree, post list, search, and keywords
+- Wiki home page or chronological blog mode
+- Text, CKEditor, Summernote, TUI, Editor.js, Markdown, and HTML editors
+- Draft/published and public/private posts
+- Markdown code highlighting, line numbers, copy buttons, and PlantUML
+- Mobile Quick Posts and promotion to full posts
+- Site administration and Korean/English UI
 
+Writing and site administration require a writer account.
+
+## Related repositories
+
+- [Wikiman hub](https://github.com/kendrickkim/wikiman)
+- [Node backend](https://github.com/kendrickkim/wikiman-backend)
+- [PHP backend](https://github.com/kendrickkim/wikiman-backend-php)
+- [Android·iOS app](https://github.com/kendrickkim/wikiman-flutter)

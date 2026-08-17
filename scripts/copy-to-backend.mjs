@@ -6,7 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const src = path.resolve(__dirname, '../dist/pwa')
 const dest = process.env.BACKEND_PUBLIC
   ? path.resolve(process.env.BACKEND_PUBLIC)
-  : path.resolve(__dirname, '../../backend/public')
+  : path.resolve(__dirname, '../../wikiman-backend/public')
 
 if (!fs.existsSync(path.join(src, 'index.html'))) {
   console.error('프론트엔드 PWA 빌드 결과가 없습니다. quasar build -m pwa가 실패했는지 확인하세요.')
