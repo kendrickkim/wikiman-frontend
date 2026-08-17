@@ -229,7 +229,7 @@
     </q-drawer>
 
     <q-drawer
-      v-if="treeOnRight"
+      v-if="treeOnRight && !adminMode"
       v-model="rightDrawer"
       side="right"
       bordered
@@ -270,6 +270,7 @@ const wiki = useWikiStore()
 const settings = useSettingsStore()
 const { t } = useI18n()
 const isNativeApp = isWikimanNativeApp()
+const adminMode = computed(() => route.path.startsWith('/settings'))
 const leftDrawer = ref(false)
 const rightDrawer = ref(false)
 const mobileSearch = ref(false)
@@ -340,7 +341,9 @@ function topMenuLinkProps(item) {
 }
 
 function goHome() {
-  router.push('/')
+  if (isNativeApp && notifyWikimanNativeApp('goHome')) return
+  if (route.path === '/' && !Object.keys(route.query).length) return
+  router.replace('/')
 }
 
 function applySearch() {

@@ -1,6 +1,6 @@
 <template>
   <div class="wiki-nav">
-    <q-list v-if="showNav" dense>
+    <q-list v-if="showNav && !adminMode" dense>
       <q-item
         v-if="settings.hasHomepage || settings.blogMode"
         clickable
@@ -60,8 +60,8 @@
       </q-item>
     </q-list>
 
-    <div v-if="showNav && auth.canWrite" class="wiki-nav-settings">
-      <div class="wiki-drawer-title">{{ t('nav.settings') }}</div>
+    <div v-if="showNav && auth.canWrite && adminMode" class="wiki-nav-settings">
+      <div class="wiki-drawer-title">{{ t('settings.title') }}</div>
       <q-list dense>
         <q-item
           v-for="item in settingsMenu"
@@ -77,7 +77,17 @@
       </q-list>
     </div>
 
-    <template v-if="showTree">
+    <q-list v-else-if="showNav && auth.canWrite" dense class="wiki-nav-settings">
+      <q-item
+        clickable
+        @click="router.push('/settings/general')"
+      >
+        <q-item-section avatar><q-icon name="admin_panel_settings" /></q-item-section>
+        <q-item-section>{{ t('settings.title') }}</q-item-section>
+      </q-item>
+    </q-list>
+
+    <template v-if="showTree && !adminMode">
       <div class="wiki-drawer-title" :class="{ 'q-mt-md': showNav }">{{ t('nav.categories') }}</div>
       <q-input
         v-model="filter"
@@ -128,6 +138,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useWikiStore } from '@/stores/wiki'
 import { useSettingsStore } from '@/stores/settings'
 import { useI18n } from '@/i18n'
+import { isWikimanNativeApp, notifyWikimanNativeApp } from '@/utils/nativeApp'
 
 const props = defineProps({
   showNav: { type: Boolean, default: true },
@@ -157,6 +168,7 @@ const auth = useAuthStore()
 const wiki = useWikiStore()
 const settings = useSettingsStore()
 const { t } = useI18n()
+const adminMode = computed(() => route.path.startsWith('/settings'))
 const settingsMenu = computed(() => [
   { key: 'settings-general', to: '/settings/general', label: t('settings.general'), icon: 'tune' },
   { key: 'settings-top-menu', to: '/settings/top-menu', label: t('settings.topMenu'), icon: 'view_week' },
@@ -243,7 +255,9 @@ function ensureSelectedVisible() {
 }
 
 function go(query) {
-  router.push({ path: '/', query })
+  const empty = !query || !Object.keys(query).length
+  if (empty && isWikimanNativeApp() && notifyWikimanNativeApp('goHome')) return
+  router.replace({ path: '/', query })
 }
 
 function select(key) {

@@ -412,7 +412,13 @@ export default {
     thumbnailCacheDescription: '간단 포스트 이미지 목록에 사용할 썸네일을 서버에 보관하는 기간입니다.',
     thumbnailCacheDays: '썸네일 캐시 보관 기간 (일)',
     thumbnailCacheHint: '1~365일 · 기본값 100일',
-    thumbnailCacheSaved: '썸네일 캐시 설정을 저장했습니다.'
+    thumbnailCacheSaved: '썸네일 캐시 설정을 저장했습니다.',
+    recordStart: '녹음 첨부',
+    recordStop: '녹음 중지',
+    recording: '녹음 중…',
+    recordFailed: '녹음을 저장하지 못했습니다.',
+    recordPermissionDenied: '마이크 권한이 필요합니다.',
+    recordUnavailable: '녹음을 시작할 수 없습니다.'
   },
   speech: {
     start: '음성 입력 시작',

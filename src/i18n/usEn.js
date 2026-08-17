@@ -412,7 +412,13 @@ export default {
     thumbnailCacheDescription: 'How long the server keeps thumbnails used in quick post image grids.',
     thumbnailCacheDays: 'Thumbnail cache retention (days)',
     thumbnailCacheHint: '1–365 days · default 100 days',
-    thumbnailCacheSaved: 'Thumbnail cache settings saved.'
+    thumbnailCacheSaved: 'Thumbnail cache settings saved.',
+    recordStart: 'Record attachment',
+    recordStop: 'Stop recording',
+    recording: 'Recording…',
+    recordFailed: 'The recording could not be saved.',
+    recordPermissionDenied: 'Microphone permission is required.',
+    recordUnavailable: 'Recording could not be started.'
   },
   speech: {
     start: 'Start voice input',

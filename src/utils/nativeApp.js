@@ -1,4 +1,5 @@
 const APP_USER_AGENT_PATTERN = /\bWikimanApp\/[\d.]+/i
+const NATIVE_EVENT = 'wikiman-native'
 
 export function isWikimanNativeApp() {
   if (typeof navigator === 'undefined') return false
@@ -11,6 +12,13 @@ export function notifyWikimanNativeApp(message) {
   if (!channel || typeof channel.postMessage !== 'function') return false
   channel.postMessage(String(message))
   return true
+}
+
+export function onWikimanNativeEvent(handler) {
+  if (typeof window === 'undefined' || typeof handler !== 'function') return () => {}
+  const listener = (event) => handler(event.detail)
+  window.addEventListener(NATIVE_EVENT, listener)
+  return () => window.removeEventListener(NATIVE_EVENT, listener)
 }
 
 export function takeWikimanSharedDraft() {

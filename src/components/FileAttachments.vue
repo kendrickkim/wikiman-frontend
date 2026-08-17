@@ -12,12 +12,25 @@
           icon="attach_file"
           :label="t('remaining.k037')"
           :loading="uploading"
-          :disable="uploading || files.length >= maxFiles"
+          :disable="uploading || recordUploading || files.length >= maxFiles"
           @click="pick"
+        />
+        <q-btn
+          v-if="editable && nativeApp"
+          unelevated
+          no-caps
+          class="q-ml-sm"
+          :color="recording ? 'negative' : 'primary'"
+          :outline="!recording"
+          :icon="recording ? 'stop' : 'fiber_manual_record'"
+          :label="recording ? t('extra.recordStop') : t('extra.recordStart')"
+          :loading="recordUploading"
+          :disable="uploading || recordUploading || files.length >= maxFiles"
+          @click="toggleRecord"
         />
       </div>
       <div v-if="editable" class="text-caption text-grey-7 q-mb-sm">
-        {{ t('extra.attachmentHint', { max: maxMb }) }}
+        {{ recording ? t('extra.recording') : t('extra.attachmentHint', { max: maxMb }) }}
       </div>
       <input
         ref="inputEl"
@@ -73,11 +86,12 @@
 import { useI18n } from '@/i18n'
 
 const { t } = useI18n()
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { api, getErrorMessage } from '@/utils/api'
 import { useSettingsStore } from '@/stores/settings'
 import { formatBytes as formatSize } from '@/utils/format'
+import { isWikimanNativeApp, notifyWikimanNativeApp, onWikimanNativeEvent } from '@/utils/nativeApp'
 
 const MAX_FILES = 50
 
@@ -92,7 +106,11 @@ const $q = useQuasar()
 const settings = useSettingsStore()
 const inputEl = ref(null)
 const uploading = ref(false)
+const recording = ref(false)
+const recordUploading = ref(false)
+const nativeApp = isWikimanNativeApp()
 const maxFiles = MAX_FILES
+let offNative = () => {}
 
 const maxMb = computed(() => {
   const n = Number(settings.maxAttachmentMb)
@@ -111,6 +129,55 @@ const files = computed({
 
 function pick() {
   inputEl.value?.click()
+}
+
+function toggleRecord() {
+  if (!nativeApp || recordUploading.value || files.value.length >= MAX_FILES) return
+  if (recording.value) notifyWikimanNativeApp('record:stop')
+  else notifyWikimanNativeApp('record:start')
+}
+
+function addUploadedFiles(uploaded) {
+  const incoming = Array.isArray(uploaded) ? uploaded : [uploaded]
+  const existing = new Set(files.value.map((item) => item.storedName))
+  files.value = [
+    ...files.value,
+    ...incoming.filter((item) => item?.storedName && !existing.has(item.storedName))
+  ]
+}
+
+function handleNativeRecord(detail) {
+  if (!detail || typeof detail !== 'object') return
+  if (detail.type === 'record:started') {
+    recording.value = true
+    recordUploading.value = false
+    return
+  }
+  if (detail.type === 'record:uploading') {
+    recordUploading.value = true
+    return
+  }
+  if (detail.type === 'record:uploaded') {
+    addUploadedFiles(detail.file)
+    recording.value = false
+    recordUploading.value = false
+    return
+  }
+  if (detail.type === 'record:stopped') {
+    recording.value = false
+    recordUploading.value = false
+    return
+  }
+  if (detail.type === 'record:error') {
+    recording.value = false
+    recordUploading.value = false
+    const key = detail.code === 'permission'
+      ? 'extra.recordPermissionDenied'
+      : detail.code === 'unavailable'
+        ? 'extra.recordUnavailable'
+        : 'extra.recordFailed'
+    $q.notify({ type: 'negative', message: t(key) })
+  }
 }
 
 function removeFile(file) {
@@ -144,15 +211,20 @@ async function onPick(event) {
     for (const file of accepted) form.append('files', file)
     const { data } = await api.post('/uploads/files', form, { timeout: 120000 })
     const uploaded = Array.isArray(data.files) ? data.files : []
-    const existing = new Set(files.value.map((item) => item.storedName))
-    files.value = [
-      ...files.value,
-      ...uploaded.filter((item) => item.storedName && !existing.has(item.storedName))
-    ]
+    addUploadedFiles(uploaded)
   } catch (err) {
     $q.notify({ type: 'negative', message: getErrorMessage(err, t('remaining.k038')) })
   } finally {
     uploading.value = false
   }
 }
+
+onMounted(() => {
+  offNative = onWikimanNativeEvent(handleNativeRecord)
+})
+
+onBeforeUnmount(() => {
+  offNative()
+  if (recording.value) notifyWikimanNativeApp('record:stop')
+})
 </script>
