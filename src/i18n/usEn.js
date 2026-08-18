@@ -196,6 +196,8 @@ export default {
     updateChecking: 'Checking',
     updateLatestInstalled: 'You already have the latest version.',
     updateNow: 'Update',
+    updateRefresh: 'Refresh',
+    updateConfirm: 'Do you want to update?',
     updateFailed: 'Could not check for updates.',
     language: {
       label: 'Site language',

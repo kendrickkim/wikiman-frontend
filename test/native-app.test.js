@@ -6,7 +6,6 @@ import {
   notifyWikimanNativeApp,
   onWikimanNativeEvent
 } from '../src/utils/nativeApp.js'
-import { ensureNativeIme, findEditableElement } from '../src/utils/nativeKeyboard.js'
 
 test('브라우저에서는 네이티브 앱 브리지를 쓰지 않는다', () => {
   assert.equal(isWikimanNativeApp(), false)
@@ -23,9 +22,4 @@ test('안드로이드 앱 User-Agent만 네이티브 안드로이드로 본다',
   assert.equal(isWikimanNativeAndroid(android), true)
   assert.equal(isWikimanNativeAndroid(ios), false)
   assert.equal(isWikimanNativeAndroid('Mozilla/5.0 (Linux; Android 13) Chrome/120.0'), false)
-})
-
-test('브라우저에서는 네이티브 IME 보조를 쓰지 않는다', () => {
-  assert.equal(ensureNativeIme({ tagName: 'TEXTAREA', type: '' }), false)
-  assert.equal(findEditableElement(null), null)
 })

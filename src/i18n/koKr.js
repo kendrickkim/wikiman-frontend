@@ -196,6 +196,8 @@ export default {
     updateChecking: '확인 중',
     updateLatestInstalled: '최신 버전을 사용 중입니다.',
     updateNow: '업데이트',
+    updateRefresh: '새로고침',
+    updateConfirm: '업데이트 하시겠습니까?',
     updateFailed: '업데이트를 확인하지 못했습니다.',
     language: {
       label: '사이트 언어',
