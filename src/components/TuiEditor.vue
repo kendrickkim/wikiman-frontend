@@ -129,4 +129,10 @@ onBeforeUnmount(() => {
 .tui-holder--no-toolbar :deep(.toastui-editor-contents p) {
   margin: 4px 0;
 }
+
+.tui-holder :deep(.ProseMirror),
+.tui-holder :deep([contenteditable='true']) {
+  -webkit-user-select: text;
+  user-select: text;
+}
 </style>

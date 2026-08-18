@@ -138,7 +138,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useWikiStore } from '@/stores/wiki'
 import { useSettingsStore } from '@/stores/settings'
 import { useI18n } from '@/i18n'
-import { isWikimanNativeApp, notifyWikimanNativeApp } from '@/utils/nativeApp'
+import { isWikimanNativeAndroid, isWikimanNativeApp, notifyWikimanNativeApp } from '@/utils/nativeApp'
 
 const props = defineProps({
   showNav: { type: Boolean, default: true },
@@ -159,7 +159,8 @@ const NAV_KEYS = new Set([
   'settings-blog',
   'settings-quick-posts',
   'settings-attachments',
-  'settings-data'
+  'settings-data',
+  'settings-update'
 ])
 
 const route = useRoute()
@@ -169,16 +170,27 @@ const wiki = useWikiStore()
 const settings = useSettingsStore()
 const { t } = useI18n()
 const adminMode = computed(() => route.path.startsWith('/settings'))
-const settingsMenu = computed(() => [
-  { key: 'settings-general', to: '/settings/general', label: t('settings.general'), icon: 'tune' },
-  { key: 'settings-top-menu', to: '/settings/top-menu', label: t('settings.topMenu'), icon: 'view_week' },
-  { key: 'settings-categories', to: '/settings/categories', label: t('settings.categories'), icon: 'folder' },
-  { key: 'settings-homepage', to: '/settings/homepage', label: t('settings.homepage'), icon: 'home' },
-  { key: 'settings-blog', to: '/settings/blog', label: t('settings.blog'), icon: 'rss_feed' },
-  { key: 'settings-quick-posts', to: '/settings/quick-posts', label: t('settings.quickPosts'), icon: 'edit_note' },
-  { key: 'settings-attachments', to: '/settings/attachments', label: t('settings.attachments'), icon: 'attach_file' },
-  { key: 'settings-data', to: '/settings/data', label: t('settings.data'), icon: 'storage' }
-])
+const settingsMenu = computed(() => {
+  const items = [
+    { key: 'settings-general', to: '/settings/general', label: t('settings.general'), icon: 'tune' },
+    { key: 'settings-top-menu', to: '/settings/top-menu', label: t('settings.topMenu'), icon: 'view_week' },
+    { key: 'settings-categories', to: '/settings/categories', label: t('settings.categories'), icon: 'folder' },
+    { key: 'settings-homepage', to: '/settings/homepage', label: t('settings.homepage'), icon: 'home' },
+    { key: 'settings-blog', to: '/settings/blog', label: t('settings.blog'), icon: 'rss_feed' },
+    { key: 'settings-quick-posts', to: '/settings/quick-posts', label: t('settings.quickPosts'), icon: 'edit_note' },
+    { key: 'settings-attachments', to: '/settings/attachments', label: t('settings.attachments'), icon: 'attach_file' },
+    { key: 'settings-data', to: '/settings/data', label: t('settings.data'), icon: 'storage' }
+  ]
+  if (isWikimanNativeAndroid()) {
+    items.push({
+      key: 'settings-update',
+      to: '/settings/update',
+      label: t('settings.update'),
+      icon: 'system_update'
+    })
+  }
+  return items
+})
 const filter = ref('')
 const treeSelected = ref(null)
 const expanded = ref([])

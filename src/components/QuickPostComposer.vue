@@ -4,6 +4,7 @@
       v-model="expanded"
       dense
       expand-separator
+      expand-icon-toggle
       icon="edit_note"
       :label="t('remaining.k049')"
       header-class="text-weight-medium"

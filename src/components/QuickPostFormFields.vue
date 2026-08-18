@@ -2,13 +2,15 @@
   <div>
     <q-banner v-if="error" class="bg-red-1 text-negative q-mb-md">{{ error }}</q-banner>
 
-    <QuickPostBodyEditor
-      :key="editorKey"
-      :model-value="modelValue"
-      :compact="compact"
-      :editor-key="editorKey"
-      @update:model-value="emit('update:modelValue', $event)"
-    />
+    <div @pointerdown.capture="onEditorPointerDown">
+      <QuickPostBodyEditor
+        :key="editorKey"
+        :model-value="modelValue"
+        :compact="compact"
+        :editor-key="editorKey"
+        @update:model-value="emit('update:modelValue', $event)"
+      />
+    </div>
 
     <QuickPostImages :content="modelValue" :max-images="maxImages" extra-class="q-mt-sm" />
 
@@ -47,6 +49,8 @@ import { useQuasar } from 'quasar'
 import { useSpeechRecognition } from '@/composables/useSpeechRecognition'
 import { useSettingsStore } from '@/stores/settings'
 import { appendQuickPostSpeech } from '@/utils/quickPostContent'
+import { isWikimanNativeAndroid } from '@/utils/nativeApp'
+import { ensureNativeIme } from '@/utils/nativeKeyboard'
 import PostLinkPreviews from '@/components/PostLinkPreviews.vue'
 import QuickPostBodyEditor from '@/components/QuickPostBodyEditor.vue'
 import QuickPostImages from '@/components/QuickPostImages.vue'
@@ -93,4 +97,11 @@ const {
 })
 
 defineExpose({ stopSpeech })
+
+function onEditorPointerDown(event) {
+  if (!isWikimanNativeAndroid()) return
+  const editor = event.target?.closest?.('.wiki-quick-post-editor')
+  if (!editor) return
+  ensureNativeIme(event.target)
+}
 </script>

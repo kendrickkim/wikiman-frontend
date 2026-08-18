@@ -1,9 +1,19 @@
 const APP_USER_AGENT_PATTERN = /\bWikimanApp\/[\d.]+/i
 const NATIVE_EVENT = 'wikiman-native'
 
-export function isWikimanNativeApp() {
-  if (typeof navigator === 'undefined') return false
-  return APP_USER_AGENT_PATTERN.test(navigator.userAgent || '')
+export function userAgentOf(userAgent) {
+  if (userAgent != null) return String(userAgent)
+  if (typeof navigator === 'undefined') return ''
+  return navigator.userAgent || ''
+}
+
+export function isWikimanNativeApp(userAgent) {
+  return APP_USER_AGENT_PATTERN.test(userAgentOf(userAgent))
+}
+
+export function isWikimanNativeAndroid(userAgent) {
+  const ua = userAgentOf(userAgent)
+  return isWikimanNativeApp(ua) && /\bAndroid\b/i.test(ua)
 }
 
 export function notifyWikimanNativeApp(message) {

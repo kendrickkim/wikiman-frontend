@@ -29,6 +29,7 @@ const routes = [
           { path: 'quick-posts', component: () => import('@/pages/settings/QuickPostSettingsPage.vue') },
           { path: 'attachments', component: () => import('@/pages/settings/AttachmentsSettingsPage.vue') },
           { path: 'data', component: () => import('@/pages/settings/BackupSettingsPage.vue') },
+          { path: 'update', component: () => import('@/pages/settings/AppUpdatePage.vue') },
           { path: 'backup', redirect: '/settings/data' }
         ]
       },

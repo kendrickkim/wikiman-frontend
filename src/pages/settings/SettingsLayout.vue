@@ -26,7 +26,8 @@ const settingsSections = computed(() => [
   { to: '/settings/blog', label: t('settings.blog') },
   { to: '/settings/quick-posts', label: t('settings.quickPosts') },
   { to: '/settings/attachments', label: t('settings.attachments') },
-  { to: '/settings/data', label: t('settings.data') }
+  { to: '/settings/data', label: t('settings.data') },
+  { to: '/settings/update', label: t('settings.update') }
 ])
 
 const sectionLabel = computed(() => {
