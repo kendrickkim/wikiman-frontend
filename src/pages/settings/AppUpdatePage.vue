@@ -12,7 +12,7 @@
       <q-card-section class="q-gutter-sm">
         <div>{{ t('settings.updateCurrent') }}: {{ currentVersion || t('settings.updateChecking') }}</div>
         <div>{{ t('settings.updateLatest') }}: {{ latestVersion || t('settings.updateChecking') }}</div>
-        <div v-if="latestVersion" class="q-mt-md">
+        <div v-if="newer" class="q-mt-md">
           <div class="text-body2 text-weight-medium q-mb-xs">{{ t('settings.updateNotes') }}</div>
           <pre class="wiki-update-notes">{{ notes || t('settings.updateNotesEmpty') }}</pre>
         </div>
