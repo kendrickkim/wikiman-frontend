@@ -12,6 +12,10 @@
       <q-card-section class="q-gutter-sm">
         <div>{{ t('settings.updateCurrent') }}: {{ currentVersion || t('settings.updateChecking') }}</div>
         <div>{{ t('settings.updateLatest') }}: {{ latestVersion || t('settings.updateChecking') }}</div>
+        <div v-if="latestVersion" class="q-mt-md">
+          <div class="text-body2 text-weight-medium q-mb-xs">{{ t('settings.updateNotes') }}</div>
+          <pre class="wiki-update-notes">{{ notes || t('settings.updateNotesEmpty') }}</pre>
+        </div>
         <q-banner v-if="error" class="bg-red-1 text-negative">{{ error }}</q-banner>
         <q-banner v-else-if="upToDate" class="bg-green-1 text-positive">
           {{ t('settings.updateLatestInstalled') }}
@@ -53,12 +57,14 @@ import {
   notifyWikimanNativeApp,
   onWikimanNativeEvent
 } from '@/utils/nativeApp'
+import { fetchGithubReleaseNotes } from '@/utils/githubRelease'
 
 const { t } = useI18n()
 const $q = useQuasar()
 const androidApp = isWikimanNativeAndroid()
 const currentVersion = ref('')
 const latestVersion = ref('')
+const notes = ref('')
 const newer = ref(false)
 const upToDate = ref(false)
 const error = ref('')
@@ -72,6 +78,9 @@ function refresh() {
   error.value = ''
   checking.value = true
   notifyWikimanNativeApp('update:check')
+  fetchGithubReleaseNotes().then((value) => {
+    if (value && !notes.value) notes.value = value
+  }).catch(() => {})
 }
 
 function confirmStart() {
@@ -99,6 +108,7 @@ function onNative(detail) {
   if (type === 'update:info') {
     currentVersion.value = detail.currentVersion || ''
     latestVersion.value = detail.latestVersion || ''
+    notes.value = String(detail.notes || notes.value || '').trim()
     newer.value = detail.newer === true
     upToDate.value = detail.supported === true && detail.newer !== true
     updating.value = detail.updating === true
@@ -134,3 +144,20 @@ onBeforeUnmount(() => {
   offNative()
 })
 </script>
+
+<style scoped>
+.wiki-update-notes {
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.04);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+}
+:global(body.body--dark) .wiki-update-notes {
+  background: rgba(255, 255, 255, 0.08);
+}
+</style>

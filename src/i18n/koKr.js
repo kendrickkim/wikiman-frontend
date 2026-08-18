@@ -198,6 +198,8 @@ export default {
     updateNow: '업데이트',
     updateRefresh: '새로고침',
     updateConfirm: '업데이트 하시겠습니까?',
+    updateNotes: '변경 내역',
+    updateNotesEmpty: '이 릴리스에는 변경 내역이 없습니다.',
     updateFailed: '업데이트를 확인하지 못했습니다.',
     language: {
       label: '사이트 언어',

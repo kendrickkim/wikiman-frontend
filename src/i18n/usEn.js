@@ -198,6 +198,8 @@ export default {
     updateNow: 'Update',
     updateRefresh: 'Refresh',
     updateConfirm: 'Do you want to update?',
+    updateNotes: 'Release notes',
+    updateNotesEmpty: 'This release has no notes.',
     updateFailed: 'Could not check for updates.',
     language: {
       label: 'Site language',
